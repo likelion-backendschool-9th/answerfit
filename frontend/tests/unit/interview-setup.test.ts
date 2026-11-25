@@ -21,6 +21,7 @@ describe("setupError", () => {
   it("정해지지 않은 유형과 방식을 막는다", () => {
     expect(check({ type: "pt" as InterviewSetup["type"] })).toBeDefined();
     expect(check({ mode: "easy" as InterviewSetup["mode"] })).toBeDefined();
+    expect(check({ mode: "toString" as InterviewSetup["mode"] })).toBeDefined();
   });
 });
 
