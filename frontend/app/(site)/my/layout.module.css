@@ -1,0 +1,19 @@
+.layout {
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 57rem);
+  gap: var(--space-12);
+  justify-content: center;
+  padding: var(--space-12) var(--space-5) var(--space-section-sm);
+}
+
+.content {
+  min-width: 0;
+}
+
+@media (max-width: 64rem) {
+  .layout {
+    grid-template-columns: minmax(0, 57rem);
+    gap: var(--space-8);
+    padding: var(--space-8) var(--space-5);
+  }
+}

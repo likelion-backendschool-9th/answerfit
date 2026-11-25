@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/Checkbox/Checkbox";
-import { Icon } from "@/components/ui/Icon/Icon";
+import { SearchField } from "@/components/ui/SearchField/SearchField";
+import { SelectField } from "@/components/ui/SelectField/SelectField";
 import { archiveHref, SORTS, type ArchiveQuery, type Sort } from "@/features/question/rules";
 import styles from "./ArchiveFilters.module.css";
 
@@ -21,23 +22,11 @@ export function ArchiveFilters({ query }: { query: ArchiveQuery }) {
         go({});
       }}
     >
-      <label className={styles.search}>
-        <Icon name="search" size={20} />
-        <input type="search" className={styles.input} aria-label="질문 내용으로 검색" placeholder="질문 내용으로 검색" value={keyword} maxLength={100} onChange={(event) => setKeyword(event.target.value)} />
-      </label>
+      <SearchField label="질문 내용으로 검색" className={styles.search} value={keyword} onChange={(event) => setKeyword(event.target.value)} />
       <Checkbox checked={query.likedOnly} onChange={(event) => go({ likedOnly: event.target.checked })}>
         좋아요한 질문만
       </Checkbox>
-      <span className={styles.sort}>
-        <select className={styles.select} aria-label="정렬" value={query.sort} onChange={(event) => go({ sort: event.target.value as Sort })}>
-          {Object.entries(SORTS).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-        <Icon name="down" size={16} />
-      </span>
+      <SelectField label="정렬" options={SORTS} value={query.sort} onChange={(event) => go({ sort: event.target.value as Sort })} />
     </form>
   );
 }

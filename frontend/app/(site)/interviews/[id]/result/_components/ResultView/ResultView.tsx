@@ -38,9 +38,11 @@ export function ResultView({ result, today }: { result: InterviewResult; today: 
         <ButtonLink href={PATHS.my} variant="outline" className={styles.my}>
           마이페이지로 가기
         </ButtonLink>
-        <ButtonLink href={`${PATHS.newInterview}?${again}`} className={styles.again}>
-          {result.type === "experience" ? "같은 서류로 다시 연습하기" : "같은 설정으로 다시 연습하기"}
-        </ButtonLink>
+        {(result.type === "experience" || result.type === "cs") && (
+          <ButtonLink href={`${PATHS.newInterview}?${again}`} className={styles.again}>
+            {result.type === "experience" ? "같은 서류로 다시 연습하기" : "같은 설정으로 다시 연습하기"}
+          </ButtonLink>
+        )}
       </div>
     </div>
   );

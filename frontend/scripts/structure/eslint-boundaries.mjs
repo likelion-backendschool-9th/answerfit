@@ -14,7 +14,7 @@ import importPlugin from "eslint-plugin-import";
 const R = fs.existsSync(path.join(process.cwd(), "src", "app")) ? "./src" : ".";
 
 /** features 아래 도메인 폴더. 도메인을 더하면 여기에도 더한다 */
-const DOMAINS = ["auth", "interview", "question", "session"];
+const DOMAINS = ["auth", "interview", "member", "question", "session"];
 
 // eslint-plugin-import의 모듈 방문자는 동적 import·require의 Literal만 처리한다.
 // 치환 없는 백틱은 같은 문자열 경로로 검사하되 원래 구문 트리는 수정하지 않는다.

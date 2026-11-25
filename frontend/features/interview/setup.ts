@@ -33,6 +33,13 @@ export function setupError(setup: InterviewSetup, groups: DocumentGroup[], today
   if (group.error) return "스캔에 실패한 서류 그룹은 쓸 수 없어요.";
 }
 
+export const GROUP_NAME_MAX = 30;
+
+export function groupNameError(name: string) {
+  const length = [...name].length;
+  if (length < 1 || length > GROUP_NAME_MAX) return `이름은 1~${GROUP_NAME_MAX}자로 입력해 주세요.`;
+}
+
 type Params = Record<string, string | string[] | undefined>;
 
 /** 주소의 값으로 처음 설정을 정한다. 잘못된 값은 기본값으로 둔다 */

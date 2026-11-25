@@ -1,3 +1,5 @@
+import { questionHref } from "@/features/question/paths";
+
 /** 화면 주소. 아직 없는 화면은 준비 중 안내로 간다 */
 export const PATHS = {
   home: "/",
@@ -6,8 +8,13 @@ export const PATHS = {
   newInterview: "/interviews/new",
   guide: "/guide",
   archive: "/archive",
-  question: (id: string) => `/archive/${encodeURIComponent(id)}`,
+  question: questionHref,
   my: "/my",
+  myInterviews: "/my/interviews",
+  myDocuments: "/my/documents",
+  myQuestions: "/my/questions",
+  myLikes: "/my/likes",
+  mySettings: "/my/settings",
   notifications: "/notifications",
   interview: (id: string) => `/interviews/${id}`,
   interviewAnalyzing: (id: string) => `/interviews/${id}/analyzing`,

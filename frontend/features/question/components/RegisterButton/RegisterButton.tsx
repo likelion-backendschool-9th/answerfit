@@ -6,12 +6,13 @@ import { Modal } from "@/components/ui/Modal/Modal";
 import { QuestionForm } from "../QuestionForm/QuestionForm";
 import styles from "./RegisterButton.module.css";
 
-export function RegisterButton() {
+export function RegisterButton({ variant = "primary" }: { variant?: "primary" | "outline" }) {
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState(false);
   return (
     <div className={styles.wrap}>
       <Button
+        variant={variant}
         className={styles.button}
         onClick={() => {
           setDone(false);

@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
-import { PATHS } from "@/app/_lib/paths";
 import { Button } from "@/components/ui/Button/Button";
 import { Icon } from "@/components/ui/Icon/Icon";
 import { saveQuestionAction, similarAction } from "@/features/question/actions";
+import { questionHref } from "@/features/question/paths";
 import { CS_CATEGORIES, questionError, TEXT_MAX } from "@/features/question/rules";
 import type { SimilarQuestion } from "@/features/question/types";
 import styles from "./QuestionForm.module.css";
@@ -83,7 +83,7 @@ export function QuestionForm({ id, initial, onCancel, onDone }: Props) {
         </p>
       </div>
       {similar && (
-        <Link href={PATHS.question(similar.id)} className={styles.similar} onClick={onCancel}>
+        <Link href={questionHref(similar.id)} className={styles.similar} onClick={onCancel}>
           <Icon name="search" size={20} />
           <span className={styles.similarText}>
             <span className={styles.similarTitle}>비슷한 질문이 이미 있어요</span>

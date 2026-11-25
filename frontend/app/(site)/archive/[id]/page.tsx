@@ -5,12 +5,12 @@ import { notFound } from "next/navigation";
 import { TopBar } from "@/app/_components/TopBar/TopBar";
 import { PATHS } from "@/app/_lib/paths";
 import { getQuestions } from "@/features/question/api";
+import { PendingActions } from "@/features/question/components/PendingActions/PendingActions";
 import { archiveHref, KIND_LABEL, neighbors, readQuery } from "@/features/question/rules";
 import { requireMember } from "@/features/session/guard";
 import { LikeButton } from "../_components/LikeButton/LikeButton";
 import { ModelAnswer } from "./_components/ModelAnswer/ModelAnswer";
 import { Neighbors } from "./_components/Neighbors/Neighbors";
-import { PendingActions } from "./_components/PendingActions/PendingActions";
 import { PendingCard } from "./_components/PendingCard/PendingCard";
 import { ReportButton } from "./_components/ReportButton/ReportButton";
 import styles from "./page.module.css";
@@ -59,7 +59,7 @@ async function Question({ params }: Props) {
       <h1 className={styles.title}>{text}</h1>
       <div className={styles.actions}>
         {pending && mine ? (
-          <PendingActions id={id} category={category} text={text} />
+          <PendingActions id={id} category={category} text={text} next={PATHS.archive} />
         ) : (
           <>
             <LikeButton id={id} liked={liked} likes={likes} wide />

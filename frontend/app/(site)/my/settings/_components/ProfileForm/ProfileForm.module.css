@@ -1,0 +1,108 @@
+.photo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4) var(--space-6);
+  margin-top: var(--space-6);
+}
+
+.avatar {
+  position: relative;
+  flex: none;
+  width: 5.5rem;
+  height: 5.5rem;
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+}
+
+.camera {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.photoButtons {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.change,
+.reset {
+  width: 7.5rem;
+  min-height: 3rem;
+  padding: 0;
+}
+
+.reset {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.hint {
+  margin-top: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-sm);
+}
+
+.file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-6);
+  margin-top: var(--space-6);
+}
+
+.bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.save {
+  width: 9.5rem;
+  min-height: 3rem;
+}
+
+.done,
+.error {
+  font-size: var(--text-sm);
+}
+
+.done {
+  color: var(--color-success);
+}
+
+.error {
+  color: var(--color-danger);
+}
+
+@media (max-width: 40rem) {
+  .fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

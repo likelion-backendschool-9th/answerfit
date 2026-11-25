@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/Button/Button";
 import { Icon } from "@/components/ui/Icon/Icon";
 import { recordingUrl } from "@/features/interview/recordings";
 import { daysUntil, mainItems, startedLabel, type InterviewResult } from "@/features/interview/result";
-import { MODE_LABEL, TYPE_LABEL } from "@/features/interview/setup";
+import { RECORD_LABEL } from "@/features/interview/records";
+import { MODE_LABEL } from "@/features/interview/setup";
 import { TitleEditor } from "../TitleEditor/TitleEditor";
 import styles from "./ResultHeader.module.css";
 
@@ -59,7 +60,7 @@ export function ResultHeader({ result, today }: { result: InterviewResult; today
           {result.groupName && <li className={styles.group}>{result.groupName}</li>}
           <li>{startedLabel(result.startedAt)}</li>
           <li>
-            {TYPE_LABEL[result.type]} · {MODE_LABEL[result.mode]}
+            {RECORD_LABEL[result.type]} · {MODE_LABEL[result.mode]}
           </li>
           <li>
             질문 {mains}개{followUps > 0 && ` + 꼬리 질문 ${followUps}개`}

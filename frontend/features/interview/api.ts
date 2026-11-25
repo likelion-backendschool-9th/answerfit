@@ -1,10 +1,12 @@
 import "server-only";
-import { analyzeDemoAnswer, createDemoInterview, DEMO_GROUPS, demoProgress, findDemoInterview, findDemoResult, finishDemoInterview, renameDemoInterview } from "@/demo/interview";
+import { listDemoGroups, removeDemoGroup, renameDemoGroup } from "@/demo/documents";
+import { analyzeDemoAnswer, createDemoInterview, demoProgress, findDemoInterview, findDemoResult, finishDemoInterview, listDemoRecords, renameDemoInterview } from "@/demo/interview";
 import { getDataMode } from "@/demo/mode";
 import { requireMember } from "@/features/session/guard";
 import { getAccessToken } from "@/features/session/session";
 import { ApiError, callBackend } from "@/lib/backend-http";
 import { analysisAt, type AnalysisProgress } from "./analysis";
+import type { InterviewRecord } from "./records";
 import type { ResultState } from "./result";
 import type { AnswerInput, DocumentGroup, Interview, InterviewSetup, Question } from "./types";
 
@@ -23,7 +25,7 @@ async function orNull<T>(request: Promise<T>): Promise<T | null> {
 
 export async function getDocumentGroups(): Promise<DocumentGroup[]> {
   await requireMember();
-  if ((await getDataMode()) === "mock") return DEMO_GROUPS;
+  if ((await getDataMode()) === "mock") return listDemoGroups();
   return call("/api/document-groups");
 }
 
@@ -72,6 +74,31 @@ export async function renameInterview(id: string, title: string): Promise<boolea
   await requireMember();
   if ((await getDataMode()) === "mock") return renameDemoInterview(id, title);
   await call(`${interviewPath(id)}/title`, { title });
+  return true;
+}
+
+/** 끝난 면접의 기록. 최신순 */
+export async function getRecords(): Promise<InterviewRecord[]> {
+  await requireMember();
+  if ((await getDataMode()) === "mock") return listDemoRecords();
+  return call("/api/interviews/records");
+}
+
+const groupPath = (id: string) => `/api/document-groups/${encodeURIComponent(id)}`;
+const hasGroup = async (id: string) => (await getDocumentGroups()).some((group) => group.id === id);
+
+/** 내 서류 그룹이 아니면 false */
+export async function renameGroup(id: string, name: string): Promise<boolean> {
+  if (!(await hasGroup(id))) return false;
+  if ((await getDataMode()) === "mock") await renameDemoGroup(id, name);
+  else await call(`${groupPath(id)}/name`, { name });
+  return true;
+}
+
+export async function removeGroup(id: string): Promise<boolean> {
+  if (!(await hasGroup(id))) return false;
+  if ((await getDataMode()) === "mock") await removeDemoGroup(id);
+  else await callBackend(groupPath(id), { method: "DELETE", token: await getAccessToken() });
   return true;
 }
 
