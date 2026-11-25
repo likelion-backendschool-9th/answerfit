@@ -1,0 +1,29 @@
+name: 버그 제보
+description: 예상과 다르게 동작하는 문제를 알립니다.
+title: "Fix: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 문제
+      description: 어떻게 돼야 하는데 실제로는 어떻게 되는지 적어 주세요.
+      placeholder: 면접을 일시 정지하면 답변 시간도 멈춰야 하는데, 계속 흐른다.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 재현 단계
+      placeholder: |
+        1. 실전 모드로 면접을 시작한다
+        2. 답변 중에 일시 정지를 누른다
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: 참고
+      description: 발생 환경(테스트 서버·로컬), 브라우저, 스크린샷, 에러 로그 등
+    validations:
+      required: false
