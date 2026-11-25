@@ -1,0 +1,18 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.word {
+  color: var(--color-accent);
+  font-family: var(--font-brand), var(--font-sans);
+  font-size: var(--text-brand);
+  font-weight: 700;
+  line-height: var(--leading-none);
+  letter-spacing: -0.055em;
+}
+
+.fit {
+  color: var(--color-primary);
+}
