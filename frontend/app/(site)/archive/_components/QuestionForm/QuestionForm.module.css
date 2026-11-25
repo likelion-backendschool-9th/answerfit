@@ -1,0 +1,152 @@
+.field {
+  margin-top: var(--space-6);
+}
+
+.label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-sm);
+}
+
+.required {
+  color: var(--color-danger);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.chip:has(.radio:checked) {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+.chip:has(.radio:focus-visible) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.radio {
+  position: absolute;
+  opacity: 0;
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-subtle);
+}
+
+.box:focus-within {
+  border-color: var(--color-accent);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+
+.textarea {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  line-height: var(--leading-body);
+  outline: none;
+  resize: vertical;
+}
+
+.count,
+.over {
+  align-self: flex-end;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.over,
+.error {
+  color: var(--color-danger);
+}
+
+.hint {
+  margin-top: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-sm);
+  text-align: right;
+}
+
+.similar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.similar svg {
+  flex: none;
+  color: var(--color-accent);
+}
+
+.similarText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-md);
+}
+
+.similarTitle {
+  color: var(--color-accent);
+}
+
+.rule {
+  display: flex;
+  gap: var(--space-2);
+  margin: var(--space-6) 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-subtle);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-sm);
+}
+
+.rule svg {
+  flex: none;
+}
+
+.error {
+  margin-bottom: var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.buttons {
+  display: flex;
+  gap: var(--space-2);
+}

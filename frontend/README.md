@@ -37,7 +37,8 @@ npm test             # 단위 테스트
 ```text
 app/                   라우트와 그 라우트만 쓰는 코드
   _components/         앱 공통 부품
-  (site)/              일반 화면
+  (site)/              푸터가 있는 일반 화면
+  (interview)/         푸터가 없는 면접 진행 화면
 components/ui/         도메인·URL을 모르는 범용 UI
 features/<도메인>/     api.ts(데이터 접근), actions.ts(서버 액션), types.ts, components/
 demo/                  목업 데이터와 시연 기록, 모드 전환기. API 연동이 끝나면 지운다
@@ -45,6 +46,16 @@ lib/                   도메인을 모르는 기반 함수
 scripts/structure/     배치·import 경계 검사
 tests/unit/            단위 테스트
 ```
+
+### 아직 목업인 것
+
+- 시선 인식과 "얼굴이 가이드 안에 있어요"는 목업 모드에서만 연결된 것처럼 보인다. 개발 모드에서는 "준비 중"으로 보인다.
+- 답변을 글자로 바꾸는 것과 분석 단계는 시간에 맞춰 보여 준다.
+- 질문별 녹화는 실제로 하지만 이 탭의 메모리(`features/interview/recordings.ts`)에만 남는다.
+- 질문 읽기는 브라우저 내장 음성을 쓴다.
+- 결과의 점수와 코멘트는 시연용이다. 답변 시간만 실제 값이고, 마지막 면접 하나만 쿠키에 남는다.
+- 면접을 보지 않아도 `/interviews/demo-sample/result`에서 목업의 결과를 볼 수 있다.
+- "PDF로 저장"은 브라우저 인쇄를 쓴다. 인쇄할 때는 `PrintReport`만 보인다.
 
 ### API를 연동할 때
 

@@ -1,0 +1,86 @@
+.card {
+  margin-top: var(--space-8);
+  padding: var(--space-6);
+  border: 1px solid var(--color-warning-border);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-surface);
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 500;
+}
+
+.title svg {
+  color: var(--color-warning);
+}
+
+.description {
+  margin-top: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-sm);
+}
+
+.steps {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-sm);
+}
+
+.steps li {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+.steps li:last-child {
+  flex: none;
+}
+
+.steps li:not(:last-child)::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  background: var(--color-border);
+}
+
+.steps .done:not(:last-child)::after {
+  background: var(--color-warning);
+}
+
+.done svg {
+  color: var(--color-success);
+}
+
+.doing svg {
+  color: var(--color-warning);
+}
+
+.waiting {
+  color: var(--color-text-muted);
+}
+
+.waiting svg {
+  color: var(--color-border);
+}
+
+@media (max-width: 48rem) {
+  .steps {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .steps li:not(:last-child)::after {
+    display: none;
+  }
+}

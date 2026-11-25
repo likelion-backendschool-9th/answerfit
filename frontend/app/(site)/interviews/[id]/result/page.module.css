@@ -1,0 +1,6 @@
+/* 예외: 인쇄할 때는 화면 대신 PrintReport를 그린다 */
+@media print {
+  .screen {
+    display: none;
+  }
+}

@@ -1,0 +1,76 @@
+.scrim {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: var(--color-scrim-light);
+  backdrop-filter: blur(6px);
+}
+
+.card {
+  width: min(100%, 24.375rem);
+  padding: var(--space-6);
+  border-radius: var(--radius-md);
+  background: var(--color-dark-surface);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.title {
+  font-weight: 500;
+}
+
+.description {
+  margin-top: var(--space-1);
+  color: var(--color-dark-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-sm);
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-sm);
+}
+
+.step > span,
+.spin {
+  display: flex;
+  flex: none;
+}
+
+.waiting {
+  color: var(--color-dark-text-muted);
+}
+
+.waiting > span {
+  color: var(--color-dark-border);
+}
+
+.done {
+  color: var(--color-dark-success);
+}
+
+.accent {
+  color: var(--color-dark-accent);
+}
+
+.spin {
+  animation: var(--animate-spin);
+}

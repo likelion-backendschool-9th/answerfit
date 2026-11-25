@@ -3,3 +3,10 @@
   border-top: 1px solid var(--color-border);
   background: var(--color-surface-subtle);
 }
+
+/* 예외: 인쇄할 때는 감춘다 */
+@media print {
+  .footer {
+    display: none;
+  }
+}

@@ -1,0 +1,48 @@
+.stage {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(75% 85% at 50% 22%, var(--color-stage-glow), var(--color-stage-mid) 40%, var(--color-stage-edge));
+  color: var(--color-dark-text);
+}
+
+.picture {
+  position: absolute;
+  inset: 0;
+}
+
+.dimmed .picture {
+  opacity: 0.45;
+}
+
+.video,
+.silhouette {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 거울처럼 보이게 좌우를 뒤집는다 */
+.video {
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.head {
+  fill: var(--color-stage-head);
+}
+
+.neck {
+  fill: var(--color-stage-neck);
+}
+
+.suit {
+  fill: var(--color-stage-suit);
+}
+
+.collar {
+  fill: var(--color-stage-collar);
+}
+
+.tie {
+  fill: var(--color-stage-tie);
+}

@@ -1,0 +1,42 @@
+.report {
+  display: none;
+}
+
+/* 예외: 인쇄 전용 */
+@media print {
+  .report {
+    display: block;
+    line-height: var(--leading-md);
+  }
+
+  .report h1 {
+    font-size: var(--text-xl);
+  }
+
+  .report h2 {
+    margin-top: var(--space-6);
+    font-size: var(--text-lg);
+  }
+
+  .report h3 {
+    margin-top: var(--space-3);
+    font-size: var(--text-md);
+  }
+
+  .table {
+    width: 100%;
+    margin-top: var(--space-4);
+    border-collapse: collapse;
+  }
+
+  .table th,
+  .table td {
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid var(--color-border);
+    text-align: left;
+  }
+
+  .item {
+    break-inside: avoid;
+  }
+}

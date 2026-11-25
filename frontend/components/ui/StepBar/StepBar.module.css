@@ -1,0 +1,30 @@
+.list {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-sm);
+}
+
+.item {
+  color: var(--color-text-muted);
+}
+
+.item::before {
+  content: "";
+  display: block;
+  height: 0.5rem;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+}
+
+.reached {
+  color: var(--color-text);
+}
+
+.reached::before {
+  background: var(--color-accent);
+}

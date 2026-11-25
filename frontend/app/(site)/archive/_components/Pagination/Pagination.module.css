@@ -1,0 +1,33 @@
+.pages {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-1);
+  margin-top: var(--space-10);
+}
+
+.page,
+.disabled {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.page:hover {
+  background: var(--color-surface-subtle);
+}
+
+.page[aria-current="page"] {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+.disabled {
+  opacity: 0.4;
+}

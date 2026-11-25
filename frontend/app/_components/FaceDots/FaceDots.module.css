@@ -1,0 +1,33 @@
+.face {
+  display: block;
+  fill: none;
+  stroke-linecap: round;
+}
+
+.inner,
+.outer {
+  stroke: var(--color-dark-text-muted);
+}
+
+.inner {
+  stroke-width: 2.6;
+}
+
+.outer {
+  stroke-width: 1.8;
+}
+
+.eyeDots {
+  stroke: var(--color-dark-accent);
+  stroke-width: 2.6;
+  opacity: 0.6;
+}
+
+.gaze {
+  stroke: var(--color-dark-accent);
+  stroke-width: 1.5;
+}
+
+.pupil {
+  fill: var(--color-dark-accent);
+}
