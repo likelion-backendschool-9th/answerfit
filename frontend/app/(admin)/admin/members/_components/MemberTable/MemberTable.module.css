@@ -1,0 +1,141 @@
+.error {
+  margin-bottom: var(--space-3);
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+}
+
+.scroll {
+  position: relative;
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+}
+
+.table {
+  width: 100%;
+  min-width: 68rem;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-sm);
+  text-align: left;
+}
+
+.table th {
+  height: 2.875rem;
+  padding: 0;
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+  font-weight: 500;
+}
+
+.table td {
+  height: 4.0625rem;
+  padding: 0;
+}
+
+.table th:first-child,
+.table td:first-child {
+  padding-left: var(--space-5);
+}
+
+.table tbody tr + tr {
+  border-top: 1px solid var(--color-border);
+}
+
+.provider,
+.joined,
+.seen {
+  width: 7rem;
+}
+
+.interviews {
+  width: 5rem;
+}
+
+.questions {
+  width: 5.5rem;
+}
+
+.status {
+  width: 9.875rem;
+}
+
+.tools {
+  width: 7.5rem;
+}
+
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.suspended {
+  background: var(--color-danger-row);
+}
+
+.member {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.avatar {
+  flex: none;
+  border-radius: var(--radius-full);
+}
+
+.who {
+  min-width: 0;
+  padding-right: var(--space-3);
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.today {
+  color: var(--color-success);
+}
+
+.number,
+.many {
+  font-family: var(--font-mono);
+}
+
+.many {
+  color: var(--color-warning);
+}
+
+.table .action {
+  padding-right: var(--space-4);
+  text-align: right;
+}
+
+.suspend,
+.release {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 2.25rem;
+  padding: 0 var(--space-2h);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.suspend {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.suspend:hover {
+  background: var(--color-danger-row);
+}

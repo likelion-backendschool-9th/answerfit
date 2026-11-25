@@ -20,8 +20,8 @@ export function isDate(value: string) {
 
 /** 화면과 서버가 함께 쓰는 검사. 문제가 없으면 undefined */
 export function setupError(setup: InterviewSetup, groups: DocumentGroup[], today: string): string | undefined {
-  if (!(setup.mode in MODE_LABEL)) return "진행 방식을 골라 주세요.";
-  if (!(setup.type in TYPE_LABEL)) return "면접 유형을 골라 주세요.";
+  if (!Object.hasOwn(MODE_LABEL, setup.mode)) return "진행 방식을 골라 주세요.";
+  if (!Object.hasOwn(TYPE_LABEL, setup.type)) return "면접 유형을 골라 주세요.";
   if (!COUNTS.includes(setup.count)) return "질문 수를 3~8개 중에서 골라 주세요.";
   if (setup.deleteAfter !== null) {
     if (!isDate(setup.deleteAfter)) return "영상 보관 날짜가 올바르지 않아요.";

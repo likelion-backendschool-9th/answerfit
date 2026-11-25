@@ -5,7 +5,7 @@ import type { Session } from "@/features/session/types";
 const COOKIE = "demo-session";
 
 export const DEMO_MEMBER: Session = { email: "jiwoo@answerfit.kr", nickname: "지우", role: "member" };
-export const DEMO_ADMIN: Session = { email: "admin@answerfit.kr", nickname: "운영자", role: "admin" };
+export const DEMO_ADMIN: Session = { email: "admin@answerfit.kr", nickname: "운영 관리자", role: "admin" };
 
 export async function readDemoSession(): Promise<Session | null> {
   const raw = (await cookies()).get(COOKIE)?.value;

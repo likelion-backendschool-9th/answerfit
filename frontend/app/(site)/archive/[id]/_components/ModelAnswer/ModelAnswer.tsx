@@ -2,13 +2,13 @@ import { Icon } from "@/components/ui/Icon/Icon";
 import type { ModelAnswer as Answer } from "@/features/question/types";
 import styles from "./ModelAnswer.module.css";
 
-export function ModelAnswer({ answer }: { answer: Answer | null }) {
+export function ModelAnswer({ answer, pending }: { answer: Answer | null; pending: boolean }) {
   return (
     <section className={styles.section} aria-labelledby="answer-title">
       <h2 id="answer-title" className={styles.title}>
         모범답안
       </h2>
-      {answer ? <Content answer={answer} /> : <Empty />}
+      {answer ? <Content answer={answer} /> : <Empty pending={pending} />}
     </section>
   );
 }
@@ -44,7 +44,7 @@ function Content({ answer: { summary, table, body, keywords } }: { answer: Answe
           </table>
         </div>
       )}
-      <p className={styles.body}>{body}</p>
+      {body && <p className={styles.body}>{body}</p>}
       <h3 className={styles.keywordTitle}>핵심 키워드</h3>
       <p className={styles.note}>모의 면접에서 이 키워드가 답변에 빠지면 꼬리 질문이 나올 수 있어요.</p>
       <ul className={styles.keywords}>
@@ -58,16 +58,16 @@ function Content({ answer: { summary, table, body, keywords } }: { answer: Answe
   );
 }
 
-function Empty() {
+function Empty({ pending }: { pending: boolean }) {
   return (
     <>
-      <p className={styles.note}>승인되면 AI가 자동으로 만들어요</p>
+      <p className={styles.note}>{pending ? "승인되면 AI가 자동으로 만들어요" : "AI가 모범답안을 준비하고 있어요"}</p>
       <div className={styles.empty}>
         <span className={styles.icon}>
           <Icon name="file" />
         </span>
         <p className={styles.emptyTitle}>아직 모범답안이 없어요</p>
-        <p className={styles.note}>관리자가 승인하면 AI가 모범답안과 핵심 키워드를 만들어 여기에 보여 드려요.</p>
+        <p className={styles.note}>{pending ? "관리자가 승인하면 AI가 모범답안과 핵심 키워드를 만들어 여기에 보여 드려요." : "준비되면 여기에 보여 드려요."}</p>
       </div>
     </>
   );

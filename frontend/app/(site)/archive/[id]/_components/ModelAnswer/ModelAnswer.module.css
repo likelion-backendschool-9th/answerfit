@@ -62,6 +62,7 @@
 }
 
 .body {
+  white-space: pre-line;
   margin-top: var(--space-6);
   font-size: var(--text-lg);
   line-height: var(--leading-lg);

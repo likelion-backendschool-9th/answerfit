@@ -44,10 +44,13 @@ async function Account() {
     );
   }
   return (
-    <form action={logoutAction}>
-      <button type="submit" className={styles.account}>
-        로그아웃
-      </button>
-    </form>
+    <>
+      {session.role === "admin" && <Link href={PATHS.admin}>관리자</Link>}
+      <form action={logoutAction}>
+        <button type="submit" className={styles.account}>
+          로그아웃
+        </button>
+      </form>
+    </>
   );
 }

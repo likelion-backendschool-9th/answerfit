@@ -10,8 +10,10 @@
   --color-primary-hover: #16225a;
   --color-accent: #3567db;
   --color-success: #11845b;
+  --color-danger: #d7342c;
+  --color-danger-surface: #fae6e5;
+  --color-danger-row: #fdf7f7;
   /* 목업에 없는 값 */
-  --color-danger: #d92d20;
   --color-kakao: #fee500;
   --color-overlay: rgb(21 23 28 / 56%);
   --color-warning: #b5600a;
@@ -20,7 +22,12 @@
   --color-warning-border: #ead0b7;
   --color-warning-badge: #f7efe6;
   --color-accent-surface: #f3f6fd;
+  --color-accent-soft: #eff3fd;
+  --color-accent-hover: #2d59c0;
   --color-success-surface: #e7f2ee;
+  --color-success-badge: #e2f0eb;
+  --color-warning-tag: #f6ece1;
+  --color-muted-badge: #ececef;
   --color-pending-surface: #fcf9f5;
   --color-pending-badge: #f4eadd;
   --color-track: #e5e6ea;
@@ -43,6 +50,13 @@
   --color-scrim-page: rgb(21 23 28 / 48%);
   --color-scrim: rgb(8 9 11 / 82%);
   --color-scrim-light: rgb(8 9 11 / 60%);
+
+  /* 관리자 메뉴 */
+  --color-nav-active: #38467d;
+  --color-nav-border: #404d82;
+  --color-nav-text: #c3c8dc;
+  --color-nav-text-muted: #a5adca;
+  --color-badge-dark: #3e4045;
 
   /* 카메라 화면 */
   --color-stage-glow: #383c43;

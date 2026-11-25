@@ -3,10 +3,14 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--space-1);
+}
+
+.plain {
   margin-top: var(--space-10);
 }
 
 .page,
+.gap,
 .disabled {
   display: grid;
   place-items: center;
@@ -30,4 +34,27 @@
 
 .disabled {
   opacity: 0.4;
+}
+
+.boxed .page,
+.boxed .gap,
+.boxed .disabled {
+  min-width: 2rem;
+  width: auto;
+  height: 2rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.boxed .page[aria-current="page"] {
+  border-color: var(--color-text);
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+}
+
+.boxed svg {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-text-muted);
 }

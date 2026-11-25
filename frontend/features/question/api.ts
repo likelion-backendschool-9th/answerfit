@@ -37,8 +37,8 @@ export async function likeQuestion(id: string, liked: boolean): Promise<boolean>
 
 /** 더 등록할 수 없으면 null */
 export async function addQuestion(input: QuestionInput): Promise<string | null> {
-  await requireMember();
-  if (await inMock()) return addDemoQuestion(input);
+  const { nickname, email } = await requireMember();
+  if (await inMock()) return addDemoQuestion(input, { nickname, email });
   return (await call<{ id: string }>("/api/questions", "POST", input)).id;
 }
 
@@ -60,7 +60,7 @@ export async function removeQuestion(id: string): Promise<boolean> {
 export async function reportQuestion({ questionId, reason, detail }: ReportInput): Promise<boolean> {
   const question = await getQuestion(questionId);
   if (!question || question.mine || question.reported) return false;
-  if (await inMock()) await reportDemoQuestion(questionId);
+  if (await inMock()) await reportDemoQuestion({ questionId, reason, detail });
   else await call(`${path(questionId)}/reports`, "POST", { reason, detail });
   return true;
 }

@@ -68,7 +68,7 @@ async function Question({ params }: Props) {
         )}
       </div>
       {pending && <PendingCard />}
-      <ModelAnswer answer={answer} />
+      <ModelAnswer answer={answer} pending={pending} />
       {!pending && <Neighbors previous={previous} next={next} />}
     </article>
   );

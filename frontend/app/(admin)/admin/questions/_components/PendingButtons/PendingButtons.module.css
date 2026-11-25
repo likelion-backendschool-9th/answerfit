@@ -1,0 +1,24 @@
+.buttons {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.reject,
+.approve {
+  min-height: 2.5rem;
+  padding: 0;
+}
+
+.reject {
+  width: 5rem;
+}
+
+.approve {
+  width: 11rem;
+}
+
+.error {
+  margin-top: var(--space-2);
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+}

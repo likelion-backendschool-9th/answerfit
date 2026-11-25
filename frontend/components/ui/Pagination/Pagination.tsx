@@ -1,19 +1,27 @@
 import Link from "next/link";
+import { cn } from "@/lib/cn";
 import { Icon } from "../Icon/Icon";
+import { pageNumbers } from "./pages";
 import styles from "./Pagination.module.css";
 
-type Props = { page: number; pages: number; href: (page: number) => string };
+type Props = { page: number; pages: number; href: (page: number) => string; variant?: "plain" | "boxed" };
 
-export function Pagination({ page, pages, href }: Props) {
+export function Pagination({ page, pages, href, variant = "plain" }: Props) {
   if (pages <= 1) return null;
   return (
-    <nav className={styles.pages} aria-label="쪽">
+    <nav className={cn(styles.pages, styles[variant])} aria-label="쪽">
       <Arrow href={page > 1 ? href(page - 1) : null} label="이전 쪽" icon="back" />
-      {Array.from({ length: pages }, (_, i) => i + 1).map((number) => (
-        <Link key={number} href={href(number)} className={styles.page} aria-current={number === page ? "page" : undefined}>
-          {number}
-        </Link>
-      ))}
+      {pageNumbers(page, pages).map((number, i) =>
+        number === null ? (
+          <span key={`gap-${i}`} className={styles.gap}>
+            …
+          </span>
+        ) : (
+          <Link key={number} href={href(number)} className={styles.page} aria-current={number === page ? "page" : undefined}>
+            {number}
+          </Link>
+        ),
+      )}
       <Arrow href={page < pages ? href(page + 1) : null} label="다음 쪽" icon="arrow" />
     </nav>
   );

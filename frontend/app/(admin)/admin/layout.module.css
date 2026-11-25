@@ -1,0 +1,18 @@
+.frame {
+  display: flex;
+  flex: 1 0 auto;
+  background: var(--color-surface-subtle);
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+@media (max-width: 64rem) {
+  .frame {
+    flex-direction: column;
+  }
+}
