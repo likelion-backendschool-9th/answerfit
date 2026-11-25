@@ -1,3 +1,4 @@
+import { PATHS } from "@/app/_lib/paths";
 import { ButtonLink } from "@/components/ui/Button/Button";
 import styles from "./DoneStep.module.css";
 
@@ -28,8 +29,8 @@ export function DoneStep({ nickname }: { nickname: string }) {
         </span>
       </div>
       <div className={styles.buttons}>
-        <ButtonLink href="/interviews/new">첫 모의 면접 시작</ButtonLink>
-        <ButtonLink href="/my" variant="outline">
+        <ButtonLink href={PATHS.newInterview}>첫 모의 면접 시작</ButtonLink>
+        <ButtonLink href={PATHS.my} variant="outline">
           마이페이지로 가기
         </ButtonLink>
       </div>

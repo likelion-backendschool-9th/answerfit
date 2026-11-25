@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { ApiError, ApiNotConnectedError } from "@/lib/backend-http";
-import { isEmailTaken, login, loginWithSocial, signup } from "./api";
+import { isEmailTaken, login, loginWithSocial, logout, signup } from "./api";
 import { SOCIAL_PROVIDERS, type AccountErrors, type LoginState, type SignupResult, type SocialProvider } from "./types";
 import { hasErrors, validateAccount, validateProfile } from "./validation";
 
@@ -83,4 +83,9 @@ export async function signupAction(form: FormData): Promise<SignupResult> {
   } catch (error) {
     return { ok: false, error: messageOf(error) };
   }
+}
+
+export async function logoutAction() {
+  await logout();
+  redirect("/");
 }

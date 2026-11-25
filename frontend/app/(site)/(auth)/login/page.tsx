@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { BrandLogo } from "@/app/_components/BrandLogo/BrandLogo";
+import { HomeHero } from "@/app/_components/HomeHero/HomeHero";
 import { LoginForm } from "./_components/LoginForm/LoginForm";
 import { SocialButtons } from "./_components/SocialButtons/SocialButtons";
 import styles from "./page.module.css";
@@ -11,8 +11,9 @@ export const metadata: Metadata = { title: "로그인" };
 export default function LoginPage() {
   return (
     <div className={styles.screen}>
-      {/* 홈을 구현하기 전까지 홈 목업을 배경으로 쓴다 */}
-      <Image src="/images/login-backdrop.jpg" alt="" fill priority sizes="100vw" className={styles.backdrop} />
+      <div className={styles.backdrop} inert>
+        <HomeHero backdrop />
+      </div>
       <section className={styles.modal} aria-labelledby="login-title">
         <div className={styles.body}>
           <div className={styles.top}>

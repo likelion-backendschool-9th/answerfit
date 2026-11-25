@@ -15,7 +15,9 @@
 }
 
 .backdrop {
-  object-fit: cover;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
 }
 
 .modal {
@@ -57,6 +59,7 @@
   font-size: var(--text-xl);
   font-weight: 500;
   line-height: var(--leading-xl);
+  letter-spacing: -0.02em;
 }
 
 .description {

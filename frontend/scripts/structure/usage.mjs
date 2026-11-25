@@ -262,7 +262,7 @@ function moduleValues() {
 }
 
 /* 다른 곳에서 만드는 변수. next/font의 variable 옵션이 html에 단다 */
-const EXTERNAL_VARIABLES = new Set(["--font-noto", "--font-brand"]);
+const EXTERNAL_VARIABLES = new Set(["--font-noto", "--font-brand", "--font-code"]);
 function undefinedVariables() {
   const sources = [];
   (function walk(d) {

@@ -1,0 +1,91 @@
+/* 목업의 글자색은 사진 위에서 읽기 어려워 위쪽에 흰 막을 깐다 */
+.header {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 4.5rem;
+  padding: var(--space-3) var(--space-12);
+}
+
+.header::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: 8rem;
+  background: linear-gradient(var(--color-veil), var(--color-veil-end));
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.tagline {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.tagline,
+.clock {
+  color: var(--color-text);
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2) var(--space-8);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.account {
+  display: inline-flex;
+  align-items: center;
+  min-height: 3rem;
+  padding: 0 var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  cursor: pointer;
+}
+
+.account:hover {
+  background: var(--color-surface-subtle);
+}
+
+@media (max-width: 80rem) {
+  .header {
+    grid-template-columns: auto 1fr;
+    padding: var(--space-3) var(--space-5);
+  }
+
+  .clock,
+  .tagline {
+    display: none;
+  }
+}
+
+@media (max-width: 40rem) {
+  .header {
+    grid-template-columns: 1fr;
+  }
+
+  .nav {
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+  }
+
+  .account {
+    min-height: 2.5rem;
+    padding: 0 var(--space-3);
+  }
+}

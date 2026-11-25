@@ -1,7 +1,7 @@
 import "server-only";
 import { addDemoMember, demoSocialMember, findDemoMember, isDemoEmailTaken } from "@/demo/auth";
 import { getDataMode } from "@/demo/mode";
-import { startSession } from "@/features/session/session";
+import { endSession, startSession } from "@/features/session/session";
 import { ApiError, ApiNotConnectedError, callBackend } from "@/lib/backend-http";
 import type { LoginInput, SignupInput, SocialProvider } from "./types";
 
@@ -48,4 +48,9 @@ export async function signup({ email, password, nickname, photo }: SignupInput) 
   if (photo) form.set("photo", photo);
   const { accessToken } = await callBackend<TokenResponse>("/api/auth/signup", { method: "POST", body: form });
   await startSession({ accessToken }, false);
+}
+
+/** 이 브라우저의 세션만 지운다. 서버 토큰을 무효로 만드는 API는 미확정 */
+export async function logout() {
+  await endSession();
 }
