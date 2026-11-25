@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { deleteLabel, estimateMinutes, initialSetup, isDate, setupError, todayInSeoul } from "@/features/interview/setup";
 import type { DocumentGroup, InterviewSetup } from "@/features/interview/types";
 
-const group = (id: string, error: string | null = null): DocumentGroup => ({ id, name: id, shortName: id, description: "", interviewDate: null, error });
+const group = (id: string, error: string | null = null): DocumentGroup => ({ id, name: id, shortName: id, description: "", interviewDate: null, error, createdOn: "2026-11-01", files: [] });
 const groups = [group("good"), group("bad", "스캔 실패")];
 const setup: InterviewSetup = { mode: "practice", type: "experience", count: 5, groupId: "good", deleteAfter: "2026-12-10" };
 const check = (change: Partial<InterviewSetup>) => setupError({ ...setup, ...change }, groups, "2026-11-25");
