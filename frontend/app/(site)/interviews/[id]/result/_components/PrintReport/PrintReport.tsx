@@ -1,5 +1,6 @@
 import { duration, mainItems, rateScore, rateTime, startedLabel, summarize, timeNote, type InterviewResult } from "@/features/interview/result";
-import { MODE_LABEL, TYPE_LABEL } from "@/features/interview/setup";
+import { RECORD_LABEL } from "@/features/interview/records";
+import { MODE_LABEL } from "@/features/interview/setup";
 import styles from "./PrintReport.module.css";
 
 /** 인쇄(PDF로 저장)할 때만 보인다. 꼬리 질문까지 모든 질문을 담는다 */
@@ -10,7 +11,7 @@ export function PrintReport({ result }: { result: InterviewResult }) {
   return (
     <div className={styles.report}>
       <h1>{result.title}</h1>
-      <p>{[result.groupName, startedLabel(result.startedAt), TYPE_LABEL[result.type], MODE_LABEL[result.mode], `질문 ${items.length - followUps}개 + 꼬리 질문 ${followUps}개`].filter(Boolean).join(" · ")}</p>
+      <p>{[result.groupName, startedLabel(result.startedAt), RECORD_LABEL[result.type], MODE_LABEL[result.mode], `질문 ${items.length - followUps}개 + 꼬리 질문 ${followUps}개`].filter(Boolean).join(" · ")}</p>
       <p>
         답변 평균 {summary.score}점({rateScore(summary.score).label}) · 시선 처리 평균 {summary.gaze}점({rateScore(summary.gaze).label}) · 답변 평균 시간 {duration(summary.seconds)}({rateTime(summary.seconds).label})
       </p>

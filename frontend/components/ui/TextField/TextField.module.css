@@ -32,6 +32,10 @@
   outline: none;
 }
 
+.input:read-only {
+  color: var(--color-text-muted);
+}
+
 .input[aria-invalid="true"] {
   border-color: var(--color-danger);
   box-shadow: inset 0 0 0 1px var(--color-danger);

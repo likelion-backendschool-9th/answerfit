@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { TopBar } from "@/app/_components/TopBar/TopBar";
 import { PATHS } from "@/app/_lib/paths";
+import { Pagination } from "@/components/ui/Pagination/Pagination";
 import { getQuestions } from "@/features/question/api";
+import { RegisterButton } from "@/features/question/components/RegisterButton/RegisterButton";
 import { archiveHref, countByCategory, KIND_LABEL, readQuery, searchQuestions } from "@/features/question/rules";
 import { requireMember } from "@/features/session/guard";
 import { ArchiveFilters } from "./_components/ArchiveFilters/ArchiveFilters";
 import { ArchiveTabs } from "./_components/ArchiveTabs/ArchiveTabs";
-import { Pagination } from "./_components/Pagination/Pagination";
 import { QuestionList } from "./_components/QuestionList/QuestionList";
-import { RegisterButton } from "./_components/RegisterButton/RegisterButton";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: "질문 아카이브" };
@@ -51,7 +51,7 @@ async function Archive({ searchParams }: Props) {
       <p className={styles.hidden} role="status">
         질문 {total}개
       </p>
-      <Pagination query={query} page={page} pages={pages} />
+      <Pagination page={page} pages={pages} href={(target) => archiveHref(query, { page: target })} />
     </>
   );
 }

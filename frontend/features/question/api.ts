@@ -1,10 +1,11 @@
 import "server-only";
 import { getDataMode } from "@/demo/mode";
-import { addDemoQuestion, likeDemoQuestion, listDemoQuestions, removeDemoQuestion, reportDemoQuestion, updateDemoQuestion } from "@/demo/question";
+import { listDemoLikedAnswers } from "@/demo/liked";
+import { addDemoQuestion, likeDemoAnswer, likeDemoQuestion, listDemoQuestions, removeDemoQuestion, reportDemoQuestion, updateDemoQuestion } from "@/demo/question";
 import { requireMember } from "@/features/session/guard";
 import { getAccessToken } from "@/features/session/session";
 import { callBackend } from "@/lib/backend-http";
-import type { ArchiveQuestion, QuestionInput, ReportInput } from "./types";
+import type { ArchiveQuestion, LikedAnswer, QuestionInput, ReportInput } from "./types";
 
 const call = async <T>(path: string, method = "GET", body?: object) => callBackend<T>(path, { method, body, token: await getAccessToken() });
 const path = (id: string) => `/api/questions/${encodeURIComponent(id)}`;
@@ -62,4 +63,16 @@ export async function reportQuestion({ questionId, reason, detail }: ReportInput
   if (await inMock()) await reportDemoQuestion(questionId);
   else await call(`${path(questionId)}/reports`, "POST", { reason, detail });
   return true;
+}
+
+/** 면접 결과에서 좋아요한 질문 */
+export async function getLikedAnswers(): Promise<LikedAnswer[]> {
+  await requireMember();
+  return (await inMock()) ? listDemoLikedAnswers() : call("/api/questions/liked-answers");
+}
+
+export async function likeAnswer(id: string, liked: boolean) {
+  await requireMember();
+  if (await inMock()) await likeDemoAnswer(id, liked);
+  else await call(`/api/questions/liked-answers/${encodeURIComponent(id)}`, liked ? "PUT" : "DELETE");
 }

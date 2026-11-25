@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FilterChips } from "@/components/ui/FilterChips/FilterChips";
 import { archiveHref, type ArchiveQuery } from "@/features/question/rules";
 import type { QuestionKind } from "@/features/question/types";
 import styles from "./ArchiveTabs.module.css";
@@ -17,13 +18,9 @@ export function ArchiveTabs({ query, kinds, categories }: Props) {
           </Link>
         ))}
       </nav>
-      <nav className={styles.chips} aria-label="분야">
-        {chips.map(([category, count]) => (
-          <Link key={category ?? "all"} href={archiveHref(query, { category })} scroll={false} className={styles.chip} aria-current={category === query.category ? "page" : undefined}>
-            {category ?? "전체"} <span className={styles.count}>{count}</span>
-          </Link>
-        ))}
-      </nav>
+      <div className={styles.chips}>
+        <FilterChips label="분야" chips={chips.map(([category, count]) => ({ label: category ?? "전체", count, href: archiveHref(query, { category }), current: category === query.category }))} />
+      </div>
     </>
   );
 }

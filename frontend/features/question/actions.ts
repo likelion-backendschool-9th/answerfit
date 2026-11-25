@@ -3,7 +3,8 @@
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { ApiError, ApiNotConnectedError } from "@/lib/backend-http";
-import { addQuestion, getQuestions, likeQuestion, removeQuestion, reportQuestion, updateQuestion } from "./api";
+import { safeNextPath } from "@/lib/next-path";
+import { addQuestion, getQuestions, likeAnswer, likeQuestion, removeQuestion, reportQuestion, updateQuestion } from "./api";
 import { findSimilar, questionError, reportError, TEXT_MAX } from "./rules";
 import type { ActionResult, QuestionInput, ReportInput, SimilarQuestion } from "./types";
 
@@ -30,6 +31,13 @@ export async function likeAction(id: string, liked: boolean): Promise<ActionResu
   return attempt(() => likeQuestion(id, liked), "질문을 찾지 못했어요.");
 }
 
+export async function unlikeAnswerAction(id: string): Promise<ActionResult> {
+  return attempt(async () => {
+    await likeAnswer(id, false);
+    return true;
+  }, "");
+}
+
 export async function saveQuestionAction(id: string | null, raw: QuestionInput): Promise<ActionResult> {
   const input = clean(raw);
   const problem = questionError(input);
@@ -38,13 +46,14 @@ export async function saveQuestionAction(id: string | null, raw: QuestionInput):
   return attempt(async () => (await addQuestion(input)) !== null, "승인 대기 중인 질문이 너무 많아요.");
 }
 
-export async function removeQuestionAction(id: string): Promise<ActionResult> {
+/** 지운 뒤 next로 간다 */
+export async function removeQuestionAction(id: string, next: string): Promise<ActionResult> {
   try {
     if (!(await removeQuestion(id))) return { error: "승인 전인 내 질문만 삭제할 수 있어요." };
   } catch (error) {
     return { error: messageOf(error) };
   }
-  redirect("/archive");
+  redirect(safeNextPath(next));
 }
 
 export async function reportAction(input: ReportInput): Promise<ActionResult> {

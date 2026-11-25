@@ -1,8 +1,11 @@
 import "server-only";
 import { cookies } from "next/headers";
+import { todayInSeoul } from "@/features/interview/setup";
 import type { ArchiveQuestion, ModelAnswer, QuestionInput } from "@/features/question/types";
+import { demoDate } from "./clock";
 
 const LIKES = "demo-likes";
+const LIKED_ANSWERS = "demo-liked-answers";
 const MINE = "demo-questions";
 const REPORTS = "demo-reports";
 const MAX_MINE = 10;
@@ -21,12 +24,12 @@ const CS: Seed[] = [
   ["l4l7", "네트워크", "L4 로드밸런싱과 L7 로드밸런싱의 차이는?", 44, "L4는 IP와 포트를 보고 나누고, L7은 주소나 헤더 같은 요청 내용을 보고 나눠요.", "L4는 내용을 열어 보지 않아 빠르고, L7은 경로에 따라 다른 서버로 보낼 수 있어요. 서비스에서 무엇이 필요한지에 맞춰 고른 예를 말해 보세요.", ["IP와 포트", "HTTP 헤더", "경로 기반 분산", "TLS 종료"]],
   ["cookie", "네트워크", "쿠키와 세션, 토큰 방식 로그인의 차이를 설명해 주세요.", 73, "세션은 상태를 서버에 두고, 토큰은 상태를 토큰 안에 담아 클라이언트가 들고 있어요.", "서버를 여러 대로 늘릴 때의 차이와, 토큰을 취소하기 어려운 문제를 함께 말하면 좋아요.", ["세션 저장소", "JWT", "만료", "HttpOnly"]],
   ["dns", "네트워크", "DNS가 도메인 이름을 IP 주소로 바꾸는 과정을 설명해 주세요.", 39, "캐시를 먼저 보고, 없으면 루트, 최상위, 권한 네임서버를 차례로 물어 찾아요.", "재귀 질의와 반복 질의를 구분하고, TTL이 하는 일을 덧붙여 보세요.", ["캐시", "루트 네임서버", "재귀 질의", "TTL"]],
-  ["process", "운영체제", "프로세스와 스레드의 차이를 설명해 주세요.", 142, "프로세스는 독립된 메모리를 갖고, 스레드는 한 프로세스의 메모리를 나눠 써요.", "스레드는 전환 비용이 작지만 하나가 잘못되면 함께 영향을 받아요. 멀티 프로세스를 고른 예를 말해 보세요.", ["메모리 공유", "컨텍스트 스위칭", "동기화"]],
+  ["process", "운영체제", "프로세스와 스레드의 차이, 그리고 멀티스레드에서 생길 수 있는 문제는 무엇인가요?", 176, "프로세스는 독립된 메모리를 갖고, 스레드는 한 프로세스의 메모리를 나눠 써요.", "스레드는 전환 비용이 작지만 하나가 잘못되면 함께 영향을 받아요. 멀티 프로세스를 고른 예를 말해 보세요.", ["메모리 공유", "컨텍스트 스위칭", "동기화"]],
   ["deadlock", "운영체제", "데드락이 생기는 네 가지 조건과 해결 방법을 설명해 주세요.", 88, "상호 배제, 점유 대기, 비선점, 순환 대기가 모두 갖춰지면 생겨요.", "네 조건 중 하나를 깨는 예방, 회피, 탐지와 회복 순서로 말하고, 잠금 순서를 정하는 실무 예를 들어 보세요.", ["상호 배제", "점유 대기", "비선점", "순환 대기"]],
   ["paging", "운영체제", "가상 메모리와 페이징이 필요한 까닭을 설명해 주세요.", 52, "실제 메모리보다 큰 주소 공간을 주고, 프로그램을 같은 크기로 나눠 올려 외부 단편화를 없애요.", "페이지 폴트가 났을 때의 순서와 교체 알고리즘을 이어서 설명해 보세요.", ["페이지 테이블", "페이지 폴트", "TLB", "단편화"]],
   ["schedule", "운영체제", "CPU 스케줄링 알고리즘을 두 가지 이상 비교해 주세요.", 37, "FCFS는 단순하지만 오래 걸리는 작업이 뒤를 막고, 라운드 로빈은 시간을 나눠 응답이 빨라요.", "선점과 비선점으로 나누고, 기아 문제와 에이징을 덧붙여 보세요.", ["선점", "라운드 로빈", "기아", "에이징"]],
   ["isolation", "데이터베이스", "트랜잭션 격리 수준을 설명해 주세요.", 167, "READ UNCOMMITTED, READ COMMITTED, REPEATABLE READ, SERIALIZABLE 네 단계가 있고, 높을수록 안전하지만 동시성이 떨어져요.", "각 단계에서 생기는 Dirty Read, Non-Repeatable Read, Phantom Read를 짝지어 말하고, 쓰는 데이터베이스의 기본값을 덧붙여 보세요.", ["Dirty Read", "Non-Repeatable Read", "Phantom Read", "MVCC"]],
-  ["index", "데이터베이스", "인덱스를 쓰면 조회가 빨라지는 까닭과 단점을 설명해 주세요.", 131, "정렬된 B+Tree를 따라가 읽을 양을 줄이지만, 쓰기와 저장 공간 비용이 늘어요.", "카디널리티가 낮은 열이나 함수로 감싼 조건에서는 쓰이지 않는 예를 말해 보세요.", ["B+Tree", "카디널리티", "커버링 인덱스", "쓰기 비용"]],
+  ["index", "데이터베이스", "인덱스는 어떻게 조회를 빠르게 하고, 언제 오히려 느려지나요?", 142, "정렬된 B+Tree를 따라가 읽을 양을 줄이지만, 쓰기와 저장 공간 비용이 늘어요.", "카디널리티가 낮은 열이나 함수로 감싼 조건에서는 쓰이지 않는 예를 말해 보세요.", ["B+Tree", "카디널리티", "커버링 인덱스", "쓰기 비용"]],
   ["normal", "데이터베이스", "정규화와 반정규화를 언제 선택하는지 설명해 주세요.", 64, "정규화로 중복과 이상 현상을 없애고, 조회가 느리면 근거를 갖고 반정규화해요.", "조인 비용을 먼저 측정하고, 반정규화한 값을 맞추는 방법까지 말하면 좋아요.", ["이상 현상", "제3정규형", "조인", "중복"]],
   ["hash", "자료구조", "해시 충돌을 해결하는 방법을 설명해 주세요.", 79, "체이닝은 같은 칸에 이어 붙이고, 개방 주소법은 빈 칸을 찾아가요.", "적재율이 높아질 때의 차이와 재해싱을 함께 말해 보세요.", ["체이닝", "개방 주소법", "적재율", "재해싱"]],
   ["stack-queue", "자료구조", "스택과 큐의 차이와 쓰이는 예를 설명해 주세요.", 45, "스택은 나중에 넣은 것을, 큐는 먼저 넣은 것을 먼저 꺼내요.", "함수 호출과 되돌리기, 작업 대기열과 너비 우선 탐색을 예로 들어 보세요.", ["LIFO", "FIFO", "함수 호출", "BFS"]],
@@ -34,6 +37,12 @@ const CS: Seed[] = [
   ["dp", "알고리즘", "동적 계획법을 쓸 수 있는 조건을 설명해 주세요.", 41, "겹치는 부분 문제와 최적 부분 구조가 있을 때 써요.", "메모이제이션과 타뷸레이션을 비교하고 간단한 예를 들어 보세요.", ["부분 문제", "메모이제이션", "점화식"]],
   ["rendering", "웹", "서버 사이드 렌더링과 클라이언트 사이드 렌더링을 비교해 주세요.", 57, "SSR은 첫 화면과 검색에 유리하고, CSR은 이후 이동이 빨라요.", "하이드레이션과 서버 부담을 함께 말하면 좋아요.", ["첫 화면", "검색 노출", "하이드레이션"]],
   ["cache", "웹", "브라우저 캐시와 CDN 캐시의 차이를 설명해 주세요.", 33, "브라우저 캐시는 한 사람의 기기에, CDN 캐시는 사용자와 가까운 서버에 저장돼요.", "Cache-Control과 ETag로 어떻게 제어하는지, 배포할 때 어떻게 비우는지 말해 보세요.", ["Cache-Control", "ETag", "무효화"]],
+];
+/** 내가 등록해 승인된 질문 */
+const MY_APPROVED: { seed: Seed; createdOn: string; approvedOn: string }[] = [
+  { createdOn: "2026-11-08", approvedOn: "2026-11-10", seed: ["my-isolation", "데이터베이스", "트랜잭션 격리 수준 4가지와 각각에서 생길 수 있는 문제를 설명해 주세요.", 37, "READ UNCOMMITTED부터 SERIALIZABLE까지 네 단계이고, 낮을수록 더 많은 이상 현상을 허용해요.", "Dirty Read, Non-Repeatable Read, Phantom Read를 각 단계와 짝지어 말하고, MVCC가 어떻게 막는지 덧붙여 보세요.", ["Dirty Read", "Phantom Read", "MVCC"]] },
+  { createdOn: "2026-10-30", approvedOn: "2026-11-01", seed: ["my-jwt", "웹", "JWT와 세션 기반 인증의 차이, 그리고 각각의 단점은 무엇인가요?", 41, "세션은 서버가 상태를 갖고, JWT는 토큰이 상태를 담아요.", "세션은 서버를 늘릴 때 저장소가 필요하고, JWT는 만료 전에 취소하기 어려워요. 리프레시 토큰으로 줄이는 방법을 말해 보세요.", ["세션 저장소", "서명", "만료", "리프레시 토큰"]] },
+  { createdOn: "2026-10-15", approvedOn: "2026-10-17", seed: ["my-docker", "운영체제", "도커 컨테이너와 가상 머신은 무엇이 다른가요?", 23, "컨테이너는 호스트 커널을 나눠 쓰고, 가상 머신은 운영체제를 통째로 올려요.", "네임스페이스와 cgroup으로 격리한다는 점, 시작 속도와 보안 경계의 차이를 말해 보세요.", ["커널 공유", "네임스페이스", "cgroup", "하이퍼바이저"]] },
 ];
 const PERSONALITY: Seed[] = [
   ["p-conflict", "협업", "팀원과 의견이 달랐던 경험과 해결 과정을 말씀해 주세요.", 92, "상황, 서로의 근거, 합의한 기준, 결과 순서로 말해요.", "누가 옳았는지보다 어떤 기준으로 합의했는지를 보여 주세요.", ["상황", "근거", "합의 기준", "결과"]],
@@ -46,13 +55,18 @@ const toQuestion =
   (kind: ArchiveQuestion["kind"]) =>
   ([id, category, text, likes, summary, body, keywords, table]: Seed): ArchiveQuestion => ({ id, kind, category, text, likes, liked: false, mine: false, status: "approved", reported: false, answer: { summary, body, keywords, table } });
 
-const BANK = [...CS.map(toQuestion("cs")), ...PERSONALITY.map(toQuestion("personality"))];
-const DEFAULT_LIKED = ["tcp-udp", "handshake"];
+function bank(): ArchiveQuestion[] {
+  const mine = MY_APPROVED.map(({ seed, createdOn, approvedOn }) => ({ ...toQuestion("cs")(seed), mine: true, createdOn: demoDate(createdOn), approvedOn: demoDate(approvedOn) }));
+  return [...CS.map(toQuestion("cs")), ...mine, ...PERSONALITY.map(toQuestion("personality"))];
+}
+const DEFAULT_LIKED = ["tcp-udp", "process", "index", "handshake", "l4l7", "cookie", "deadlock", "isolation", "p-conflict"];
+/** 면접에서 받아 좋아요한 질문. [기록의 id, 결과 항목의 id] */
+const DEFAULT_LIKED_ANSWERS = ["demo-sample/sample-Q2", "demo-sample/sample-Q4", "demo-rec-1/cs-1"];
 /** 쿠키가 없을 때 보여 줄 내 질문. 목록의 네 번째 뒤에 나온다 */
-const DEFAULT_MINE: Saved[] = [{ id: "mine-l4l7", category: "네트워크", text: "로드밸런서의 L4와 L7 방식은 어떻게 다른가요?" }];
+const defaultMine = (): Saved[] => [{ id: "mine-l4l7", category: "네트워크", text: "로드밸런서의 L4와 L7 방식은 어떻게 다른가요?", createdOn: demoDate("2026-11-24") }];
 const MINE_AT = 4;
 
-type Saved = QuestionInput & { id: string };
+type Saved = QuestionInput & { id: string; createdOn?: string };
 
 async function readJson<T>(name: string, isValid: (value: unknown) => value is T, fallback: T): Promise<T> {
   const raw = (await cookies()).get(name)?.value;
@@ -69,7 +83,7 @@ const isIds = (value: unknown): value is string[] => Array.isArray(value) && val
 const isSaved = (value: unknown): value is Saved[] => Array.isArray(value) && value.every((q) => typeof q?.id === "string" && typeof q?.category === "string" && typeof q?.text === "string");
 
 const readLiked = () => readJson(LIKES, isIds, DEFAULT_LIKED);
-const readMine = () => readJson(MINE, isSaved, DEFAULT_MINE);
+const readMine = () => readJson(MINE, isSaved, defaultMine());
 const readReports = () => readJson(REPORTS, isIds, []);
 
 async function save(name: string, value: unknown) {
@@ -78,8 +92,9 @@ async function save(name: string, value: unknown) {
 
 export async function listDemoQuestions(): Promise<ArchiveQuestion[]> {
   const [liked, mine, reports] = await Promise.all([readLiked(), readMine(), readReports()]);
-  const pending = mine.map(({ id, category, text }): ArchiveQuestion => ({ id, kind: "cs", category, text, likes: 0, liked: false, mine: true, status: "pending", reported: false, answer: null }));
-  return [...BANK.slice(0, MINE_AT), ...pending, ...BANK.slice(MINE_AT)].map((question) => {
+  const pending = mine.map(({ id, category, text, createdOn }): ArchiveQuestion => ({ id, createdOn, kind: "cs", category, text, likes: 0, liked: false, mine: true, status: "pending", reported: false, answer: null }));
+  const approved = bank();
+  return [...approved.slice(0, MINE_AT), ...pending, ...approved.slice(MINE_AT)].map((question) => {
     const isLiked = liked.includes(question.id);
     // 처음부터 좋아요한 질문은 개수에 이미 들어 있다
     const base = question.likes - (DEFAULT_LIKED.includes(question.id) ? 1 : 0);
@@ -97,14 +112,14 @@ export async function addDemoQuestion({ category, text }: QuestionInput): Promis
   const mine = await readMine();
   if (mine.length >= MAX_MINE) return null;
   const id = `mine-${Date.now().toString(36)}`;
-  await save(MINE, [{ id, category, text }, ...mine]);
+  await save(MINE, [{ id, category, text, createdOn: todayInSeoul(new Date()) }, ...mine]);
   return id;
 }
 
 export async function updateDemoQuestion(id: string, { category, text }: QuestionInput) {
   await save(
     MINE,
-    (await readMine()).map((question) => (question.id === id ? { id, category, text } : question)),
+    (await readMine()).map((question) => (question.id === id ? { ...question, category, text } : question)),
   );
 }
 
@@ -117,4 +132,11 @@ export async function removeDemoQuestion(id: string) {
 
 export async function reportDemoQuestion(id: string) {
   await save(REPORTS, [...new Set([...(await readReports()), id])]);
+}
+
+export const readDemoLikedAnswers = () => readJson(LIKED_ANSWERS, isIds, DEFAULT_LIKED_ANSWERS);
+
+export async function likeDemoAnswer(id: string, liked: boolean) {
+  const others = (await readDemoLikedAnswers()).filter((one) => one !== id);
+  await save(LIKED_ANSWERS, liked ? [...others, id] : others);
 }

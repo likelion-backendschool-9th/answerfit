@@ -1,0 +1,98 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.pending {
+  border-color: var(--color-warning);
+  background: var(--color-pending-surface);
+}
+
+.text {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.category {
+  color: var(--color-accent);
+}
+
+.badge {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-xs);
+  line-height: var(--leading-md);
+}
+
+.waiting {
+  background: var(--color-pending-badge);
+  color: var(--color-warning);
+}
+
+.approved {
+  background: var(--color-success-surface);
+  color: var(--color-success);
+}
+
+.question {
+  display: block;
+  margin: var(--space-px-6) 0;
+  font-weight: 500;
+}
+
+/* 카드 어디를 눌러도 질문으로 간다. 버튼은 그 위에 있다 */
+.question::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.date,
+.state {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-sm);
+}
+
+.actions,
+.state {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.actions {
+  position: relative;
+  z-index: 1;
+}
+
+.likes,
+.locked {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.likes {
+  font-family: var(--font-mono);
+}
+
+.locked {
+  padding: var(--space-px-6) var(--space-2h);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-subtle);
+}

@@ -4,9 +4,9 @@ import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { ApiError, ApiNotConnectedError } from "@/lib/backend-http";
 import type { AnalysisProgress } from "./analysis";
-import { createInterview, finishInterview, getDocumentGroups, getProgress, renameInterview, submitAnswer } from "./api";
+import { createInterview, finishInterview, getDocumentGroups, getProgress, removeGroup, renameGroup, renameInterview, submitAnswer } from "./api";
 import { titleError } from "./result";
-import { setupError, todayInSeoul } from "./setup";
+import { groupNameError, setupError, todayInSeoul } from "./setup";
 import type { AnswerInput, AnswerResult, InterviewSetup } from "./types";
 
 function messageOf(error: unknown) {
@@ -60,6 +60,29 @@ export async function renameInterviewAction(id: string, input: string): Promise<
   if (problem) return { error: problem };
   try {
     if (!(await renameInterview(id, title))) return { error: "예시 면접의 제목은 바꿀 수 없어요." };
+  } catch (error) {
+    return { error: messageOf(error) };
+  }
+  refresh();
+  return {};
+}
+
+export async function renameGroupAction(id: string, input: string): Promise<{ error?: string }> {
+  const name = input.trim();
+  const problem = groupNameError(name);
+  if (problem) return { error: problem };
+  try {
+    if (!(await renameGroup(id, name))) return { error: "서류 그룹을 찾지 못했어요." };
+  } catch (error) {
+    return { error: messageOf(error) };
+  }
+  refresh();
+  return {};
+}
+
+export async function removeGroupAction(id: string): Promise<{ error?: string }> {
+  try {
+    if (!(await removeGroup(id))) return { error: "서류 그룹을 찾지 못했어요." };
   } catch (error) {
     return { error: messageOf(error) };
   }

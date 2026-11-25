@@ -1,4 +1,4 @@
-import type { InterviewMode, InterviewType } from "./types";
+import type { InterviewMode, RecordType } from "./types";
 
 /** 백엔드 형식은 모두 미확정 */
 export type ResultItem = {
@@ -29,7 +29,7 @@ export type InterviewResult = {
   id: string;
   title: string;
   mode: InterviewMode;
-  type: InterviewType;
+  type: RecordType;
   groupId: string | null;
   groupName: string | null;
   /** 시작한 시각(ISO) */

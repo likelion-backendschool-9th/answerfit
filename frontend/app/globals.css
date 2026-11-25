@@ -20,6 +20,9 @@
   --color-warning-border: #ead0b7;
   --color-warning-badge: #f7efe6;
   --color-accent-surface: #f3f6fd;
+  --color-success-surface: #e7f2ee;
+  --color-pending-surface: #fcf9f5;
+  --color-pending-badge: #f4eadd;
   --color-track: #e5e6ea;
   --color-veil: rgb(255 255 255 / 72%);
   --color-veil-end: rgb(255 255 255 / 0%);

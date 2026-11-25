@@ -1,22 +1,19 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { KEEP_DAYS, todayInSeoul } from "@/features/interview/setup";
-import { addDays, defaultTitle, type InterviewResult, type ResultState } from "@/features/interview/result";
+import { addDays, defaultTitle, summarize, mainItems, type InterviewResult, type ResultState } from "@/features/interview/result";
+import type { InterviewRecord } from "@/features/interview/records";
 import { analysisAt } from "@/features/interview/analysis";
-import type { AnswerInput, DocumentGroup, Interview, InterviewSetup, Question } from "@/features/interview/types";
-import { buildItem, SAMPLE_RESULT } from "./result";
+import type { AnswerInput, Interview, InterviewSetup, Question, RecordType } from "@/features/interview/types";
+import { listDemoGroups } from "./documents";
+import { demoRecords, SAMPLE_ID } from "./records";
+import { buildItem, recordResult, sampleResult } from "./result";
 
 const COOKIE = "demo-interview";
 /** 결과 정리 화면이 보이는 시간 */
 const RESULT_MS = 12_000;
 /** 분석 화면이 보이도록 잠시 기다린다 */
 const ANALYZE_MS = 4500;
-
-export const DEMO_GROUPS: DocumentGroup[] = [
-  { id: "webtoon", name: "가나웹툰 · 백엔드 신입", shortName: "가나웹툰 · 백엔드", description: "자소서 PDF · 직무기술서 링크 · 면접일 12월 10일", interviewDate: "2026-12-10", error: null },
-  { id: "pay", name: "다라페이 · 서버 개발", shortName: "다라페이 · 서버", description: "자소서 텍스트 · 직무기술서 PDF · 면접일 미입력", interviewDate: null, error: null },
-  { id: "bank", name: "마바뱅크 · Server Developer", shortName: "마바뱅크 · Server", description: "", interviewDate: null, error: "직무기술서 링크 스캔 실패 — 텍스트로 붙여 넣어 주세요" },
-];
 
 type DemoQuestion = Question & { followUp?: string };
 const make = (prefix: string, rows: [category: string, text: string, hint: string, followUp?: string][]): DemoQuestion[] =>
@@ -44,6 +41,16 @@ const QUESTIONS: Record<InterviewSetup["type"], DemoQuestion[]> = {
     ["Java · JVM", "가비지 컬렉션이 동작하는 과정을 설명해 주세요.", "Young, Old 영역과 Stop-the-world를 말해 보세요."],
   ]),
 };
+
+/** 새로 볼 수는 없지만 지난 기록에 있는 질문 */
+const PERSONALITY = make("per", [
+  ["협업 · 갈등", "팀원과 의견이 달랐던 경험과 해결 과정을 말씀해 주세요.", ""],
+  ["성장 · 실패", "가장 크게 실패한 경험과 그 뒤에 바꾼 점을 말씀해 주세요.", ""],
+  ["지원 동기", "우리 회사에 지원한 까닭을 말씀해 주세요.", ""],
+  ["문제 해결 · 우선순위", "할 일이 한꺼번에 몰렸을 때 어떻게 순서를 정하나요?", ""],
+]);
+
+const questionsOf = (type: RecordType) => (type === "cs" || type === "experience" ? QUESTIONS[type] : PERSONALITY);
 
 const open = ({ id, category, text, hint }: Question): Question => ({ id, category, text, hint });
 
@@ -122,13 +129,15 @@ export async function finishDemoInterview(id: string) {
 const percentOf = ({ finishedAt }: Saved) => (finishedAt ? ((Date.now() - finishedAt) / RESULT_MS) * 100 : 0);
 
 export async function demoProgress(id: string) {
-  if (id === SAMPLE_RESULT.id) return analysisAt(100, SAMPLE_RESULT.items.length);
   const saved = await read(id);
   return saved?.finishedAt ? analysisAt(percentOf(saved), saved.answers.length) : null;
 }
 
-function toResult(saved: Saved): InterviewResult {
-  const group = DEMO_GROUPS.find(({ id }) => id === saved.groupId);
+async function groupNames() {
+  return new Map((await listDemoGroups()).map(({ id, name }) => [id, name]));
+}
+
+function toResult(saved: Saved, names: Map<string, string>): InterviewResult {
   const started = todayInSeoul(new Date(saved.startedAt));
   const seconds = new Map(saved.answers);
   const items = QUESTIONS[saved.type].slice(0, saved.count).flatMap((question, index) => {
@@ -143,7 +152,7 @@ function toResult(saved: Saved): InterviewResult {
     mode: saved.mode,
     type: saved.type,
     groupId: saved.groupId,
-    groupName: group?.name ?? null,
+    groupName: (saved.groupId && names.get(saved.groupId)) || null,
     startedAt: saved.startedAt,
     deleteAfter: saved.deleteAfter ?? addDays(started, KEEP_DAYS),
     items,
@@ -151,11 +160,14 @@ function toResult(saved: Saved): InterviewResult {
 }
 
 export async function findDemoResult(id: string): Promise<ResultState | null> {
-  if (id === SAMPLE_RESULT.id) return { state: "done", result: SAMPLE_RESULT };
+  const names = await groupNames();
+  if (id === SAMPLE_ID) return { state: "done", result: sampleResult(names.get("webtoon") ?? null) };
+  const record = demoRecords(names).find((one) => one.id === id);
+  if (record) return { state: "done", result: recordResult(record, questionsOf(record.type).map(open)) };
   const saved = await read(id);
   if (!saved) return null;
   if (!saved.finishedAt) return { state: "inProgress" };
-  return percentOf(saved) >= 100 ? { state: "done", result: toResult(saved) } : { state: "analyzing" };
+  return percentOf(saved) >= 100 ? { state: "done", result: toResult(saved, names) } : { state: "analyzing" };
 }
 
 /** 예시 결과의 제목은 바꾸지 않는다 */
@@ -163,4 +175,23 @@ export async function renameDemoInterview(id: string, title: string) {
   const saved = await read(id);
   if (saved) await write({ ...saved, title });
   return saved !== null;
+}
+
+/** 방금 끝난 면접이 있으면 맨 앞에 붙인다 */
+export async function listDemoRecords(): Promise<InterviewRecord[]> {
+  const names = await groupNames();
+  const records = demoRecords(names);
+  const raw = (await cookies()).get(COOKIE)?.value;
+  let id: unknown;
+  try {
+    id = JSON.parse(raw ?? "null")?.id;
+  } catch {
+    return records;
+  }
+  const saved = typeof id === "string" ? await read(id) : null;
+  if (!saved?.finishedAt || percentOf(saved) < 100) return records;
+  const result = toResult(saved, names);
+  if (result.items.length === 0) return records;
+  const { title, type, mode, groupId, groupName, startedAt, deleteAfter, items } = result;
+  return [{ id: result.id, title, type, mode, count: mainItems(items).length, score: summarize(items).score, groupId, groupName, startedAt, deleteAfter }, ...records];
 }

@@ -4,7 +4,7 @@ import type { Session } from "@/features/session/types";
 import { DEMO_ADMIN, DEMO_MEMBER } from "./session";
 
 /** 시연 계정의 비밀번호. 실제 계정이 아니다 */
-const DEMO_PASSWORD = "answerfit1";
+export const DEMO_PASSWORD = "answerfit1";
 const COOKIE = "demo-members";
 const MAX_MEMBERS = 5;
 
@@ -36,6 +36,14 @@ export async function addDemoMember(email: string, nickname: string): Promise<Se
   const members = [...(await readMembers()), member].slice(-MAX_MEMBERS);
   (await cookies()).set(COOKIE, JSON.stringify(members), { path: "/", sameSite: "lax", httpOnly: true });
   return member;
+}
+
+/** 목업에서 가입한 회원만 이름이 남는다 */
+export async function renameDemoMember(email: string, nickname: string) {
+  const members = await readMembers();
+  if (!members.some(same(email))) return;
+  const renamed = members.map((member) => (same(email)(member) ? { ...member, nickname } : member));
+  (await cookies()).set(COOKIE, JSON.stringify(renamed), { path: "/", sameSite: "lax", httpOnly: true });
 }
 
 export const demoSocialMember = () => DEMO_MEMBER;

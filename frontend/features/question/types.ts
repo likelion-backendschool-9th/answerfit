@@ -19,9 +19,15 @@ export type ArchiveQuestion = {
   mine: boolean;
   status: "approved" | "pending";
   reported: boolean;
+  /** 내가 등록한 질문에만 있다(YYYY-MM-DD) */
+  createdOn?: string;
+  approvedOn?: string;
   /** 승인 전에는 없다 */
   answer: ModelAnswer | null;
 };
+
+/** 면접에서 받아 좋아요한 질문 */
+export type LikedAnswer = { id: string; interviewId: string; text: string; date: string; typeLabel: string; score: number };
 
 export type QuestionInput = { category: string; text: string };
 export type ReportInput = { questionId: string; reason: string; detail: string };

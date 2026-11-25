@@ -1,0 +1,91 @@
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.title {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-sm);
+}
+
+.count {
+  margin-left: var(--space-1);
+  color: var(--color-text-muted);
+}
+
+.legend {
+  display: flex;
+  gap: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.legend li::before {
+  content: "";
+  width: 1rem;
+  border-top: 2px solid var(--color-accent);
+}
+
+.legend .past::before {
+  border-top: 2px dotted var(--color-text-muted);
+}
+
+.radar {
+  display: block;
+  width: min(100%, 27.5rem);
+  margin: var(--space-4) auto 0;
+  overflow: visible;
+}
+
+.grid {
+  fill: none;
+  stroke: var(--color-border);
+}
+
+.before {
+  fill: none;
+  stroke: var(--color-text-muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+
+.area {
+  fill: var(--color-accent);
+  fill-opacity: 0.16;
+  stroke: var(--color-accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.point {
+  fill: var(--color-surface);
+  stroke: var(--color-accent);
+  stroke-width: 2;
+}
+
+.name {
+  fill: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.score {
+  fill: var(--color-text);
+  font-family: var(--font-mono);
+}
+
+.weak,
+.weak .score {
+  fill: var(--color-warning);
+}

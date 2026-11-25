@@ -5,10 +5,13 @@ import { Button } from "@/components/ui/Button/Button";
 import { Icon } from "@/components/ui/Icon/Icon";
 import { Modal } from "@/components/ui/Modal/Modal";
 import { removeQuestionAction } from "@/features/question/actions";
-import { QuestionForm } from "../../../_components/QuestionForm/QuestionForm";
+import { QuestionForm } from "../QuestionForm/QuestionForm";
 import styles from "./PendingActions.module.css";
 
-export function PendingActions({ id, category, text }: { id: string; category: string; text: string }) {
+/** next는 지운 뒤 갈 주소 */
+type Props = { id: string; category: string; text: string; next: string };
+
+export function PendingActions({ id, category, text, next }: Props) {
   const [open, setOpen] = useState<"edit" | "remove" | null>(null);
   const [error, setError] = useState<string>();
   const [pending, startTransition] = useTransition();
@@ -16,7 +19,7 @@ export function PendingActions({ id, category, text }: { id: string; category: s
 
   function remove() {
     startTransition(async () => {
-      const result = await removeQuestionAction(id);
+      const result = await removeQuestionAction(id, next);
       if (result) setError(result.error);
     });
   }

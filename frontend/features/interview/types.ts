@@ -1,6 +1,8 @@
 /** 백엔드 형식은 모두 미확정 */
 export type InterviewMode = "practice" | "real";
 export type InterviewType = "experience" | "cs";
+/** 기록에 남는 유형. 인성과 PT는 아직 새로 볼 수 없다 */
+export type RecordType = InterviewType | "personality" | "pt";
 
 export type DocumentGroup = {
   id: string;
@@ -12,7 +14,12 @@ export type DocumentGroup = {
   interviewDate: string | null;
   /** 스캔에 실패한 그룹은 고를 수 없다 */
   error: string | null;
+  /** 등록한 날(YYYY-MM-DD) */
+  createdOn: string;
+  files: DocumentFile[];
 };
+
+export type DocumentFile = { id: string; name: string; kind: "pdf" | "link" | "text"; uploadedAt: string };
 
 export type InterviewSetup = {
   mode: InterviewMode;
