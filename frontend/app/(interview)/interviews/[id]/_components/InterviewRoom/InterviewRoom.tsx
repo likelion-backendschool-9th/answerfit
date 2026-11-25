@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useEffectEvent, useReducer } from "react";
+import { startTransition, useEffect, useEffectEvent, useReducer, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PATHS } from "@/app/_lib/paths";
-import { submitAnswerAction } from "@/features/interview/actions";
+import { Button } from "@/components/ui/Button/Button";
+import { finishInterviewAction, submitAnswerAction } from "@/features/interview/actions";
 import { CameraStage } from "@/features/interview/components/CameraStage/CameraStage";
 import { discardRecordings } from "@/features/interview/recordings";
 import { initRoom, roomReducer, type Phase } from "@/features/interview/room";
@@ -64,9 +65,15 @@ export function InterviewRoom({ interview, gazeReady }: { interview: Interview; 
     };
   }, [phase]);
 
+  const [finishError, setFinishError] = useState<string>();
+  const finish = useEffectEvent(async () => {
+    const result = await finishInterviewAction(interview.id).catch(() => ({ error: "면접을 마치지 못했어요." }));
+    if (result) setFinishError(result.error);
+  });
+
   useEffect(() => {
-    if (phase === "finished") router.replace(PATHS.interviewResult(interview.id));
-  }, [phase, router, interview.id]);
+    if (phase === "finished") startTransition(() => finish());
+  }, [phase]);
 
   function quit() {
     discardRecordings(interview.id);
@@ -92,6 +99,14 @@ export function InterviewRoom({ interview, gazeReady }: { interview: Interview; 
         <RoomPanel state={state} levels={levels} dispatch={dispatch} />
       </div>
       {phase === "analyzing" && <AnalyzingCard />}
+      {finishError && (
+        <div className={styles.failed} role="alert">
+          <p>{finishError}</p>
+          <Button variant="light" onClick={quit}>
+            홈으로 가기
+          </Button>
+        </div>
+      )}
       <PauseDialog open={paused} state={state} onResume={() => dispatch({ type: "resume" })} onQuit={quit} />
     </div>
   );

@@ -33,5 +33,23 @@ export function setupError(setup: InterviewSetup, groups: DocumentGroup[], today
   if (group.error) return "스캔에 실패한 서류 그룹은 쓸 수 없어요.";
 }
 
+type Params = Record<string, string | string[] | undefined>;
+
+/** 주소의 값으로 처음 설정을 정한다. 잘못된 값은 기본값으로 둔다 */
+export function initialSetup(groups: DocumentGroup[], params: Params, today: string): InterviewSetup {
+  const usable = groups.filter(({ error }) => !error);
+  const group = usable.find(({ id }) => id === params.group) ?? usable[0] ?? null;
+  const count = Number(params.count);
+  const date = group?.interviewDate ?? null;
+  return {
+    mode: params.mode === "real" ? "real" : "practice",
+    type: params.type === "cs" ? "cs" : "experience",
+    count: COUNTS.includes(count) ? count : 5,
+    groupId: group?.id ?? null,
+    // 지난 면접일은 보관 날짜로 쓸 수 없다
+    deleteAfter: date && date >= today ? date : null,
+  };
+}
+
 /** 한국 시간 기준 오늘(YYYY-MM-DD) */
 export const todayInSeoul = (now: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(now);

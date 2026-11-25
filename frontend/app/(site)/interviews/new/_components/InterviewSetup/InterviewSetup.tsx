@@ -10,18 +10,11 @@ import { InfoStep } from "../InfoStep/InfoStep";
 import { SummaryCard } from "../SummaryCard/SummaryCard";
 import styles from "./InterviewSetup.module.css";
 
-type Props = { groups: DocumentGroup[]; gazeReady: boolean; today: string };
+type Props = { initial: Setup; groups: DocumentGroup[]; gazeReady: boolean; today: string };
 
-export function InterviewSetup({ groups, gazeReady, today }: Props) {
-  const firstGroup = groups.find(({ error }) => !error) ?? null;
+export function InterviewSetup({ initial, groups, gazeReady, today }: Props) {
   const [step, setStep] = useState<1 | 2>(1);
-  const [setup, setSetup] = useState<Setup>({
-    mode: "practice",
-    type: "experience",
-    count: 5,
-    groupId: firstGroup?.id ?? null,
-    deleteAfter: firstGroup?.interviewDate ?? null,
-  });
+  const [setup, setSetup] = useState(initial);
   const [error, setError] = useState<string>();
   const [devicesReady, setDevicesReady] = useState(false);
   const [pending, startTransition] = useTransition();
