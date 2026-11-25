@@ -1,0 +1,42 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.button {
+  position: relative;
+  min-height: 3rem;
+  padding: 0 var(--space-12);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: var(--color-surface-subtle);
+}
+
+.kakao,
+.kakao:hover {
+  border-color: var(--color-kakao);
+  background: var(--color-kakao);
+}
+
+.icon {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--space-5);
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+}
+
+.error {
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}

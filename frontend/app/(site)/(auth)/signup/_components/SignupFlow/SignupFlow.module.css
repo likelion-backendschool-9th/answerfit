@@ -1,0 +1,11 @@
+.flow {
+  width: min(100%, 30rem);
+  margin: 0 auto;
+  padding: var(--space-16) 0;
+}
+
+@media (max-width: 40rem) {
+  .flow {
+    padding: var(--space-8) var(--space-5);
+  }
+}

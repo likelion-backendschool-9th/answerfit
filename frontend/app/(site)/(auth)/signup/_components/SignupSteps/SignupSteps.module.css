@@ -1,0 +1,37 @@
+.steps {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-sm);
+}
+
+.current {
+  color: var(--color-accent);
+}
+
+.list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.item {
+  color: var(--color-text-muted);
+}
+
+.item::before {
+  content: "";
+  display: block;
+  height: 0.5rem;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+}
+
+.reached {
+  color: var(--color-text);
+}
+
+.reached::before {
+  background: var(--color-accent);
+}
