@@ -1,0 +1,61 @@
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 5.875rem;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+}
+
+.icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-subtle);
+  color: var(--color-primary);
+}
+
+.dangerIcon {
+  background: var(--color-danger-surface);
+  color: var(--color-danger);
+}
+
+.label,
+.note {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-sm);
+}
+
+.body {
+  margin: 0;
+}
+
+.value {
+  margin-right: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  font-weight: 500;
+  line-height: var(--leading-xl);
+}
+
+.good {
+  color: var(--color-success);
+}
+
+.danger {
+  color: var(--color-danger);
+}

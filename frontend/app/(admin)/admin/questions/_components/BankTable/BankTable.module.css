@@ -1,0 +1,194 @@
+.scroll {
+  position: relative;
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+}
+
+.table {
+  width: 100%;
+  min-width: 70rem;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-sm);
+  text-align: left;
+}
+
+.table th {
+  height: 2.875rem;
+  padding: 0 var(--space-4) 0 0;
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+  font-weight: 500;
+}
+
+.table td {
+  height: 3.8125rem;
+  padding: 0 var(--space-4) 0 0;
+}
+
+.table tbody tr + tr {
+  border-top: 1px solid var(--color-border);
+}
+
+.table tbody tr:hover {
+  background: var(--color-surface-subtle);
+}
+
+.checkColumn {
+  width: 3.375rem;
+}
+
+.table .check {
+  padding-left: var(--space-5);
+}
+
+.id {
+  width: 6rem;
+}
+
+.kind {
+  width: 9.75rem;
+}
+
+.state {
+  width: 7.5rem;
+}
+
+.source {
+  width: 9rem;
+}
+
+.likes {
+  width: 5.5rem;
+}
+
+.date {
+  width: 7.5rem;
+}
+
+.tools {
+  width: 5.5rem;
+}
+
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.box {
+  display: block;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+  appearance: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  background: var(--color-surface);
+  cursor: pointer;
+}
+
+.table th .box:not(:checked, :indeterminate) {
+  border-color: var(--color-text-muted);
+  background: none;
+}
+
+.box:checked,
+.box:indeterminate {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+}
+
+.box:checked::after,
+.box:indeterminate::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--color-text-inverse);
+  clip-path: polygon(18% 48%, 28% 38%, 43% 54%, 74% 24%, 84% 34%, 43% 74%);
+}
+
+.box:indeterminate::after {
+  clip-path: inset(43% 20%);
+}
+
+.bulk {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.bulkRemove {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 2rem;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
+  cursor: pointer;
+}
+
+.code {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+}
+
+.cs {
+  margin-right: var(--space-1);
+  color: var(--color-accent);
+}
+
+.personality {
+  color: var(--color-primary);
+}
+
+.text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.number {
+  font-family: var(--font-mono);
+}
+
+.table .actions {
+  padding-right: var(--space-4);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tool {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.tool + .tool {
+  margin-left: var(--space-2);
+}
+
+.tool:hover {
+  background: var(--color-surface-subtle);
+}
