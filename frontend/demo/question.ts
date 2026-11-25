@@ -1,14 +1,20 @@
 import "server-only";
-import { cookies } from "next/headers";
 import { todayInSeoul } from "@/features/interview/setup";
-import type { ArchiveQuestion, ModelAnswer, QuestionInput } from "@/features/question/types";
-import { demoDate } from "./clock";
+import type { AnswerState, BankQuestion, PendingQuestion, QuestionDraft, ReportEntry, ReportStatus, ReportedQuestion } from "@/features/admin/types";
+import { findSimilar } from "@/features/question/rules";
+import type { ArchiveQuestion, ModelAnswer, QuestionInput, ReportInput } from "@/features/question/types";
+import { demoDate, demoTime } from "./clock";
+import { readStore, writeStore } from "./store";
 
-const LIKES = "demo-likes";
-const LIKED_ANSWERS = "demo-liked-answers";
-const MINE = "demo-questions";
-const REPORTS = "demo-reports";
+const LIKES = "likes";
+const LIKED_ANSWERS = "liked-answers";
+const SUBMISSIONS = "submissions";
+const BANK_EDITS = "bank-edits";
+const REPORTS = "reports";
+const REPORT_STATUS = "report-status";
 const MAX_MINE = 10;
+/** 승인한 뒤 AI가 모범답안을 만드는 시간 */
+const GENERATE_MS = 8000;
 
 type Seed = [id: string, category: string, text: string, likes: number, summary: string, body: string, keywords: string[], table?: ModelAnswer["table"]];
 
@@ -31,8 +37,9 @@ const CS: Seed[] = [
   ["isolation", "데이터베이스", "트랜잭션 격리 수준을 설명해 주세요.", 167, "READ UNCOMMITTED, READ COMMITTED, REPEATABLE READ, SERIALIZABLE 네 단계가 있고, 높을수록 안전하지만 동시성이 떨어져요.", "각 단계에서 생기는 Dirty Read, Non-Repeatable Read, Phantom Read를 짝지어 말하고, 쓰는 데이터베이스의 기본값을 덧붙여 보세요.", ["Dirty Read", "Non-Repeatable Read", "Phantom Read", "MVCC"]],
   ["index", "데이터베이스", "인덱스는 어떻게 조회를 빠르게 하고, 언제 오히려 느려지나요?", 142, "정렬된 B+Tree를 따라가 읽을 양을 줄이지만, 쓰기와 저장 공간 비용이 늘어요.", "카디널리티가 낮은 열이나 함수로 감싼 조건에서는 쓰이지 않는 예를 말해 보세요.", ["B+Tree", "카디널리티", "커버링 인덱스", "쓰기 비용"]],
   ["normal", "데이터베이스", "정규화와 반정규화를 언제 선택하는지 설명해 주세요.", 64, "정규화로 중복과 이상 현상을 없애고, 조회가 느리면 근거를 갖고 반정규화해요.", "조인 비용을 먼저 측정하고, 반정규화한 값을 맞추는 방법까지 말하면 좋아요.", ["이상 현상", "제3정규형", "조인", "중복"]],
-  ["hash", "자료구조", "해시 충돌을 해결하는 방법을 설명해 주세요.", 79, "체이닝은 같은 칸에 이어 붙이고, 개방 주소법은 빈 칸을 찾아가요.", "적재율이 높아질 때의 차이와 재해싱을 함께 말해 보세요.", ["체이닝", "개방 주소법", "적재율", "재해싱"]],
+  ["hash", "자료구조", "해시 테이블에서 충돌이 생기면 어떻게 해결하나요?", 9, "체이닝은 같은 칸에 이어 붙이고, 개방 주소법은 빈 칸을 찾아가요.", "적재율이 높아질 때의 차이와 재해싱을 함께 말해 보세요.", ["체이닝", "개방 주소법", "적재율", "재해싱"]],
   ["stack-queue", "자료구조", "스택과 큐의 차이와 쓰이는 예를 설명해 주세요.", 45, "스택은 나중에 넣은 것을, 큐는 먼저 넣은 것을 먼저 꺼내요.", "함수 호출과 되돌리기, 작업 대기열과 너비 우선 탐색을 예로 들어 보세요.", ["LIFO", "FIFO", "함수 호출", "BFS"]],
+  ["complexity", "알고리즘", "시간 복잡도와 공간 복잡도를 함께 따져야 하는 예를 들어 주세요.", 22, "메모리를 더 써서 시간을 줄이거나 그 반대를 골라야 할 때 함께 따져요.", "메모이제이션, 해시 테이블, 정렬의 추가 공간을 예로 들고, 입력 크기와 제한을 먼저 확인한다고 말해 보세요.", ["시간 복잡도", "공간 복잡도", "절충"]],
   ["sort", "알고리즘", "퀵 정렬과 병합 정렬을 비교해 주세요.", 66, "퀵 정렬은 평균이 빠르고 추가 공간이 적지만 최악이 O(n²)이고, 병합 정렬은 항상 O(n log n)이지만 공간이 더 필요해요.", "피벗 선택과 안정 정렬 여부를 덧붙여 보세요.", ["피벗", "안정 정렬", "분할 정복"]],
   ["dp", "알고리즘", "동적 계획법을 쓸 수 있는 조건을 설명해 주세요.", 41, "겹치는 부분 문제와 최적 부분 구조가 있을 때 써요.", "메모이제이션과 타뷸레이션을 비교하고 간단한 예를 들어 보세요.", ["부분 문제", "메모이제이션", "점화식"]],
   ["rendering", "웹", "서버 사이드 렌더링과 클라이언트 사이드 렌더링을 비교해 주세요.", 57, "SSR은 첫 화면과 검색에 유리하고, CSR은 이후 이동이 빨라요.", "하이드레이션과 서버 부담을 함께 말하면 좋아요.", ["첫 화면", "검색 노출", "하이드레이션"]],
@@ -48,6 +55,7 @@ const PERSONALITY: Seed[] = [
   ["p-conflict", "협업", "팀원과 의견이 달랐던 경험과 해결 과정을 말씀해 주세요.", 92, "상황, 서로의 근거, 합의한 기준, 결과 순서로 말해요.", "누가 옳았는지보다 어떤 기준으로 합의했는지를 보여 주세요.", ["상황", "근거", "합의 기준", "결과"]],
   ["p-fail", "성장", "가장 크게 실패한 경험과 그 뒤에 바꾼 점을 말씀해 주세요.", 81, "실패를 숨기지 않고, 배운 점과 바뀐 행동을 구체적으로 말해요.", "다시 같은 상황에서 실제로 다르게 행동한 예가 있으면 가장 좋아요.", ["원인", "배운 점", "바뀐 행동"]],
   ["p-join", "지원 동기", "우리 회사에 지원한 까닭을 말씀해 주세요.", 120, "회사가 푸는 문제와 내 경험이 만나는 지점을 말해요.", "어느 회사에나 할 수 있는 말은 빼고, 직접 써 본 경험을 넣어 보세요.", ["서비스 이해", "내 경험", "기여"]],
+  ["p-weak", "성장", "본인의 가장 큰 단점은 무엇인가요?", 35, "단점을 하나 고르고, 줄이려고 실제로 한 일을 말해요.", "장점을 단점처럼 말하기보다, 일에 미친 영향과 바뀐 점을 구체적으로 말해 보세요.", ["단점", "영향", "개선"]],
   ["p-priority", "문제 해결", "할 일이 한꺼번에 몰렸을 때 어떻게 순서를 정하나요?", 48, "영향과 마감으로 나누고, 관련된 사람과 먼저 맞춰요.", "실제로 일정을 조율한 예를 들어 보세요.", ["영향", "마감", "조율"]],
 ];
 
@@ -55,88 +63,246 @@ const toQuestion =
   (kind: ArchiveQuestion["kind"]) =>
   ([id, category, text, likes, summary, body, keywords, table]: Seed): ArchiveQuestion => ({ id, kind, category, text, likes, liked: false, mine: false, status: "approved", reported: false, answer: { summary, body, keywords, table } });
 
-function bank(): ArchiveQuestion[] {
-  const mine = MY_APPROVED.map(({ seed, createdOn, approvedOn }) => ({ ...toQuestion("cs")(seed), mine: true, createdOn: demoDate(createdOn), approvedOn: demoDate(approvedOn) }));
-  return [...CS.map(toQuestion("cs")), ...mine, ...PERSONALITY.map(toQuestion("personality"))];
-}
+/** 처음부터 좋아요한 질문 */
 const DEFAULT_LIKED = ["tcp-udp", "process", "index", "handshake", "l4l7", "cookie", "deadlock", "isolation", "p-conflict"];
-/** 면접에서 받아 좋아요한 질문. [기록의 id, 결과 항목의 id] */
 const DEFAULT_LIKED_ANSWERS = ["demo-sample/sample-Q2", "demo-sample/sample-Q4", "demo-rec-1/cs-1"];
-/** 쿠키가 없을 때 보여 줄 내 질문. 목록의 네 번째 뒤에 나온다 */
-const defaultMine = (): Saved[] => [{ id: "mine-l4l7", category: "네트워크", text: "로드밸런서의 L4와 L7 방식은 어떻게 다른가요?", createdOn: demoDate("2026-11-24") }];
+/** 승인 전인 내 질문을 끼워 넣는 자리 */
 const MINE_AT = 4;
 
-type Saved = QuestionInput & { id: string; createdOn?: string };
+/** 아직 모범답안이 없는 질문 */
+const NO_ANSWER = new Set(["hash"]);
 
-async function readJson<T>(name: string, isValid: (value: unknown) => value is T, fallback: T): Promise<T> {
-  const raw = (await cookies()).get(name)?.value;
-  if (!raw) return fallback;
-  try {
-    const value: unknown = JSON.parse(raw);
-    return isValid(value) ? value : fallback;
-  } catch {
-    return fallback;
-  }
+type Item = ArchiveQuestion & { code: string; source: string | null; hidden: boolean; answerState: AnswerState; updatedOn: string; answerText: string };
+
+/** 목업에 있는 번호. 나머지는 순서대로 매긴다 */
+const CODES: Record<string, number> = { "tcp-udp": 412, "my-isolation": 398, process: 391, "p-conflict": 388, "my-jwt": 371, "p-fail": 365, index: 352, complexity: 347, hash: 340, "p-weak": 318, https: 290, l4l7: 287, rest: 270 };
+const UPDATED: Record<string, string> = { "tcp-udp": "2026-11-02", "my-isolation": "2026-11-10", process: "2026-10-28", "p-conflict": "2026-10-25", "my-jwt": "2026-11-01", "p-fail": "2026-10-20", index: "2026-11-24", complexity: "2026-10-12", hash: "2026-10-08" };
+const FIRST_OTHER_CODE = 264;
+const codeText = (number: number) => `Q-${String(number).padStart(4, "0")}`;
+
+const answerText = (answer: ModelAnswer | null) => (answer ? [answer.summary, answer.body].filter(Boolean).join("\n\n") : "");
+
+/** 첫 문단을 요약으로, 나머지를 본문으로 쓴다. 비교표는 남긴다 */
+function toAnswer(text: string, keywords: string[], table?: ModelAnswer["table"]): ModelAnswer | null {
+  const [summary, ...rest] = text.split(/\n\s*\n/);
+  return summary.trim() ? { summary: summary.trim(), body: rest.join("\n\n").trim(), keywords, table } : null;
 }
 
-const isIds = (value: unknown): value is string[] => Array.isArray(value) && value.every((id) => typeof id === "string");
-const isSaved = (value: unknown): value is Saved[] => Array.isArray(value) && value.every((q) => typeof q?.id === "string" && typeof q?.category === "string" && typeof q?.text === "string");
+export const generatedAnswer = (text: string) => ({
+  answer: `"${text}"에 대한 시연용 모범답안이에요. 핵심을 한 문장으로 먼저 말해요.\n\n근거와 예시를 하나씩 붙이고, 실제로 쓴 경험이 있으면 결과까지 말해 보세요. AI를 연동하면 이 자리에 실제 답안이 나와요.`,
+  keywords: ["핵심 정의", "근거", "예시"],
+});
 
-const readLiked = () => readJson(LIKES, isIds, DEFAULT_LIKED);
-const readMine = () => readJson(MINE, isSaved, defaultMine());
-const readReports = () => readJson(REPORTS, isIds, []);
-
-async function save(name: string, value: unknown) {
-  (await cookies()).set(name, JSON.stringify(value), { path: "/", sameSite: "lax", httpOnly: true });
-}
-
-export async function listDemoQuestions(): Promise<ArchiveQuestion[]> {
-  const [liked, mine, reports] = await Promise.all([readLiked(), readMine(), readReports()]);
-  const pending = mine.map(({ id, category, text, createdOn }): ArchiveQuestion => ({ id, createdOn, kind: "cs", category, text, likes: 0, liked: false, mine: true, status: "pending", reported: false, answer: null }));
-  const approved = bank();
-  return [...approved.slice(0, MINE_AT), ...pending, ...approved.slice(MINE_AT)].map((question) => {
-    const isLiked = liked.includes(question.id);
-    // 처음부터 좋아요한 질문은 개수에 이미 들어 있다
-    const base = question.likes - (DEFAULT_LIKED.includes(question.id) ? 1 : 0);
-    return { ...question, liked: isLiked, likes: base + (isLiked ? 1 : 0), reported: reports.includes(question.id) };
+function seedBank(): Item[] {
+  const mine = MY_APPROVED.map(({ seed, createdOn, approvedOn }) => ({ ...toQuestion("cs")(seed), mine: true, createdOn: demoDate(createdOn), approvedOn: demoDate(approvedOn) }));
+  let other = FIRST_OTHER_CODE;
+  return [...CS.map(toQuestion("cs")), ...mine, ...PERSONALITY.map(toQuestion("personality"))].map((question) => {
+    const answer = NO_ANSWER.has(question.id) ? null : question.answer;
+    return {
+      ...question,
+      answer,
+      code: codeText(CODES[question.id] ?? other--),
+      source: question.mine ? "지우" : null,
+      hidden: false,
+      answerState: answer ? "ready" : "none",
+      updatedOn: demoDate(UPDATED[question.id] ?? "2026-10-01"),
+      answerText: answerText(answer),
+    };
   });
+}
+
+type Submission = QuestionInput & { id: string; code: string; nickname: string; email: string; mine: boolean; createdAt: string; approvedAt: number | null };
+
+const defaultSubmissions = (): Submission[] => [
+  { id: "mine-l4l7", code: "U-0087", category: "네트워크", text: "로드밸런서의 L4와 L7 방식은 어떻게 다른가요?", nickname: "지우", email: "jiwoo@answerfit.kr", mine: true, createdAt: demoTime("2026-11-24", "23:52"), approvedAt: null },
+  { id: "user-cap", code: "U-0086", category: "데이터베이스", text: "CAP 이론을 실제 서비스 설계 예시로 설명해 주세요.", nickname: "민준", email: "minjun@answerfit.kr", mine: false, createdAt: demoTime("2026-11-23", "18:20"), approvedAt: null },
+  { id: "user-gc", code: "U-0085", category: "운영체제", text: "가비지 컬렉션은 언제, 어떻게 동작하고 서비스에 어떤 영향을 주나요?", nickname: "서연", email: "seoyeon@answerfit.kr", mine: false, createdAt: demoTime("2026-11-22", "10:07"), approvedAt: null },
+];
+const readSubmissions = () => readStore<Submission[]>(SUBMISSIONS, defaultSubmissions());
+
+/** 관리자가 바꾼 것 */
+type BankEdits = { edited: Record<string, QuestionDraft & { updatedOn: string }>; added: { id: string; code: string }[]; removed: string[]; hidden: Record<string, boolean> };
+const NO_EDITS: BankEdits = { edited: {}, added: [], removed: [], hidden: { cache: true } };
+const readEdits = () => readStore<BankEdits>(BANK_EDITS, NO_EDITS);
+
+const today = () => todayInSeoul(new Date());
+
+/** 승인한 질문은 문제 은행에 들어간다. 모범답안은 잠시 뒤에 생긴다 */
+function fromSubmission({ id, category, text, nickname, mine, createdAt, approvedAt }: Submission, code: string): Item {
+  const ready = approvedAt !== null && Date.now() - approvedAt >= GENERATE_MS;
+  const generated = generatedAnswer(text);
+  const approvedOn = approvedAt === null ? undefined : todayInSeoul(new Date(approvedAt));
+  return {
+    id, kind: "cs", category, text, likes: 0, liked: false, mine, reported: false, code, hidden: false, approvedOn,
+    status: approvedAt === null ? "pending" : "approved",
+    createdOn: todayInSeoul(new Date(createdAt)),
+    answer: ready ? toAnswer(generated.answer, generated.keywords) : null,
+    answerState: ready ? "ready" : "generating",
+    answerText: ready ? generated.answer : "",
+    source: nickname,
+    updatedOn: approvedOn ?? todayInSeoul(new Date(createdAt)),
+  };
+}
+
+/** 문제 은행의 모든 질문. 숨긴 것도 들어 있다 */
+async function readBank(): Promise<Item[]> {
+  const [edits, submissions] = await Promise.all([readEdits(), readSubmissions()]);
+  const seeds = seedBank();
+  const top = Math.max(...Object.values(CODES));
+  const approved = submissions.filter(({ approvedAt }) => approvedAt !== null).map((one, i) => fromSubmission(one, codeText(top + edits.added.length + i + 1)));
+  const added = edits.added.map(({ id, code }): Item => ({ id, code, kind: "cs", category: "", text: "", likes: 0, liked: false, mine: false, status: "approved", reported: false, answer: null, source: null, hidden: false, answerState: "ready", updatedOn: today(), answerText: "" }));
+  return [...added, ...seeds.slice(0, MINE_AT), ...approved, ...seeds.slice(MINE_AT)]
+    .filter(({ id }) => !edits.removed.includes(id))
+    .map((item) => {
+      const hidden = edits.hidden[item.id] ?? false;
+      const edit = edits.edited[item.id];
+      if (!edit) return { ...item, hidden };
+      const answer = toAnswer(edit.answer, edit.keywords, item.answer?.table);
+      return { ...item, hidden, kind: edit.kind, category: edit.category, text: edit.text, answer, answerState: "ready" as const, answerText: edit.answer, updatedOn: edit.updatedOn };
+    });
+}
+
+const readLiked = () => readStore<string[]>(LIKES, DEFAULT_LIKED);
+
+async function withLikes(items: Item[]): Promise<Item[]> {
+  const liked = await readLiked();
+  return items.map((item) => {
+    const isLiked = liked.includes(item.id);
+    // 처음부터 좋아요한 질문은 개수에 이미 들어 있다
+    return { ...item, liked: isLiked, likes: item.likes - (DEFAULT_LIKED.includes(item.id) ? 1 : 0) + (isLiked ? 1 : 0) };
+  });
+}
+
+/** 회원이 보는 질문. 숨긴 질문은 빠지고, 승인 전인 내 질문이 들어 있다 */
+export async function listDemoQuestions(): Promise<ArchiveQuestion[]> {
+  const [bank, submissions, reports] = await Promise.all([readBank(), readSubmissions(), readReports()]);
+  const pending = submissions.filter(({ mine, approvedAt }) => mine && approvedAt === null).map((one) => ({ ...fromSubmission(one, one.code), answer: null }));
+  const open = bank.filter(({ hidden }) => !hidden);
+  const items = await withLikes([...open.slice(0, MINE_AT), ...pending, ...open.slice(MINE_AT)]);
+  return items.map(({ id, kind, category, text, likes, liked, mine, status, createdOn, approvedOn, answer }) => ({ id, kind, category, text, likes, liked, mine, status, createdOn, approvedOn, answer, reported: reports.some((report) => report.questionId === id) }));
 }
 
 export async function likeDemoQuestion(id: string, liked: boolean) {
   const others = (await readLiked()).filter((one) => one !== id);
-  await save(LIKES, liked ? [...others, id] : others);
+  await writeStore(LIKES, liked ? [...others, id] : others);
 }
 
 /** 더 등록할 수 없으면 null */
-export async function addDemoQuestion({ category, text }: QuestionInput): Promise<string | null> {
-  const mine = await readMine();
-  if (mine.length >= MAX_MINE) return null;
+export async function addDemoQuestion({ category, text }: QuestionInput, who: { nickname: string; email: string }): Promise<string | null> {
+  const submissions = await readSubmissions();
+  if (submissions.filter(({ mine, approvedAt }) => mine && approvedAt === null).length >= MAX_MINE) return null;
   const id = `mine-${Date.now().toString(36)}`;
-  await save(MINE, [{ id, category, text, createdOn: todayInSeoul(new Date()) }, ...mine]);
+  const last = Math.max(87, ...submissions.map(({ code }) => Number(code.slice(2))));
+  const added: Submission = { id, code: `U-${String(last + 1).padStart(4, "0")}`, category, text, ...who, mine: true, createdAt: new Date().toISOString(), approvedAt: null };
+  await writeStore(SUBMISSIONS, [added, ...submissions]);
   return id;
 }
 
 export async function updateDemoQuestion(id: string, { category, text }: QuestionInput) {
-  await save(
-    MINE,
-    (await readMine()).map((question) => (question.id === id ? { ...question, category, text } : question)),
+  await writeStore(
+    SUBMISSIONS,
+    (await readSubmissions()).map((one) => (one.id === id ? { ...one, category, text } : one)),
   );
 }
 
 export async function removeDemoQuestion(id: string) {
-  await save(
-    MINE,
-    (await readMine()).filter((question) => question.id !== id),
+  await writeStore(
+    SUBMISSIONS,
+    (await readSubmissions()).filter((one) => one.id !== id),
   );
 }
 
-export async function reportDemoQuestion(id: string) {
-  await save(REPORTS, [...new Set([...(await readReports()), id])]);
-}
-
-export const readDemoLikedAnswers = () => readJson(LIKED_ANSWERS, isIds, DEFAULT_LIKED_ANSWERS);
+export const readDemoLikedAnswers = () => readStore<string[]>(LIKED_ANSWERS, DEFAULT_LIKED_ANSWERS);
 
 export async function likeDemoAnswer(id: string, liked: boolean) {
   const others = (await readDemoLikedAnswers()).filter((one) => one !== id);
-  await save(LIKED_ANSWERS, liked ? [...others, id] : others);
+  await writeStore(LIKED_ANSWERS, liked ? [...others, id] : others);
+}
+
+// ---------- 관리자 ----------
+export async function listDemoBank(): Promise<BankQuestion[]> {
+  const items = await withLikes(await readBank());
+  return items
+    .map(({ id, code, kind, category, text, answerState, hidden, source, likes, updatedOn, answerText: answer, answer: model }) => ({ id, code, kind, category, text, answerState, hidden, source, likes, updatedOn, answer, keywords: model?.keywords ?? [] }))
+    .sort((a, b) => b.code.localeCompare(a.code));
+}
+
+export async function listDemoPending(): Promise<PendingQuestion[]> {
+  const [bank, submissions] = await Promise.all([readBank(), readSubmissions()]);
+  const candidates = bank.filter(({ kind }) => kind === "cs");
+  return submissions
+    .filter(({ approvedAt }) => approvedAt === null)
+    .map(({ id, code, category, text, nickname, email, createdAt }) => {
+      const similar = findSimilar(candidates, text);
+      return { id, code, category, text, nickname, email, createdAt, similar: similar && { id: similar.id, code: similar.code, text: similar.text } };
+    });
+}
+
+export async function approveDemoQuestion(id: string) {
+  await writeStore(
+    SUBMISSIONS,
+    (await readSubmissions()).map((one) => (one.id === id ? { ...one, approvedAt: Date.now() } : one)),
+  );
+}
+
+/** id가 없으면 새로 등록한다 */
+export async function saveDemoBank(id: string | null, draft: QuestionDraft) {
+  const edits = await readEdits();
+  const bank = await readBank();
+  const target = id ?? `admin-${Date.now().toString(36)}`;
+  const last = Math.max(...bank.map(({ code }) => Number(code.slice(2))));
+  await writeStore(BANK_EDITS, {
+    ...edits,
+    added: id ? edits.added : [{ id: target, code: codeText(last + 1) }, ...edits.added],
+    edited: { ...edits.edited, [target]: { ...draft, updatedOn: today() } },
+  });
+}
+
+export async function removeDemoBank(ids: string[]) {
+  const edits = await readEdits();
+  await writeStore(BANK_EDITS, { ...edits, removed: [...new Set([...edits.removed, ...ids])] });
+}
+
+type Report = ReportEntry & { questionId: string };
+const defaultReports = (): Report[] => [
+  { questionId: "tcp-udp", reason: "모범답안이 틀렸어요", detail: "DNS는 응답이 512바이트를 넘으면 TCP로 다시 요청한다는 설명이 빠져 있어요.", at: demoTime("2026-11-25", "01:12") },
+  { questionId: "tcp-udp", reason: "모범답안이 틀렸어요", detail: "비교표에서 UDP 헤더 크기(8바이트)가 빠졌어요.", at: demoTime("2026-11-24", "22:40") },
+  { questionId: "cache", reason: "모범답안이 틀렸어요", detail: "CDN도 브라우저처럼 Cache-Control을 따라요.", at: demoTime("2026-11-24", "15:02") },
+  { questionId: "cache", reason: "모범답안이 틀렸어요", detail: "", at: demoTime("2026-11-24", "11:30") },
+  { questionId: "cache", reason: "모범답안이 틀렸어요", detail: "", at: demoTime("2026-11-23", "20:11") },
+  { questionId: "cache", reason: "질문 내용이 사실과 달라요", detail: "", at: demoTime("2026-11-22", "09:45") },
+  { questionId: "p-weak", reason: "부적절한 표현이 있어요", detail: "압박처럼 느껴져요.", at: demoTime("2026-11-20", "19:08") },
+  { questionId: "https", reason: "이미 있는 질문과 중복돼요", detail: "", at: demoTime("2026-11-18", "21:20") },
+  { questionId: "https", reason: "이미 있는 질문과 중복돼요", detail: "TLS 질문이 또 있어요.", at: demoTime("2026-11-17", "13:33") },
+  { questionId: "https", reason: "기타", detail: "", at: demoTime("2026-11-16", "08:10") },
+  { questionId: "rest", reason: "질문 내용이 사실과 달라요", detail: "", at: demoTime("2026-11-12", "17:55") },
+];
+/** 회원이 시연에서 한 신고 */
+const readReports = () => readStore<Report[]>(REPORTS, []);
+const readStatuses = () => readStore<Record<string, ReportStatus>>(REPORT_STATUS, { cache: "hidden", rest: "closed" });
+
+export async function reportDemoQuestion({ questionId, reason, detail }: ReportInput) {
+  const [reports, statuses] = await Promise.all([readReports(), readStatuses()]);
+  await writeStore(REPORTS, [{ questionId, reason, detail, at: new Date().toISOString() }, ...reports]);
+  // 끝난 신고도 새 신고가 오면 다시 확인한다
+  if (statuses[questionId] === "closed") await writeStore(REPORT_STATUS, { ...statuses, [questionId]: "waiting" });
+}
+
+export async function listDemoReports(): Promise<ReportedQuestion[]> {
+  const [bank, reports, statuses] = await Promise.all([readBank(), readReports(), readStatuses()]);
+  const entries = [...reports, ...defaultReports()].sort((a, b) => b.at.localeCompare(a.at));
+  const ids = [...new Set(entries.map(({ questionId }) => questionId))];
+  return ids.flatMap((id): ReportedQuestion[] => {
+    const question = bank.find((one) => one.id === id);
+    if (!question) return [];
+    const own = entries.filter(({ questionId }) => questionId === id).map(({ reason, detail, at }) => ({ reason, detail, at }));
+    return [{ id, code: question.code, text: question.text, status: statuses[id] ?? "waiting", entries: own }];
+  });
+}
+
+/** 숨기면 아카이브에서 빠지고, 끝내거나 다시 공개하면 돌아온다 */
+export async function settleDemoReport(id: string, status: ReportStatus) {
+  const [edits, statuses] = await Promise.all([readEdits(), readStatuses()]);
+  await writeStore(REPORT_STATUS, { ...statuses, [id]: status });
+  await writeStore(BANK_EDITS, { ...edits, hidden: { ...edits.hidden, [id]: status === "hidden" } });
 }

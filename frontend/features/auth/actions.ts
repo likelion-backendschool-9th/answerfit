@@ -3,9 +3,16 @@
 import { redirect } from "next/navigation";
 import { ApiError, ApiNotConnectedError } from "@/lib/backend-http";
 import { safeNextPath } from "@/lib/next-path";
+import { getSession } from "@/features/session/session";
 import { isEmailTaken, login, loginWithSocial, logout, signup } from "./api";
 import { SOCIAL_PROVIDERS, type AccountErrors, type LoginState, type SignupResult, type SocialProvider } from "./types";
 import { hasErrors, validateAccount, validateProfile } from "./validation";
+
+/** 갈 곳을 정하지 않은 관리자는 관리자 화면으로 보낸다 */
+async function landing(next: FormDataEntryValue | null) {
+  const path = safeNextPath(next);
+  return path === "/" && (await getSession())?.role === "admin" ? "/admin" : path;
+}
 
 const text = (form: FormData, name: string) => {
   const value = form.get(name);
@@ -31,7 +38,7 @@ export async function loginAction(_: LoginState, form: FormData): Promise<LoginS
   } catch (error) {
     return fail(messageOf(error));
   }
-  redirect(safeNextPath(form.get("next")));
+  redirect(await landing(form.get("next")));
 }
 
 export async function socialLoginAction(_: LoginState, form: FormData): Promise<LoginState> {
@@ -42,7 +49,7 @@ export async function socialLoginAction(_: LoginState, form: FormData): Promise<
   } catch (error) {
     return { error: messageOf(error) };
   }
-  redirect(safeNextPath(form.get("next")));
+  redirect(await landing(form.get("next")));
 }
 
 const readAccount = (form: FormData) => ({

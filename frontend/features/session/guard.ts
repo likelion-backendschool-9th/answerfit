@@ -1,5 +1,5 @@
 import "server-only";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
 import { getSession } from "./session";
 import type { Session } from "./types";
@@ -10,5 +10,12 @@ export async function requireMember(next = "/"): Promise<Session> {
   await connection();
   const session = await getSession();
   if (!session) redirect(`/login?next=${encodeURIComponent(next)}`);
+  return session;
+}
+
+/** 관리자가 아니면 없는 화면으로 보여 준다 */
+export async function requireAdmin(next = "/admin"): Promise<Session> {
+  const session = await requireMember(next);
+  if (session.role !== "admin") notFound();
   return session;
 }

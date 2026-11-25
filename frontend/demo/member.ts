@@ -4,6 +4,7 @@ import type { CategoryScore, Learning } from "@/features/member/learning";
 import type { LinkedLogin, Profile } from "@/features/member/types";
 import { DEMO_PASSWORD, renameDemoMember } from "./auth";
 import { readDemoSession, writeDemoSession } from "./session";
+import { clearStore } from "./store";
 
 const LINKS = "demo-links";
 
@@ -58,6 +59,7 @@ export async function setDemoLink(provider: string, linked: boolean) {
 
 /** 시연 기록을 모두 지운다. 모드 선택은 남긴다 */
 export async function clearDemoRecords() {
+  await clearStore();
   const store = await cookies();
   for (const { name } of store.getAll()) if (name.startsWith("demo-") && name !== "demo-mode") store.delete(name);
 }

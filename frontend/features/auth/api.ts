@@ -1,4 +1,5 @@
 import "server-only";
+import { demoSuspensionMessage } from "@/demo/members";
 import { addDemoMember, demoSocialMember, findDemoMember, isDemoEmailTaken } from "@/demo/auth";
 import { getDataMode } from "@/demo/mode";
 import { endSession, startSession } from "@/features/session/session";
@@ -7,11 +8,18 @@ import type { LoginInput, SignupInput, SocialProvider } from "./types";
 
 type TokenResponse = { accessToken: string };
 
+/** 이용이 정지된 회원은 로그인할 수 없다 */
+async function rejectSuspended(email: string) {
+  const message = await demoSuspensionMessage(email);
+  if (message) throw new ApiError(403, "SUSPENDED", message);
+}
+
 /** 맞지 않으면 false. 이메일과 비밀번호 중 무엇이 틀렸는지는 알려 주지 않는다 */
 export async function login({ email, password, remember }: LoginInput): Promise<boolean> {
   if ((await getDataMode()) === "mock") {
     const member = await findDemoMember(email, password);
     if (!member) return false;
+    await rejectSuspended(member.email);
     await startSession({ demo: member }, remember);
     return true;
   }
@@ -27,7 +35,9 @@ export async function login({ email, password, remember }: LoginInput): Promise<
 
 export async function loginWithSocial(provider: SocialProvider) {
   if ((await getDataMode()) === "api") throw new ApiNotConnectedError(`/api/auth/social/${provider}`);
-  await startSession({ demo: demoSocialMember() }, false);
+  const member = demoSocialMember();
+  await rejectSuspended(member.email);
+  await startSession({ demo: member }, false);
 }
 
 export async function isEmailTaken(email: string): Promise<boolean> {
