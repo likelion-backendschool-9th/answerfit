@@ -3,7 +3,7 @@ import Link from "next/link";
 import { cn } from "@/lib/cn";
 import styles from "./Button.module.css";
 
-type Variant = "primary" | "outline" | "light" | "dark";
+type Variant = "primary" | "accent" | "danger" | "outline" | "light" | "dark";
 /** md는 폼 너비를 채우고, lg는 글자만큼 차지한다 */
 type Size = "md" | "lg";
 type Look = { variant?: Variant; size?: Size };

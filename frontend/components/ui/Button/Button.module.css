@@ -43,6 +43,20 @@
   background: var(--color-primary-hover);
 }
 
+.accent {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+
+.accent:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+
+.danger {
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
+}
+
 .light {
   background: var(--color-light-button);
   color: var(--color-primary);

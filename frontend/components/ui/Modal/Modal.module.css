@@ -1,14 +1,22 @@
 .modal {
-  width: min(65.25rem, calc(100% - var(--space-8)));
   max-height: calc(100dvh - var(--space-8));
   margin: auto;
-  padding: var(--space-12);
   overflow-y: auto;
   border: 0;
   border-radius: var(--radius-frame);
   background: var(--color-surface);
   color: var(--color-text);
   box-shadow: var(--shadow-lg);
+}
+
+.lg {
+  width: min(65.25rem, calc(100% - var(--space-8)));
+  padding: var(--space-12);
+}
+
+.sm {
+  width: min(30rem, calc(100% - var(--space-8)));
+  padding: var(--space-7) var(--space-8);
 }
 
 .modal::backdrop {
@@ -18,11 +26,22 @@
 .top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-3);
+}
+
+.icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-full);
+  background: var(--color-danger-surface);
+  color: var(--color-danger);
 }
 
 .title {
+  flex: 1;
   font-size: var(--text-xl);
   font-weight: 500;
   line-height: var(--leading-xl);
@@ -31,6 +50,7 @@
 
 .close {
   display: grid;
+  flex: none;
   place-items: center;
   width: 2.5rem;
   height: 2.5rem;
@@ -56,7 +76,8 @@
 }
 
 @media (max-width: 40rem) {
-  .modal {
+  .lg,
+  .sm {
     padding: var(--space-5);
   }
 }
