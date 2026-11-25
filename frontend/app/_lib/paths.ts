@@ -6,6 +6,7 @@ export const PATHS = {
   newInterview: "/interviews/new",
   guide: "/guide",
   archive: "/archive",
+  question: (id: string) => `/archive/${encodeURIComponent(id)}`,
   my: "/my",
   notifications: "/notifications",
   interview: (id: string) => `/interviews/${id}`,

@@ -9,11 +9,15 @@ const PATHS = {
   check: "M12 22.25a10.25 10.25 0 1 0 0-20.5 10.25 10.25 0 0 0 0 20.5ZM8.5 12.5l2.5 2.5 4.5-5",
   chevron: "M9 5.5l6.5 6.5L9 18.5",
   circle: "M12 22.25a10.25 10.25 0 1 0 0-20.5 10.25 10.25 0 0 0 0 20.5Z",
+  clock: "M12 22.25a10.25 10.25 0 1 0 0-20.5 10.25 10.25 0 0 0 0 20.5ZM12 6v6l4 2",
+  close: "M5 5l14 14M19 5 5 19",
+  down: "M5.5 9l6.5 6.5L18.5 9",
   download: "M12 3v12.5M6.5 10.5 12 16l5.5-5.5M3.5 16.5V19a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-2.5",
   error: "M12 22.25a10.25 10.25 0 1 0 0-20.5 10.25 10.25 0 0 0 0 20.5ZM9 9l6 6M15 9l-6 6",
   face: "M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3M8 14s1.5 2 4 2 4-2 4-2M9 9.5v.01M15 9.5v.01",
   file: "M14 2.5H6.5a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V8L14 2.5ZM14 2.5V8h5.5M8 9h2M8 13h8M8 17h8",
   folder: "M20 20H4a2 2 0 0 1-2-2V5.5a2 2 0 0 1 2-2h5l2.5 3.5H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2Z",
+  heart: "M12 20.5 3.8 12.2a5.3 5.3 0 0 1 7.5-7.5l.7.7.7-.7a5.3 5.3 0 0 1 7.5 7.5Z",
   info: "M12 22.25a10.25 10.25 0 1 0 0-20.5 10.25 10.25 0 0 0 0 20.5ZM12 11.5V17M12 7.5v.01",
   lock: "M7 11V7.5a5 5 0 0 1 10 0V11M5 11h14a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 22H5a1.5 1.5 0 0 1-1.5-1.5v-8A1.5 1.5 0 0 1 5 11Z",
   message: "M21 15.5a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10.5ZM7 8h10M7 12.5h7",
@@ -23,6 +27,7 @@ const PATHS = {
   person: "M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM5 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2",
   play: "M7 4v16l13-8Z",
   plus: "M12 4v16M4 12h16",
+  search: "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM21 21l-4.3-4.3",
   skip: "M5 4.5v15l11-7.5ZM20 4.5v15",
   speaker: "M11 5 6.5 8.5H3v7h3.5L11 19V5ZM15.5 9a4.5 4.5 0 0 1 0 6M18.5 6a9 9 0 0 1 0 12",
   spinner: "M21 12a9 9 0 1 1-6.2-8.6",
@@ -35,9 +40,9 @@ const PATHS = {
 export type IconName = keyof typeof PATHS;
 
 /** 장식 아이콘. 뜻은 옆의 글자가 전한다 */
-export function Icon({ name, size = 24 }: { name: IconName; size?: number }) {
+export function Icon({ name, size = 24, filled = false }: { name: IconName; size?: number; filled?: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width={size} height={size} fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d={PATHS[name]} />
     </svg>
   );

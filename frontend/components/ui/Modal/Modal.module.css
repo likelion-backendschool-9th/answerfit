@@ -1,0 +1,62 @@
+.modal {
+  width: min(65.25rem, calc(100% - var(--space-8)));
+  max-height: calc(100dvh - var(--space-8));
+  margin: auto;
+  padding: var(--space-12);
+  overflow-y: auto;
+  border: 0;
+  border-radius: var(--radius-frame);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-lg);
+}
+
+.modal::backdrop {
+  background: var(--color-scrim-page);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.title {
+  font-size: var(--text-xl);
+  font-weight: 500;
+  line-height: var(--leading-xl);
+  letter-spacing: -0.02em;
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-right: calc(var(--space-2) * -1);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.close:hover {
+  background: var(--color-surface-subtle);
+}
+
+.description {
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-sm);
+}
+
+@media (max-width: 40rem) {
+  .modal {
+    padding: var(--space-5);
+  }
+}
