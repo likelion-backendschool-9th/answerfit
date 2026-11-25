@@ -30,10 +30,11 @@ const PROVIDERS = [
   { id: "kakao", label: "카카오로 계속하기", icon: KakaoIcon },
 ];
 
-export function SocialButtons() {
+export function SocialButtons({ next }: { next: string }) {
   const [state, action, pending] = useActionState(socialLoginAction, {});
   return (
     <form action={action} className={styles.list}>
+      <input type="hidden" name="next" value={next} />
       {PROVIDERS.map(({ id, label, icon }) => (
         <button key={id} type="submit" name="provider" value={id} disabled={pending} className={cn(styles.button, id === "kakao" && styles.kakao)}>
           <span className={styles.icon}>{icon}</span>

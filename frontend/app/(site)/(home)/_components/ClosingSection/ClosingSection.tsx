@@ -1,5 +1,5 @@
 import { PATHS } from "@/app/_lib/paths";
-import { ArrowIcon } from "@/components/ui/ArrowIcon/ArrowIcon";
+import { Icon } from "@/components/ui/Icon/Icon";
 import { ButtonLink } from "@/components/ui/Button/Button";
 import styles from "./ClosingSection.module.css";
 
@@ -17,7 +17,7 @@ export function ClosingSection() {
       </p>
       <div className={styles.buttons}>
         <ButtonLink href={PATHS.newInterview} size="lg">
-          지금 면접 시작하기 <ArrowIcon />
+          지금 면접 시작하기 <Icon name="arrow" />
         </ButtonLink>
         <ButtonLink href={PATHS.archive} size="lg" variant="outline">
           질문 아카이브 보기

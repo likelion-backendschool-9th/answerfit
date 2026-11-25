@@ -67,6 +67,11 @@
   color: var(--color-text-muted);
 }
 
+/* 폼이 오기 전까지 같은 높이를 잡아 모달이 흔들리지 않게 한다 */
+.loading {
+  height: 33.8125rem;
+}
+
 .divider {
   display: flex;
   align-items: center;

@@ -7,4 +7,6 @@ export const PATHS = {
   guide: "/guide",
   archive: "/archive",
   my: "/my",
+  notifications: "/notifications",
+  interviewResult: (id: string) => `/interviews/${id}/result`,
 } as const;

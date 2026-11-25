@@ -7,12 +7,13 @@ import { TextField } from "@/components/ui/TextField/TextField";
 import { loginAction } from "@/features/auth/actions";
 import styles from "./LoginForm.module.css";
 
-export function LoginForm() {
+export function LoginForm({ next }: { next: string }) {
   const [state, action, pending] = useActionState(loginAction, {});
   const [notice, setNotice] = useState("");
 
   return (
     <form action={action} className={styles.form} noValidate>
+      <input type="hidden" name="next" value={next} />
       <TextField label="이메일" name="email" type="email" autoComplete="username" placeholder="이메일 입력" defaultValue={state.email} autoFocus required />
       <TextField label="비밀번호" name="password" type="password" autoComplete="current-password" placeholder="비밀번호 입력" required />
       <div className={styles.options}>

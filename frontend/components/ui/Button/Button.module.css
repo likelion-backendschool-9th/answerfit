@@ -3,7 +3,6 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-3);
-  min-height: 3.5rem;
   border: 1px solid transparent;
   font-weight: 500;
   cursor: pointer;
@@ -16,9 +15,17 @@
 }
 
 .md {
-  width: 100%;
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-sm);
+}
+
+/* 부르는 쪽이 바꿀 수 있는 기본 크기. 우선순위를 0으로 둔다 */
+:where(.button) {
+  min-height: 3.5rem;
+}
+
+:where(.md) {
+  width: 100%;
 }
 
 .lg {
@@ -34,6 +41,25 @@
 
 .primary:hover:not(:disabled) {
   background: var(--color-primary-hover);
+}
+
+.light {
+  background: var(--color-light-button);
+  color: var(--color-primary);
+}
+
+.light:hover:not(:disabled) {
+  background: var(--color-surface);
+}
+
+.dark {
+  border-color: var(--color-dark-border);
+  background: var(--color-dark-surface);
+  color: var(--color-dark-text);
+}
+
+.dark:hover:not(:disabled) {
+  background: var(--color-dark-border);
 }
 
 .outline {

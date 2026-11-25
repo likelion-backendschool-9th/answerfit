@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { BrandLogo } from "@/app/_components/BrandLogo/BrandLogo";
+import { safeNextPath } from "@/lib/next-path";
 import { HomeHero } from "@/app/_components/HomeHero/HomeHero";
 import { LoginForm } from "./_components/LoginForm/LoginForm";
 import { SocialButtons } from "./_components/SocialButtons/SocialButtons";
@@ -8,7 +10,9 @@ import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: "로그인" };
 
-export default function LoginPage() {
+type Props = { searchParams: Promise<{ next?: string | string[] }> };
+
+export default function LoginPage({ searchParams }: Props) {
   return (
     <div className={styles.screen}>
       <div className={styles.backdrop} inert>
@@ -28,9 +32,9 @@ export default function LoginPage() {
             다시 만나서 반가워요
           </h1>
           <p className={styles.description}>로그인하고 말로 답하는 모의 면접을 이어가세요.</p>
-          <LoginForm />
-          <p className={styles.divider}>또는 소셜 계정으로</p>
-          <SocialButtons />
+          <Suspense fallback={<div className={styles.loading} />}>
+            <Forms searchParams={searchParams} />
+          </Suspense>
         </div>
         <div className={styles.footer}>
           <Link href="/signup" className={styles.signup}>
@@ -39,5 +43,17 @@ export default function LoginPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+/** 돌아갈 주소를 폼과 함께 그린다. 서버 액션이 주소를 다시 검사한다 */
+async function Forms({ searchParams }: Props) {
+  const next = safeNextPath((await searchParams).next);
+  return (
+    <>
+      <LoginForm next={next} />
+      <p className={styles.divider}>또는 소셜 계정으로</p>
+      <SocialButtons next={next} />
+    </>
   );
 }

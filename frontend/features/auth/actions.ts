@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { ApiError, ApiNotConnectedError } from "@/lib/backend-http";
+import { safeNextPath } from "@/lib/next-path";
 import { isEmailTaken, login, loginWithSocial, logout, signup } from "./api";
 import { SOCIAL_PROVIDERS, type AccountErrors, type LoginState, type SignupResult, type SocialProvider } from "./types";
 import { hasErrors, validateAccount, validateProfile } from "./validation";
@@ -30,7 +31,7 @@ export async function loginAction(_: LoginState, form: FormData): Promise<LoginS
   } catch (error) {
     return fail(messageOf(error));
   }
-  redirect("/");
+  redirect(safeNextPath(form.get("next")));
 }
 
 export async function socialLoginAction(_: LoginState, form: FormData): Promise<LoginState> {
@@ -41,7 +42,7 @@ export async function socialLoginAction(_: LoginState, form: FormData): Promise<
   } catch (error) {
     return { error: messageOf(error) };
   }
-  redirect("/");
+  redirect(safeNextPath(form.get("next")));
 }
 
 const readAccount = (form: FormData) => ({

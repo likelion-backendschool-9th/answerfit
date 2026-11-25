@@ -9,9 +9,13 @@ const TOKEN_COOKIE = "access-token";
 /** "로그인 상태 유지"를 고르면 14일. 고르지 않으면 브라우저를 닫을 때까지 */
 const REMEMBER_SECONDS = 60 * 60 * 24 * 14;
 
+export async function getAccessToken() {
+  return (await cookies()).get(TOKEN_COOKIE)?.value;
+}
+
 export async function getSession(): Promise<Session | null> {
   if ((await getDataMode()) === "mock") return readDemoSession();
-  const token = (await cookies()).get(TOKEN_COOKIE)?.value;
+  const token = await getAccessToken();
   if (!token) return null;
   try {
     return await callBackend<Session>("/api/members/me", { token });

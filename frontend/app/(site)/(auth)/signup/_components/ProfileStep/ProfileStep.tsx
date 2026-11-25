@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button/Button";
+import { ChoiceCard } from "@/components/ui/ChoiceCard/ChoiceCard";
 import { TextField } from "@/components/ui/TextField/TextField";
 import type { ProfileErrors } from "@/features/auth/types";
 import { PHOTO_TYPES } from "@/features/auth/validation";
-import { PhotoChoice } from "../PhotoChoice/PhotoChoice";
 import { StepHeading } from "../StepHeading/StepHeading";
 import styles from "./ProfileStep.module.css";
 
@@ -45,14 +45,16 @@ export function ProfileStep({ values, errors, error, pending, onChange, onBack, 
       <fieldset className={styles.photo}>
         <legend className={styles.legend}>프로필 사진</legend>
         <div className={styles.choices}>
-          <PhotoChoice
+          <ChoiceCard
+            name="photoChoice"
             title="기본 로고 사용"
             description="사진이 없으면 ANSWERFIT 로고로 표시돼요"
             icon="person"
             checked={!values.usePhoto}
             onSelect={() => onChange({ ...values, usePhoto: false })}
           />
-          <PhotoChoice
+          <ChoiceCard
+            name="photoChoice"
             title="사진 올리기"
             description={values.photo?.name ?? "JPG · PNG, 5MB 이하"}
             icon="camera"

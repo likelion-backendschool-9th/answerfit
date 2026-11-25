@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { PATHS } from "@/app/_lib/paths";
 import { ButtonLink } from "@/components/ui/Button/Button";
-import { ArrowIcon } from "@/components/ui/ArrowIcon/ArrowIcon";
+import { Icon } from "@/components/ui/Icon/Icon";
 import { FaceDots } from "../FaceDots/FaceDots";
 import { SiteHeader } from "../SiteHeader/SiteHeader";
 import { Waveform } from "../Waveform/Waveform";
@@ -47,7 +47,7 @@ export function HomeHero({ backdrop = false }: { backdrop?: boolean }) {
         </h1>
         <div className={styles.buttons}>
           <ButtonLink href={PATHS.newInterview} size="lg">
-            카메라 켜고 면접 시작 <ArrowIcon />
+            카메라 켜고 면접 시작 <Icon name="arrow" />
           </ButtonLink>
           <ButtonLink href="#flow" size="lg" variant="outline">
             면접 방식 둘러보기

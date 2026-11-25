@@ -52,7 +52,7 @@
   font-weight: 500;
   color: var(--color-text-muted);
   font-size: var(--text-sm);
-  line-height: var(--leading-md);
+  line-height: var(--leading-sm);
 }
 
 .input {
@@ -61,10 +61,36 @@
 }
 
 .mark {
+  display: flex;
   flex: none;
   color: var(--color-border);
 }
 
 .input:checked + .mark {
   color: var(--color-accent);
+}
+
+.locked {
+  background: var(--color-surface-subtle);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.locked .avatar {
+  background: var(--color-surface);
+}
+
+.locked .mark {
+  color: var(--color-text-muted);
+}
+
+.error {
+  border-color: var(--color-danger);
+  box-shadow: inset 0 0 0 1px var(--color-danger);
+  cursor: not-allowed;
+}
+
+.error .description,
+.error .mark {
+  color: var(--color-danger);
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Waveform } from "@/app/_components/Waveform/Waveform";
 import { PATHS } from "@/app/_lib/paths";
-import { ArrowIcon } from "@/components/ui/ArrowIcon/ArrowIcon";
+import { Icon } from "@/components/ui/Icon/Icon";
 import { Chip } from "@/components/ui/Chip/Chip";
 import { cn } from "@/lib/cn";
 import { SectionHeading } from "../SectionHeading/SectionHeading";
@@ -39,7 +39,7 @@ export function FlowSection() {
             description="설정 · 서류 · 장치 확인은 한 화면에서 끝내고, 면접이 시작되면 질문에만 집중하세요."
           />
           <Link href={PATHS.guide} className={styles.more}>
-            진행 방식 자세히 보기 <ArrowIcon />
+            진행 방식 자세히 보기 <Icon name="arrow" />
           </Link>
         </div>
         <ol className={styles.steps}>
