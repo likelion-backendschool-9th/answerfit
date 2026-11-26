@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getArchive, getMyLikedQuestions, getMyQuestions, getQuestionDetail, getSimilarityCandidates } from "@/features/question/api";
+import { getArchive, getMyLikedQuestions, getMyQuestions, getQuestionDetail } from "@/features/question/api";
 import type { CategoryResponse, QuestionDetailResponse, QuestionListItem, QuestionListResponse } from "@/features/question/read-model";
 import type { ArchiveQuery } from "@/features/question/rules";
 import type { ArchiveQuestion } from "@/features/question/types";
@@ -193,7 +193,6 @@ describe("회원 전용 조회 경계", () => {
     { name: "상세", read: () => getQuestionDetail("42") },
     { name: "내 질문", read: getMyQuestions },
     { name: "좋아요 목록", read: getMyLikedQuestions },
-    { name: "유사 질문 후보", read: getSimilarityCandidates },
   ])("$name은 회원 검증 실패 전에 데이터에 접근하지 않는다", async ({ read }) => {
     const redirect = new Error("NEXT_REDIRECT:login");
     mocks.member.mockRejectedValueOnce(redirect);
@@ -210,7 +209,6 @@ describe("기존 전체 배열 소비자", () => {
   it.each([
     { name: "내 질문", read: getMyQuestions, expected: [...sharedIds, "mine-pending", "mine-rejected"] },
     { name: "좋아요 목록", read: getMyLikedQuestions, expected: [...sharedIds, "personality-liked"] },
-    { name: "유사 질문 후보", read: getSimilarityCandidates, expected: [...sharedIds, "other-approved"] },
   ])("$name은 아카이브 첫 페이지로 대체되지 않는다", async ({ read, expected }) => {
     mocks.fetch.mockResolvedValueOnce(json(legacyQuestions()));
 
