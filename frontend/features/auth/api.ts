@@ -7,7 +7,7 @@ import { getDataMode, isSwitchable } from "@/demo/mode";
 import { safeNextPath } from "@/lib/next-path";
 import { endSession, startSession } from "@/features/session/session";
 import { ApiError, ApiNotConnectedError, callBackend } from "@/lib/backend-http";
-import { encodeKakaoCookie, encodeNotice, isSocialLoginError, KAKAO_CALLBACK_PATH, kakaoAuthorizeUrl, kakaoRedirectUri, noticeFor, readKakaoCallback, SOCIAL_LOGIN_MESSAGES, type SocialLoginError } from "./kakao";
+import { encodeKakaoCookie, encodeNotice, isSocialLoginError, KAKAO_CALLBACK_PATH, socialErrorOf, kakaoAuthorizeUrl, kakaoRedirectUri, noticeFor, readKakaoCallback, SOCIAL_LOGIN_MESSAGES, type SocialLoginError } from "./kakao";
 import type { LoginInput, SignupInput, SocialProvider } from "./types";
 
 type TokenResponse = { accessToken: string };
@@ -85,7 +85,7 @@ export async function finishKakaoLogin(params: URLSearchParams): Promise<KakaoLo
   } catch (error) {
     if (error instanceof ApiNotConnectedError) return { ok: false, error: "API_NOT_CONNECTED", next: callback.next };
     if (!(error instanceof ApiError)) throw error;
-    const code = isSocialLoginError(error.code) ? error.code : "KAKAO_AUTH_FAILED";
+    const code = socialErrorOf(error.code);
     // 정지 사유처럼 백엔드가 쓴 문장은 주소에 넣지 않고 짧은 쿠키로 넘긴다
     jar.set(NOTICE_COOKIE, encodeNotice(code, error.message), { ...cookieBase(), path: "/login", maxAge: 60 });
     return { ok: false, error: code, next: callback.next };

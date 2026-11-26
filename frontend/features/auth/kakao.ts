@@ -23,6 +23,23 @@ export function isSocialLoginError(code: unknown): code is SocialLoginError {
   return typeof code === "string" && Object.hasOwn(SOCIAL_LOGIN_MESSAGES, code);
 }
 
+/** 백엔드 ErrorCode(docs/api-response.md) → 로그인 화면 안내 코드 */
+const BACKEND_ERRORS: Record<string, SocialLoginError> = {
+  "BACKEND-BUSINESS-108": "EMAIL_NOT_VERIFIED",
+  "BACKEND-BUSINESS-109": "EMAIL_ALREADY_REGISTERED",
+  "BACKEND-BUSINESS-110": "SUSPENDED",
+  "BACKEND-BUSINESS-111": "WITHDRAWN",
+  "BACKEND-INFRA-101": "KAKAO_AUTH_FAILED",
+  "BACKEND-INFRA-102": "KAKAO_UNAVAILABLE",
+  "BACKEND-INFRA-103": "KAKAO_NOT_CONFIGURED",
+};
+
+/** 백엔드 코드든 프론트에서 정한 코드든 안내 코드로 바꾼다. 모르는 코드는 인증 실패로 본다 */
+export function socialErrorOf(code: unknown): SocialLoginError {
+  if (typeof code === "string" && Object.hasOwn(BACKEND_ERRORS, code)) return BACKEND_ERRORS[code];
+  return isSocialLoginError(code) ? code : "KAKAO_AUTH_FAILED";
+}
+
 /** 백엔드가 쓴 안내 문장(정지 사유 등). 그 문장을 만든 코드와 함께 남긴다 */
 export const encodeNotice = (code: SocialLoginError, message: string) => JSON.stringify({ code, message });
 
