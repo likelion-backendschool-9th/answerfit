@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useTransition, ViewTransition, type CSSProperties } from "react";
+import { useState, useTransition, ViewTransition } from "react";
 import { Icon } from "@/components/ui/Icon/Icon";
+import { LikeHeart } from "@/components/ui/LikeHeart/LikeHeart";
 import { followUpOf, itemNumber, type ResultItem } from "@/features/interview/result";
 import { likeAnswerAction } from "@/features/question/actions";
-import { cn } from "@/lib/cn";
 import { FeedbackCard } from "../FeedbackCard/FeedbackCard";
 import { ScoreCard } from "../ScoreCard/ScoreCard";
 import { SectionLabel } from "../SectionLabel/SectionLabel";
@@ -14,14 +14,10 @@ import styles from "./QuestionDetail.module.css";
 /** 뒤 번호로 가면 왼쪽으로, 앞 번호로 가면 오른쪽으로 넘긴다. 애니메이션은 globals.css의 result-next·result-previous */
 const SLIDE = { "result-next": "result-next", "result-previous": "result-previous", default: "none" };
 
-/** 하트 둘레로 퍼지는 점 여섯 개의 방향 */
-const SPARKS = [0, 60, 120, 180, 240, 300];
-
 type Props = { interviewId: string; items: ResultItem[]; item: ResultItem; liked: boolean; onSelect: (id: string) => void };
 
 export function QuestionDetail({ interviewId, items, item, liked: initialLiked, onSelect }: Props) {
   const [liked, setLiked] = useState(initialLiked);
-  const [bursts, setBursts] = useState(0);
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
   const followUp = followUpOf(items, item);
@@ -30,8 +26,6 @@ export function QuestionDetail({ interviewId, items, item, liked: initialLiked, 
   function toggleLike() {
     const next = !liked;
     setLiked(next);
-    // 좋아요를 누를 때만 터뜨린다. 숫자가 바뀌면 하트가 다시 그려져 애니메이션이 처음부터 돈다
-    if (next) setBursts((count) => count + 1);
     setError("");
     startTransition(async () => {
       const result = await likeAnswerAction(`${interviewId}/${item.id}`, next).catch(() => ({ error: "좋아요를 바꾸지 못했어요." }));
@@ -49,16 +43,7 @@ export function QuestionDetail({ interviewId, items, item, liked: initialLiked, 
           질문별 상세 내용
         </SectionLabel>
         <button type="button" className={styles.like} aria-pressed={liked} disabled={pending} onClick={toggleLike}>
-          <span key={bursts} className={cn(styles.heart, liked && bursts > 0 && styles.pop)} aria-hidden="true">
-            <Icon name="heart" size={16} filled={liked} />
-            {liked && bursts > 0 && (
-              <span className={styles.burst}>
-                {SPARKS.map((angle) => (
-                  <span key={angle} className={styles.spark} style={{ "--angle": `${angle}deg` } as CSSProperties} />
-                ))}
-              </span>
-            )}
-          </span>
+          <LikeHeart liked={liked} size={16} />
           좋아요
         </button>
       </div>

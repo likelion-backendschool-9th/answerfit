@@ -1,7 +1,7 @@
 "use client";
 
 import { useOptimistic, useState, useTransition } from "react";
-import { Icon } from "@/components/ui/Icon/Icon";
+import { LikeHeart } from "@/components/ui/LikeHeart/LikeHeart";
 import { likeAction } from "@/features/question/actions";
 import { cn } from "@/lib/cn";
 import styles from "./LikeButton.module.css";
@@ -25,7 +25,7 @@ export function LikeButton({ id, liked, likes, wide = false }: Props) {
   return (
     <span className={styles.wrap}>
       <button type="button" className={cn(wide ? styles.wide : styles.small, shown && styles.liked)} aria-pressed={shown} aria-label={wide ? undefined : "좋아요"} disabled={pending} onClick={toggle}>
-        <Icon name="heart" size={20} filled={shown} />
+        <LikeHeart liked={shown} />
         {wide && (
           <>
             좋아요 <span className={styles.count}>{count}</span>
