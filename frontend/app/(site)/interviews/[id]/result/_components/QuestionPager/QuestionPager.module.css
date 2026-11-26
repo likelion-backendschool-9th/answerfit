@@ -1,11 +1,15 @@
 .pager {
+  /* 번호 칸 한 개의 크기. 파란 칸이 움직이는 거리도 이것으로 센다 */
+  --cell: 2.25rem;
+  --ease: cubic-bezier(0.25, 1, 0.5, 1);
+
   display: flex;
   align-items: center;
   gap: var(--space-1);
   width: fit-content;
   max-width: 100%;
-  margin: var(--space-4) 0 var(--space-4) auto;
-  padding: var(--space-1) var(--space-2);
+  margin: var(--space-4) 0 var(--space-3) auto;
+  padding: var(--space-1);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
 }
@@ -22,18 +26,12 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: var(--cell);
+  height: var(--cell);
   border-radius: var(--radius-sm);
   background: var(--color-accent);
-  transform: translateX(calc(var(--index) * (2.5rem + var(--space-1))));
-  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .indicator {
-    transition: none;
-  }
+  transform: translateX(calc(var(--index) * (var(--cell) + var(--space-1))));
+  transition: transform 380ms var(--ease);
 }
 
 .arrow,
@@ -41,8 +39,8 @@
   display: grid;
   flex: none;
   place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: var(--cell);
+  height: var(--cell);
   padding: 0;
   border: 0;
   border-radius: var(--radius-sm);
@@ -51,25 +49,22 @@
   cursor: pointer;
 }
 
+/* 굵기를 바꾸면 글자 폭이 튀어 깜빡여 보여서, 고른 번호도 굵기는 그대로 두고 색만 바꾼다 */
 .number {
+  position: relative;
   font-family: var(--font-mono);
   font-size: var(--text-sm);
+  font-weight: 500;
+  transition: color 380ms var(--ease);
 }
 
-.number:hover,
+.number:hover:not([aria-current]),
 .arrow:hover:not(:disabled) {
   background: var(--color-surface-subtle);
 }
 
-.number {
-  position: relative;
-  transition: color 320ms;
-}
-
 .number[aria-current] {
-  background: none;
   color: var(--color-text-inverse);
-  font-weight: 700;
 }
 
 .arrow:disabled {

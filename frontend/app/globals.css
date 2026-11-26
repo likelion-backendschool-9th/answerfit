@@ -238,6 +238,63 @@ h1:focus {
   }
 }
 
+/*
+ * 면접 결과에서 문항을 바꿀 때(QuestionDetail). 흰 카드 틀은 그대로 두고 안의 내용만 넘긴다.
+ * 이전 내용이 살짝 밀려나며 먼저 사라지고, 그다음 새 내용이 반대쪽에서 들어온다. 둘을 겹치면 두 장이 비쳐 어지럽다.
+ * view transition 의사 요소는 문서 루트에 붙어 CSS 모듈에 둘 수 없어 여기 둔다.
+ * 페이지 전체(root)는 섞지 않는다. 그대로 두면 바뀌지 않은 곳까지 겹쳐 그려져 깜빡여 보인다.
+ */
+html:has([data-result-motion])::view-transition-old(root),
+html:has([data-result-motion])::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-group(.result-next),
+::view-transition-group(.result-previous) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+::view-transition-old(.result-next),
+::view-transition-old(.result-previous) {
+  animation: 160ms cubic-bezier(0.4, 0, 1, 1) both result-leave;
+}
+
+::view-transition-new(.result-next),
+::view-transition-new(.result-previous) {
+  animation: 300ms cubic-bezier(0.25, 1, 0.5, 1) 100ms both result-arrive;
+}
+
+::view-transition-old(.result-next) {
+  --result-shift: -1rem;
+}
+
+::view-transition-new(.result-next) {
+  --result-shift: 1rem;
+}
+
+::view-transition-old(.result-previous) {
+  --result-shift: 1rem;
+}
+
+::view-transition-new(.result-previous) {
+  --result-shift: -1rem;
+}
+
+@keyframes result-leave {
+  to {
+    opacity: 0;
+    transform: translateX(var(--result-shift));
+  }
+}
+
+@keyframes result-arrive {
+  from {
+    opacity: 0;
+    transform: translateX(var(--result-shift));
+  }
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -250,5 +307,11 @@ h1:focus {
   *::after {
     transition-duration: 0s !important;
     animation-duration: 0s !important;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }
