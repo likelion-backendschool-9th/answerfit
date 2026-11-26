@@ -12,10 +12,14 @@ export const metadata: Metadata = {
   icons: { icon: "/brand/logo-light.png" },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+/** auth는 화면 안에서 로그인을 누르면 뜨는 모달 자리다(app/@auth) */
+export default function RootLayout({ children, auth }: Readonly<{ children: React.ReactNode; auth: React.ReactNode }>) {
   return (
     <html lang="ko" className={`${noto.variable} ${brand.variable} ${code.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        {auth}
+      </body>
     </html>
   );
 }
