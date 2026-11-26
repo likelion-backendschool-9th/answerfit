@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Wordmark } from "@/app/_components/Wordmark/Wordmark";
 import { PATHS } from "@/app/_lib/paths";
 import { Icon, type IconName } from "@/components/ui/Icon/Icon";
 import { logoutAction } from "@/features/auth/actions";
@@ -29,7 +30,7 @@ export function AdminSide({ nickname, email, count }: Props) {
     <div className={styles.side}>
       <Link href={PATHS.adminQuestions} className={styles.brand} aria-label="ANSWERFIT 관리자">
         <Image src="/brand/logo-light.png" alt="" width={28} height={28} className={styles.logo} />
-        <span className={styles.word}>ANSWERFIT</span>
+        <Wordmark tone="dark" />
         <span className={styles.tag}>ADMIN</span>
       </Link>
       <nav aria-label="관리자 메뉴" className={styles.nav}>
