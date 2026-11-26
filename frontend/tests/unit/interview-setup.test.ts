@@ -10,9 +10,9 @@ const check = (change: Partial<InterviewSetup>) => setupError({ ...setup, ...cha
 describe("setupError", () => {
   it("맞는 설정은 통과한다", () => expect(check({})).toBeUndefined());
   it.each([2, 9, 3.5])("질문 수 %s는 막는다", (count) => expect(check({ count })).toBeDefined());
-  it("경험 면접은 서류 그룹이 필요하다", () => expect(check({ groupId: null })).toBeDefined());
+  it.each(["experience", "personality"] as const)("%s 면접은 서류 그룹이 필요하다", (type) => expect(check({ type, groupId: null })).toBeDefined());
   it("스캔에 실패한 그룹은 막는다", () => expect(check({ groupId: "bad" })).toBeDefined());
-  it.each(["cs", "personality", "pt"] as const)("%s 면접은 서류 그룹이 필요 없다", (type) => expect(check({ type, groupId: null })).toBeUndefined());
+  it.each(["cs", "pt"] as const)("%s 면접은 서류 그룹이 필요 없다", (type) => expect(check({ type, groupId: null })).toBeUndefined());
   it("보관 날짜를 비울 수 있다", () => expect(check({ deleteAfter: null })).toBeUndefined());
   it("오늘은 되고 어제는 막는다", () => {
     expect(check({ deleteAfter: "2026-11-25" })).toBeUndefined();
