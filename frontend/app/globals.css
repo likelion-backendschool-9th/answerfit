@@ -104,6 +104,7 @@
   --text-lg: 1.125rem;
   --text-xl: 1.5rem;
   --text-2xl: 2.25rem;
+  --text-hero: 3.5rem;
   --text-brand: 1.6875rem;
 
   --leading-none: 1;
@@ -204,6 +205,22 @@ a {
 main:focus,
 h1:focus {
   outline: none;
+}
+
+/*
+ * 구역 단위 스크롤. data-snap-sections가 있는 화면(홈)에서만 켠다.
+ * 화면보다 긴 구역은 안에서 자유롭게 스크롤된다. 푸터도 맞춤 지점이라 맨 아래까지 내려갈 수 있다.
+ */
+html:has([data-snap-sections]) {
+  scroll-snap-type: y mandatory;
+}
+
+[data-snap-sections] > section {
+  scroll-snap-align: start;
+}
+
+html:has([data-snap-sections]) footer {
+  scroll-snap-align: end;
 }
 
 @keyframes spin {
