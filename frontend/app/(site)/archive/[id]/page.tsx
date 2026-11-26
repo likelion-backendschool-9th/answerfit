@@ -4,9 +4,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TopBar } from "@/app/_components/TopBar/TopBar";
 import { PATHS } from "@/app/_lib/paths";
-import { getQuestions } from "@/features/question/api";
+import { getQuestionDetail } from "@/features/question/api";
 import { PendingActions } from "@/features/question/components/PendingActions/PendingActions";
-import { archiveHref, KIND_LABEL, neighbors, readQuery } from "@/features/question/rules";
+import { archiveHref, KIND_LABEL, readQuery } from "@/features/question/rules";
 import { requireMember } from "@/features/session/guard";
 import { LikeButton } from "../_components/LikeButton/LikeButton";
 import { ModelAnswer } from "./_components/ModelAnswer/ModelAnswer";
@@ -31,45 +31,49 @@ export default function QuestionPage({ params }: Props) {
 }
 
 async function Question({ params }: Props) {
-  const id = decodeURIComponent((await params).id);
+  const { id } = await params;
   await requireMember(PATHS.question(id));
-  const questions = await getQuestions();
-  const question = questions.find((one) => one.id === id);
-  if (!question) notFound();
+  const detail = await getQuestionDetail(id);
+  if (!detail) notFound();
+  const { question, previous, next } = detail;
   const { kind, category, text, mine, status, likes, liked, reported, answer } = question;
   const query = { ...readQuery({}), kind };
   const pending = status === "pending";
-  // 승인 전인 내 질문은 앞뒤 질문에 끼지 않는다
-  const { previous, next } = neighbors(
-    questions.filter((one) => one.status === "approved" || one.id === id),
-    question,
-  );
+  const rejected = status === "rejected";
+  const approved = status === "approved";
+  const unapproved = pending || rejected;
+  const canEdit = question.canEdit ?? (mine && unapproved);
+  const canDelete = question.canDelete ?? (mine && unapproved);
+  const canReport = question.canReport ?? (approved && !mine && !reported);
+  const categoryId = question.categoryId === undefined ? category : question.categoryId;
+  const hasCategory = categoryId !== null && Boolean(category);
+  const label = hasCategory ? `${KIND_LABEL[kind]} · ${category}` : KIND_LABEL[kind];
   return (
     <article className={styles.content}>
       <nav aria-label="현재 위치" className={styles.crumb}>
-        <Link href={PATHS.archive}>질문 아카이브</Link> › <Link href={archiveHref(query)}>{KIND_LABEL[kind]}</Link> › <Link href={archiveHref(query, { category })}>{category}</Link>
+        <Link href={PATHS.archive}>질문 아카이브</Link> › <Link href={archiveHref(query)}>{KIND_LABEL[kind]}</Link>
+        {hasCategory && <> › <Link href={archiveHref(query, { category: categoryId })}>{category}</Link></>}
       </nav>
-      {pending ? (
-        <p className={styles.badge}>승인 대기</p>
+      {unapproved ? (
+        <p className={styles.badge}>{rejected ? "반려됨" : "승인 대기"}</p>
       ) : (
-        <p className={styles.category}>
-          {KIND_LABEL[kind]} · {category}
-        </p>
+        <p className={styles.category}>{label}</p>
       )}
       <h1 className={styles.title}>{text}</h1>
       <div className={styles.actions}>
-        {pending && mine ? (
-          <PendingActions id={id} category={category} text={text} next={PATHS.archive} />
-        ) : (
+        {(canEdit || canDelete) && (
+          <PendingActions id={id} category={category} text={text} next={PATHS.archive} canEdit={canEdit} canDelete={canDelete} />
+        )}
+        {approved && (
           <>
             <LikeButton id={id} liked={liked} likes={likes} wide />
-            {!mine && <ReportButton id={id} label={`${KIND_LABEL[kind]} · ${category}`} text={text} reported={reported} />}
+            {(canReport || (reported && !mine)) && <ReportButton id={id} label={label} text={text} reported={reported} />}
           </>
         )}
       </div>
-      {pending && <PendingCard />}
-      <ModelAnswer answer={answer} pending={pending} />
-      {!pending && <Neighbors previous={previous} next={next} />}
+      {unapproved && <PendingCard rejected={rejected} reason={question.rejectionReason} />}
+      <ModelAnswer answer={answer} pending={pending} rejected={rejected} answerStatus={question.answerStatus} />
+      {approved && <Neighbors previous={previous} next={next} />}
     </article>
   );
 }

@@ -21,7 +21,7 @@ export function readQuery(params: Params): ArchiveQuery {
   return {
     kind: one("kind") === "personality" ? "personality" : "cs",
     category: one("category") || null,
-    keyword: one("q").trim().slice(0, 100),
+    keyword: [...one("q").trim()].slice(0, 100).join(""),
     likedOnly: one("liked") === "1",
     sort: one("sort") === "likes" ? "likes" : "latest",
     page: Number.isInteger(page) && page > 0 ? page : 1,

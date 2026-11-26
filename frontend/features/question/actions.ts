@@ -4,7 +4,7 @@ import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { ApiError, ApiNotConnectedError } from "@/lib/backend-http";
 import { safeNextPath } from "@/lib/next-path";
-import { addQuestion, getQuestions, likeAnswer, likeQuestion, removeQuestion, reportQuestion, updateQuestion } from "./api";
+import { addQuestion, getSimilarityCandidates, likeAnswer, likeQuestion, removeQuestion, reportQuestion, updateQuestion } from "./api";
 import { findSimilar, questionError, reportError, TEXT_MAX } from "./rules";
 import type { ActionResult, QuestionInput, ReportInput, SimilarQuestion } from "./types";
 
@@ -66,7 +66,7 @@ export async function reportAction(input: ReportInput): Promise<ActionResult> {
 /** 등록하려는 질문과 비슷한, 이미 승인된 질문 */
 export async function similarAction(text: string): Promise<SimilarQuestion | null> {
   try {
-    const approved = (await getQuestions()).filter(({ kind, status }) => kind === "cs" && status === "approved");
+    const approved = await getSimilarityCandidates();
     const found = findSimilar(approved, text.slice(0, TEXT_MAX));
     return found && { id: found.id, text: found.text };
   } catch (error) {

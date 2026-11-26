@@ -3,9 +3,9 @@ import { Suspense } from "react";
 import { TopBar } from "@/app/_components/TopBar/TopBar";
 import { PATHS } from "@/app/_lib/paths";
 import { Pagination } from "@/components/ui/Pagination/Pagination";
-import { getQuestions } from "@/features/question/api";
+import { getArchive } from "@/features/question/api";
 import { RegisterButton } from "@/features/question/components/RegisterButton/RegisterButton";
-import { archiveHref, countByCategory, KIND_LABEL, readQuery, searchQuestions } from "@/features/question/rules";
+import { archiveHref, KIND_LABEL, readQuery } from "@/features/question/rules";
 import { requireMember } from "@/features/session/guard";
 import { ArchiveFilters } from "./_components/ArchiveFilters/ArchiveFilters";
 import { ArchiveTabs } from "./_components/ArchiveTabs/ArchiveTabs";
@@ -37,15 +37,15 @@ export default function ArchivePage({ searchParams }: Props) {
 }
 
 async function Archive({ searchParams }: Props) {
-  const query = readQuery(await searchParams);
-  await requireMember(archiveHref(query, { page: query.page }));
-  const questions = await getQuestions();
-  const { items, total, page, pages } = searchQuestions(questions, query);
-  const kinds = (["cs", "personality"] as const).map((kind) => ({ kind, label: KIND_LABEL[kind], count: questions.filter((question) => question.kind === kind).length }));
+  const requested = readQuery(await searchParams);
+  await requireMember(archiveHref(requested, { page: requested.page }));
+  const { items, total, page, pages, majorCounts, categories, query } = await getArchive(requested);
+  const kinds = (["cs", "personality"] as const).map((kind) => ({ kind,
+    label: categories.find((group) => group.kind === kind)?.label ?? KIND_LABEL[kind], count: majorCounts[kind] }));
   const filtered = Boolean(query.keyword || query.likedOnly);
   return (
     <>
-      <ArchiveTabs query={query} kinds={kinds} categories={countByCategory(questions, query.kind)} />
+      <ArchiveTabs query={query} kinds={kinds} categories={categories.find(({ kind }) => kind === query.kind)?.categories ?? []} />
       <ArchiveFilters key={archiveHref(query)} query={query} />
       {items.length > 0 ? <QuestionList items={items} /> : <p className={styles.empty}>{filtered ? "조건에 맞는 질문이 없어요." : "아직 질문이 없어요."}</p>}
       <p className={styles.hidden} role="status">

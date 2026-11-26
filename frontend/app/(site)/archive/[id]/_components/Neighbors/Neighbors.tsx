@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { PATHS } from "@/app/_lib/paths";
 import { Icon } from "@/components/ui/Icon/Icon";
-import type { ArchiveQuestion } from "@/features/question/types";
 import styles from "./Neighbors.module.css";
 
-type Props = { previous: ArchiveQuestion | null; next: ArchiveQuestion | null };
+type Neighbor = { id: string; text: string };
+type Props = { previous: Neighbor | null; next: Neighbor | null };
 
 export function Neighbors({ previous, next }: Props) {
   if (!previous && !next) return null;
