@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.likelion.answerfit.global.common.ApiResponse;
 import com.likelion.answerfit.user.dto.MemberResponse;
 import com.likelion.answerfit.user.service.MemberService;
 
@@ -20,7 +21,7 @@ public class MemberController {
 
     /** 토큰의 subject가 회원 id다 */
     @GetMapping("/me")
-    public MemberResponse me(@AuthenticationPrincipal Jwt jwt) {
-        return memberService.getMe(Long.valueOf(jwt.getSubject()));
+    public ApiResponse<MemberResponse> me(@AuthenticationPrincipal Jwt jwt) {
+        return ApiResponse.ok(memberService.getMe(Long.valueOf(jwt.getSubject())));
     }
 }

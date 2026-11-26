@@ -12,8 +12,8 @@ import org.springframework.transaction.support.TransactionOperations;
 import com.likelion.answerfit.auth.jwt.TokenService;
 import com.likelion.answerfit.auth.kakao.KakaoClient;
 import com.likelion.answerfit.auth.kakao.KakaoUser;
-import com.likelion.answerfit.global.error.ApiException;
-import com.likelion.answerfit.global.error.ErrorCode;
+import com.likelion.answerfit.global.exception.CustomException;
+import com.likelion.answerfit.global.exception.ErrorCode;
 import com.likelion.answerfit.user.entity.SocialProvider;
 import com.likelion.answerfit.user.entity.User;
 import com.likelion.answerfit.user.entity.UserSocialAccount;
@@ -75,7 +75,7 @@ public class SocialLoginServiceImpl implements SocialLoginService {
             user = transaction.execute(status -> findOrSignUp(kakao));
         }
         if (user.getStatus() == UserStatus.SUSPENDED) {
-            throw new ApiException(ErrorCode.SUSPENDED, suspendedMessage(user));
+            throw new CustomException(ErrorCode.SUSPENDED, suspendedMessage(user));
         }
         return tokenService.issue(user);
     }
@@ -83,16 +83,16 @@ public class SocialLoginServiceImpl implements SocialLoginService {
     private User findOrSignUp(KakaoUser kakao) {
         return socialAccountRepository.findByProviderAndProviderUserId(SocialProvider.KAKAO, kakao.id())
                 .map(account -> userRepository.findActiveById(account.getUser().getId())
-                        .orElseThrow(() -> new ApiException(ErrorCode.WITHDRAWN)))
+                        .orElseThrow(() -> new CustomException(ErrorCode.WITHDRAWN)))
                 .orElseGet(() -> signUp(kakao));
     }
 
     private User signUp(KakaoUser kakao) {
         if (kakao.email() == null || kakao.email().isBlank() || !kakao.emailVerified()) {
-            throw new ApiException(ErrorCode.EMAIL_NOT_VERIFIED);
+            throw new CustomException(ErrorCode.EMAIL_NOT_VERIFIED);
         }
         if (userRepository.existsByEmailIgnoreCase(kakao.email())) {
-            throw new ApiException(ErrorCode.EMAIL_ALREADY_REGISTERED);
+            throw new CustomException(ErrorCode.EMAIL_ALREADY_REGISTERED);
         }
         User user = userRepository.save(User.createSocial(kakao.email(), nicknameFor(kakao.nickname())));
         socialAccountRepository.save(UserSocialAccount.builder()

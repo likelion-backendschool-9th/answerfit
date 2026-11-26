@@ -14,8 +14,8 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.likelion.answerfit.global.error.ApiException;
-import com.likelion.answerfit.global.error.ErrorCode;
+import com.likelion.answerfit.global.exception.CustomException;
+import com.likelion.answerfit.global.exception.ErrorCode;
 
 /** https://developers.kakao.com/docs/ko/kakaologin/rest-api */
 @Component
@@ -54,13 +54,13 @@ public class KakaoApiClient implements KakaoClient {
     @Override
     public KakaoUser fetchUser(String code, String redirectUri) {
         if (clientId.isBlank() || clientSecret.isBlank()) {
-            throw new ApiException(ErrorCode.KAKAO_NOT_CONFIGURED);
+            throw new CustomException(ErrorCode.KAKAO_NOT_CONFIGURED);
         }
         try {
             return exchange(code, redirectUri);
         } catch (RestClientException e) {
             // 카카오 5xx, 연결 실패, 시간 초과. 카카오가 코드를 거절한 4xx는 onStatus에서 KAKAO_AUTH_FAILED가 된다
-            throw new ApiException(ErrorCode.KAKAO_UNAVAILABLE);
+            throw new CustomException(ErrorCode.KAKAO_UNAVAILABLE);
         }
     }
 
@@ -77,22 +77,22 @@ public class KakaoApiClient implements KakaoClient {
                 .body(form)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, (request, response) -> {
-                    throw new ApiException(ErrorCode.KAKAO_AUTH_FAILED);
+                    throw new CustomException(ErrorCode.KAKAO_AUTH_FAILED);
                 })
                 .body(TokenBody.class);
         if (token == null || token.accessToken() == null) {
-            throw new ApiException(ErrorCode.KAKAO_AUTH_FAILED);
+            throw new CustomException(ErrorCode.KAKAO_AUTH_FAILED);
         }
 
         UserBody user = restClient.get().uri(USER_URL)
                 .header("Authorization", "Bearer " + token.accessToken())
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, (request, response) -> {
-                    throw new ApiException(ErrorCode.KAKAO_AUTH_FAILED);
+                    throw new CustomException(ErrorCode.KAKAO_AUTH_FAILED);
                 })
                 .body(UserBody.class);
         if (user == null || user.id() == null) {
-            throw new ApiException(ErrorCode.KAKAO_AUTH_FAILED);
+            throw new CustomException(ErrorCode.KAKAO_AUTH_FAILED);
         }
         return user.toKakaoUser();
     }
