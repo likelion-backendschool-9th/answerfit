@@ -9,6 +9,7 @@
 | 이슈 | 내용 | 문서 |
 | --- | --- | --- |
 | [#12](https://github.com/likelion-backendschool-9th/answerfit/issues/12) | 카카오 소셜 로그인 | [kakao-login.md](kakao-login.md) |
+| [#15](https://github.com/likelion-backendschool-9th/answerfit/issues/15) | 이메일 회원가입 | [local-signup.md](local-signup.md) |
 
 ## 정한 것
 
