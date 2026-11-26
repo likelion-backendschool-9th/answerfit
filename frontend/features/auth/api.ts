@@ -28,7 +28,7 @@ export async function login({ email, password, remember }: LoginInput): Promise<
     return true;
   }
   try {
-    const { accessToken } = await callBackend<TokenResponse>("/api/auth/login", { method: "POST", body: { email, password } });
+    const { accessToken } = await callBackend<TokenResponse>("/api/v1/auth/login", { method: "POST", body: { email, password } });
     await startSession({ accessToken }, remember);
     return true;
   } catch (error) {
@@ -45,7 +45,7 @@ export async function loginWithSocial(provider: SocialProvider, next: unknown): 
     await startSession({ demo: member }, false);
     return undefined;
   }
-  if (provider !== "kakao") throw new ApiNotConnectedError(`/api/auth/social/${provider}`);
+  if (provider !== "kakao") throw new ApiNotConnectedError(`/api/v1/auth/social/${provider}`);
   return startKakaoLogin(safeNextPath(next));
 }
 
@@ -79,7 +79,7 @@ export async function finishKakaoLogin(params: URLSearchParams): Promise<KakaoLo
   if (!callback.ok) return callback;
   try {
     const { redirectUri } = kakaoConfig();
-    const { accessToken } = await callBackend<TokenResponse>("/api/auth/social/kakao", { method: "POST", body: { code: callback.code, redirectUri } });
+    const { accessToken } = await callBackend<TokenResponse>("/api/v1/auth/social/kakao", { method: "POST", body: { code: callback.code, redirectUri } });
     await startSession({ accessToken }, false);
     return { ok: true, next: callback.next };
   } catch (error) {
@@ -100,7 +100,7 @@ export async function socialLoginNotice(error: unknown): Promise<string | undefi
 
 export async function isEmailTaken(email: string): Promise<boolean> {
   if ((await getDataMode()) === "mock") return isDemoEmailTaken(email);
-  const { available } = await callBackend<{ available: boolean }>(`/api/auth/email-availability?email=${encodeURIComponent(email)}`);
+  const { available } = await callBackend<{ available: boolean }>(`/api/v1/auth/email-availability?email=${encodeURIComponent(email)}`);
   return !available;
 }
 
@@ -114,7 +114,7 @@ export async function signup({ email, password, nickname, photo }: SignupInput) 
   form.set("password", password);
   form.set("nickname", nickname);
   if (photo) form.set("photo", photo);
-  const { accessToken } = await callBackend<TokenResponse>("/api/auth/signup", { method: "POST", body: form });
+  const { accessToken } = await callBackend<TokenResponse>("/api/v1/auth/signup", { method: "POST", body: form });
   await startSession({ accessToken }, false);
 }
 

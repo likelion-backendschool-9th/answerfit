@@ -12,7 +12,7 @@ import type { AnswerInput, DocumentGroup, Interview, InterviewSetup, Question } 
 
 const call = async <T>(path: string, body?: object) => callBackend<T>(path, { method: body ? "POST" : "GET", body, token: await getAccessToken() });
 
-const interviewPath = (id: string) => `/api/interviews/${encodeURIComponent(id)}`;
+const interviewPath = (id: string) => `/api/v1/interviews/${encodeURIComponent(id)}`;
 
 async function orNull<T>(request: Promise<T>): Promise<T | null> {
   try {
@@ -26,13 +26,13 @@ async function orNull<T>(request: Promise<T>): Promise<T | null> {
 export async function getDocumentGroups(): Promise<DocumentGroup[]> {
   await requireMember();
   if ((await getDataMode()) === "mock") return listDemoGroups();
-  return call("/api/document-groups");
+  return call("/api/v1/document-groups");
 }
 
 export async function createInterview(setup: InterviewSetup): Promise<string> {
   await requireMember();
   if ((await getDataMode()) === "mock") return createDemoInterview(setup);
-  return (await call<{ id: string }>("/api/interviews", setup)).id;
+  return (await call<{ id: string }>("/api/v1/interviews", setup)).id;
 }
 
 export async function getInterview(id: string): Promise<Interview | null> {
@@ -81,10 +81,10 @@ export async function renameInterview(id: string, title: string): Promise<boolea
 export async function getRecords(): Promise<InterviewRecord[]> {
   await requireMember();
   if ((await getDataMode()) === "mock") return listDemoRecords();
-  return call("/api/interviews/records");
+  return call("/api/v1/interviews/records");
 }
 
-const groupPath = (id: string) => `/api/document-groups/${encodeURIComponent(id)}`;
+const groupPath = (id: string) => `/api/v1/document-groups/${encodeURIComponent(id)}`;
 const hasGroup = async (id: string) => (await getDocumentGroups()).some((group) => group.id === id);
 
 /** 내 서류 그룹이 아니면 false */

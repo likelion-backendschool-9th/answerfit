@@ -15,7 +15,7 @@ import com.likelion.answerfit.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/members")
+@RequestMapping("/api/v1/members")
 @RequiredArgsConstructor
 public class MemberController {
 

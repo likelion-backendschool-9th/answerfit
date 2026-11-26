@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/error").permitAll()
+                        .requestMatchers("/api/v1/auth/**", "/error").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(server -> server
                         .jwt(Customizer.withDefaults())
