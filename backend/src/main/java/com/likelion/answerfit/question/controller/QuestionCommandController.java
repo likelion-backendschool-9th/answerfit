@@ -4,6 +4,7 @@ import java.net.URI;
 import java.security.Principal;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,5 +45,13 @@ public class QuestionCommandController {
             @PathVariable("questionId") @Positive(message = "질문 ID는 양수여야 합니다.") Long questionId,
             @Valid @RequestBody UpdateQuestionRequest request, Principal principal) {
         return questionCommandService.updateQuestion(questionId, request, QuestionAuthentication.requireMember(principal));
+    }
+
+    @DeleteMapping("/{questionId}")
+    public ResponseEntity<Void> deleteQuestion(
+            @PathVariable("questionId") @Positive(message = "질문 ID는 양수여야 합니다.") Long questionId,
+            Principal principal) {
+        questionCommandService.deleteQuestion(questionId, QuestionAuthentication.requireMember(principal));
+        return ResponseEntity.noContent().build();
     }
 }

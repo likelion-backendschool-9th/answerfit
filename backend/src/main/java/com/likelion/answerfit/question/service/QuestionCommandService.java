@@ -40,6 +40,24 @@ public class QuestionCommandService {
     }
 
     public QuestionUpdateResponse updateQuestion(Long questionId, UpdateQuestionRequest request, QuestionMember member) {
+        Question question = requireEditableQuestionForUpdate(questionId, member);
+        Category category = request.categoryId() == null ? question.getCategory()
+                : categoryRepository.findById(request.categoryId())
+                        .orElseThrow(() -> new QuestionException(QuestionErrorCode.INVALID_CATEGORY));
+        QuestionPolicy.requireCsCategory(category);
+        String content = request.content() == null ? question.getContent() : request.content();
+        question.update(category, content);
+
+        boolean editable = QuestionPolicy.canEdit(question, member);
+        return new QuestionUpdateResponse(question.getId().toString(), question.getStatus(), editable, editable);
+    }
+
+    public void deleteQuestion(Long questionId, QuestionMember member) {
+        Question question = requireEditableQuestionForUpdate(questionId, member);
+        question.delete();
+    }
+
+    private Question requireEditableQuestionForUpdate(Long questionId, QuestionMember member) {
         Question question = questionRepository.findForUpdateById(questionId)
                 .orElseThrow(() -> new QuestionException(QuestionErrorCode.QUESTION_NOT_FOUND));
         if (!QuestionPolicy.canView(question, member)) {
@@ -51,15 +69,6 @@ public class QuestionCommandService {
         if (!QuestionPolicy.canEdit(question, member)) {
             throw new QuestionException(QuestionErrorCode.QUESTION_NOT_EDITABLE);
         }
-
-        Category category = request.categoryId() == null ? question.getCategory()
-                : categoryRepository.findById(request.categoryId())
-                        .orElseThrow(() -> new QuestionException(QuestionErrorCode.INVALID_CATEGORY));
-        QuestionPolicy.requireCsCategory(category);
-        String content = request.content() == null ? question.getContent() : request.content();
-        question.update(category, content);
-
-        boolean editable = QuestionPolicy.canEdit(question, member);
-        return new QuestionUpdateResponse(question.getId().toString(), question.getStatus(), editable, editable);
+        return question;
     }
 }
