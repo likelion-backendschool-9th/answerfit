@@ -7,8 +7,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -23,8 +21,8 @@ import com.likelion.answerfit.global.config.SecurityConfig;
 import com.likelion.answerfit.global.error.ApiException;
 import com.likelion.answerfit.global.error.ErrorCode;
 import com.likelion.answerfit.user.controller.MemberController;
-import com.likelion.answerfit.user.entity.User;
-import com.likelion.answerfit.user.repository.UserRepository;
+import com.likelion.answerfit.user.dto.MemberResponse;
+import com.likelion.answerfit.user.service.MemberService;
 
 // 권한 확인 테스트: 지우지 않는다 (docs/testing.md)
 @WebMvcTest({AuthController.class, MemberController.class})
@@ -40,7 +38,7 @@ class AuthApiTest {
     private SocialLoginService socialLoginService;
 
     @MockitoBean
-    private UserRepository userRepository;
+    private MemberService memberService;
 
     @Test
     void 카카오_로그인은_토큰_없이_부를_수_있다() throws Exception {
@@ -88,7 +86,7 @@ class AuthApiTest {
 
     @Test
     void 로그인한_회원은_자기_정보를_받는다() throws Exception {
-        when(userRepository.findActiveById(7L)).thenReturn(Optional.of(User.createSocial("jiwoo@kakao.com", "지우")));
+        when(memberService.getMe(7L)).thenReturn(new MemberResponse("jiwoo@kakao.com", "지우", "member"));
 
         mvc.perform(get("/api/v1/members/me").with(jwt().jwt(token -> token.subject("7"))))
                 .andExpect(status().isOk())
@@ -99,7 +97,7 @@ class AuthApiTest {
 
     @Test
     void 탈퇴한_회원의_토큰은_401() throws Exception {
-        when(userRepository.findActiveById(7L)).thenReturn(Optional.empty());
+        when(memberService.getMe(7L)).thenThrow(new ApiException(ErrorCode.UNAUTHORIZED));
 
         mvc.perform(get("/api/v1/members/me").with(jwt().jwt(token -> token.subject("7"))))
                 .andExpect(status().isUnauthorized())

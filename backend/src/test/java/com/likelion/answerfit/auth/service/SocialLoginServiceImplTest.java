@@ -29,14 +29,14 @@ import com.likelion.answerfit.user.entity.UserSocialAccount;
 import com.likelion.answerfit.user.repository.UserRepository;
 import com.likelion.answerfit.user.repository.UserSocialAccountRepository;
 
-class SocialLoginServiceTest {
+class SocialLoginServiceImplTest {
 
     private final KakaoClient kakaoClient = mock(KakaoClient.class);
     private final UserRepository userRepository = mock(UserRepository.class);
     private final UserSocialAccountRepository socialAccountRepository = mock(UserSocialAccountRepository.class);
     private final TokenService tokenService = mock(TokenService.class);
     private final SocialLoginService service =
-            new SocialLoginService(kakaoClient, userRepository, socialAccountRepository, tokenService,
+            new SocialLoginServiceImpl(kakaoClient, userRepository, socialAccountRepository, tokenService,
                     TransactionOperations.withoutTransaction(), () -> 4821);
 
     @BeforeEach
