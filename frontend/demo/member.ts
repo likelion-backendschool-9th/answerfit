@@ -8,24 +8,23 @@ import { clearStore } from "./store";
 
 const LINKS = "demo-links";
 
-/** attempts: 이번 달 응시 횟수. 3개월은 3배, 전체는 6배로 본다 */
-const CATEGORIES: [name: string, month: number, last: number, quarter: number, before: number, all: number, attempts: number][] = [
-  ["운영체제", 72, 70, 70, 67, 69, 6],
-  ["네트워크", 81, 76, 77, 71, 74, 5],
-  ["데이터베이스", 64, 66, 65, 63, 65, 7],
-  ["자료구조", 76, 71, 73, 70, 72, 4],
-  ["알고리즘", 58, 55, 57, 56, 57, 3],
-  ["웹", 70, 68, 69, 66, 68, 5],
-  ["보안", 66, 60, 63, 58, 61, 2],
-  ["디자인 패턴", 74, 72, 72, 71, 71, 2],
+const CATEGORIES: [name: string, month: number, last: number, quarter: number, before: number, all: number][] = [
+  ["운영체제", 72, 70, 70, 67, 69],
+  ["네트워크", 81, 76, 77, 71, 74],
+  ["데이터베이스", 64, 66, 65, 63, 65],
+  ["자료구조", 76, 71, 73, 70, 72],
+  ["알고리즘", 58, 55, 57, 56, 57],
+  ["웹", 70, 68, 69, 66, 68],
+  ["보안", 66, 60, 63, 58, 61],
+  ["디자인 패턴", 74, 72, 72, 71, 71],
 ];
 
 export const demoLearning = (): Learning => ({
   streakDays: 5,
   categories: {
-    month: CATEGORIES.map(([name, score, previous, , , , attempts]): CategoryScore => ({ name, score, previous, attempts })),
-    quarter: CATEGORIES.map(([name, , , score, previous, , attempts]): CategoryScore => ({ name, score, previous, attempts: attempts * 3 })),
-    all: CATEGORIES.map(([name, , , , , score, attempts]): CategoryScore => ({ name, score, previous: null, attempts: attempts * 6 })),
+    month: CATEGORIES.map(([name, score, previous]): CategoryScore => ({ name, score, previous })),
+    quarter: CATEGORIES.map(([name, , , score, previous]): CategoryScore => ({ name, score, previous })),
+    all: CATEGORIES.map(([name, , , , , score]): CategoryScore => ({ name, score, previous: null })),
   },
 });
 

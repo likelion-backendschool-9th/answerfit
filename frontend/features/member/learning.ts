@@ -1,8 +1,7 @@
 import type { Period } from "@/features/interview/records";
 
 /** 백엔드 형식은 미확정 */
-/** attempts: 그 기간에 이 분야 질문을 받은 횟수 */
-export type CategoryScore = { name: string; score: number; previous: number | null; attempts: number };
+export type CategoryScore = { name: string; score: number; previous: number | null };
 export type Learning = { streakDays: number; categories: Record<Period, CategoryScore[]> };
 
 const WEAK_COUNT = 2;
@@ -24,23 +23,6 @@ export function withSubject(word: string) {
   const code = word.charCodeAt(word.length - 1) - 0xac00;
   return `${word}${code >= 0 && code <= 11171 && code % 28 > 0 ? "이" : "가"}`;
 }
-
-/** 레이더는 3각형부터 그린다. 그보다 적으면 목록만 보인다 */
-export const RADAR_MIN = 3;
-/** 이보다 많으면 응시 횟수가 많은 RADAR_OVERFLOW개만 그린다 */
-export const RADAR_MAX = 10;
-export const RADAR_OVERFLOW = 8;
-
-/** 레이더에 그릴 분야. 고른 분야는 원래 순서를 지켜 꼭짓점 자리가 기간마다 크게 바뀌지 않게 한다 */
-export function radarCategories(categories: CategoryScore[]) {
-  if (categories.length < RADAR_MIN) return [];
-  if (categories.length <= RADAR_MAX) return categories;
-  const kept = new Set([...categories].sort((a, b) => b.attempts - a.attempts).slice(0, RADAR_OVERFLOW));
-  return categories.filter((category) => kept.has(category));
-}
-
-/** 점수가 가장 낮은 분야. 같으면 앞의 것 */
-export const lowestOf = (categories: CategoryScore[]) => categories.reduce<CategoryScore | null>((low, category) => (!low || category.score < low.score ? category : low), null);
 
 /** 위에서 시계 방향으로 도는 점. 값은 0~100 */
 export function radarPoint(index: number, count: number, value: number, radius: number) {

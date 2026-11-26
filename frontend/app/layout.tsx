@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Noto_Sans_KR, Roboto_Mono } from "next/font/google";
+import { Archivo, Noto_Sans_KR, Roboto_Mono } from "next/font/google";
 import { InlineScript } from "./_components/InlineScript/InlineScript";
 import { THEME_SCRIPT } from "./_lib/theme";
 import "./globals.css";
 
 const noto = Noto_Sans_KR({ variable: "--font-noto", preload: false, display: "swap" });
+const brand = Archivo({ variable: "--font-brand", weight: "700", subsets: ["latin"], display: "swap" });
 const code = Roboto_Mono({ variable: "--font-code", subsets: ["latin"], display: "swap" });
 
 // 파비콘은 모드에 따라 바뀌어야 해서 metadata.icons 대신 THEME_SCRIPT가 <link>를 만든다
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
  */
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ko" data-theme="light" suppressHydrationWarning className={`${noto.variable} ${code.variable}`}>
+    <html lang="ko" data-theme="light" suppressHydrationWarning className={`${noto.variable} ${brand.variable} ${code.variable}`}>
       <head>
         <InlineScript html={THEME_SCRIPT} />
       </head>

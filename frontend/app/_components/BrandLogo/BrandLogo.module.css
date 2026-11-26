@@ -1,8 +1,20 @@
-/* 워드마크 높이는 Wordmark의 --wordmark-height(기본 1.25rem). 헤더처럼 작게 쓰는 곳은 감싼 요소에서 바꾼다 */
 .logo {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+}
+
+.word {
+  color: var(--color-accent);
+  font-family: var(--font-brand), var(--font-sans);
+  font-size: var(--brand-size, var(--text-brand));
+  font-weight: 700;
+  line-height: var(--leading-none);
+  letter-spacing: -0.055em;
+}
+
+.fit {
+  color: var(--color-primary);
 }
 
 /* 모드에 맞는 로고만 보인다. data-theme은 layout.tsx의 스크립트가 <html>에 단다 */
