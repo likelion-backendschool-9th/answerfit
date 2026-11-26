@@ -16,3 +16,16 @@
 .fit {
   color: var(--color-primary);
 }
+
+/* 모드에 맞는 로고만 보인다. data-theme은 layout.tsx의 스크립트가 <html>에 단다 */
+.darkIcon {
+  display: none;
+}
+
+:global(html[data-theme="dark"]) .lightIcon {
+  display: none;
+}
+
+:global(html[data-theme="dark"]) .darkIcon {
+  display: inline;
+}

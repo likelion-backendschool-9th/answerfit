@@ -51,5 +51,5 @@
 
 .tab[aria-current="page"] .count {
   background: var(--color-badge-dark);
-  color: var(--color-text-inverse);
+  color: var(--color-dark-text);
 }
