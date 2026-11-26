@@ -1,32 +1,29 @@
+/* 스크롤해도 화면 위에 붙어 있도록 sticky로 둔다. 본문이 비치지 않게 배경을 채운다 */
 .bar {
-  display: flex;
-  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-2) var(--space-4);
-  min-height: 4.5rem;
-  padding: var(--space-3) var(--space-12);
+  min-height: 3rem;
+  padding: var(--space-1) var(--space-12);
   border-bottom: 1px solid var(--color-border);
   background: var(--color-surface);
 }
 
+/* 헤더에서는 로고 글자를 한 단계 작게 쓴다(BrandLogo가 읽는 변수) */
 .brand {
+  --brand-size: var(--text-xl);
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-}
-
-.tagline {
-  color: var(--color-text-muted);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: 0.06em;
-  white-space: nowrap;
 }
 
 .nav {
   display: flex;
   gap: var(--space-10);
+  font-size: var(--text-sm);
   font-weight: 500;
   white-space: nowrap;
 }
@@ -35,22 +32,47 @@
   color: var(--color-text-muted);
 }
 
+.link:hover {
+  color: var(--color-text);
+}
+
 .link[aria-current="page"] {
   color: var(--color-primary);
 }
 
 .icons {
   display: flex;
-  gap: var(--space-2);
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2) var(--space-5);
 }
 
 .icon {
   display: grid;
   place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
   border-radius: var(--radius-full);
   color: var(--color-text-muted);
+}
+
+/* 비회원용 글자 버튼 */
+.text {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.text:hover {
+  color: var(--color-text);
+}
+
+.login {
+  color: var(--color-accent);
+}
+
+.login:hover {
+  color: var(--color-accent-hover);
 }
 
 .avatar {
@@ -60,18 +82,18 @@
 
 @media (max-width: 64rem) {
   .bar {
-    padding: var(--space-3) var(--space-5);
-  }
-
-  .tagline {
-    display: none;
+    padding: var(--space-1) var(--space-5);
   }
 }
 
 @media (max-width: 40rem) {
+  .bar {
+    grid-template-columns: 1fr auto;
+  }
+
   .nav {
-    order: 3;
-    width: 100%;
+    grid-column: 1 / -1;
+    grid-row: 2;
     justify-content: space-between;
     gap: var(--space-3);
     font-size: var(--text-sm);

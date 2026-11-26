@@ -8,6 +8,7 @@ export const PATHS = {
   newInterview: "/interviews/new",
   guide: "/guide",
   archive: "/archive",
+  experiences: "/experiences",
   question: questionHref,
   my: "/my",
   myInterviews: "/my/interviews",
