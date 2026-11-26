@@ -1,9 +1,9 @@
-/* 위의 헤더(TopBar, 4.5rem)와 합쳐 첫 화면을 채운다 */
+/* 위의 헤더(TopBar, 3.5rem)와 합쳐 첫 화면을 채운다 */
 .hero {
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - 4.5rem);
+  min-height: calc(100dvh - 3.5rem);
   isolation: isolate;
   background: var(--color-dark-surface);
   color: var(--color-text-inverse);
