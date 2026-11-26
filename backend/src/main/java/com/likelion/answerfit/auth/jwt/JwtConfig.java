@@ -36,6 +36,7 @@ public class JwtConfig {
     static SecretKey signingKey(String secret) {
         byte[] bytes;
         if (secret == null || secret.isBlank()) {
+            // TODO: 서비스 시 제거 필요. 운영에서는 JWT_SECRET이 없으면 서버가 시작되지 않게 막는다.
             log.warn("JWT_SECRET이 없어 임시 키로 토큰을 서명합니다. 서버를 다시 켜면 로그인이 풀립니다.");
             bytes = new byte[MIN_SECRET_BYTES];
             new SecureRandom().nextBytes(bytes);
