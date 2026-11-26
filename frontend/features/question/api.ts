@@ -9,15 +9,15 @@ import { toArchiveQuestion, toQuestionCategories, toQuestionDetail, type Categor
 import { CS_CATEGORIES, KIND_LABEL, neighbors, PAGE_SIZE, searchQuestions, type ArchiveQuery } from "./rules";
 import type { ArchiveQuestion, LikedAnswer, QuestionInput, QuestionKind, ReportInput } from "./types";
 
-const call = async <T>(path: string, method = "GET", body?: object) => callBackend<T>(path, { method, body, token: await getAccessToken() });
-const path = (id: string) => `/api/questions/${encodeURIComponent(id)}`;
+const call = async <T>(path: string, method = "GET", body?: object) => callBackend<T>(path, { method, body, token: await getAccessToken(), responseFormat: "plain" });
+const path = (id: string) => `/api/v1/questions/${encodeURIComponent(id)}`;
 
 const inMock = async () => (await getDataMode()) === "mock";
 
 /** 마이페이지와 후속 액션의 기존 전체 배열 계약. 공개 목록의 페이지 응답으로 대체하지 않는다. */
 async function getLegacyQuestions(): Promise<ArchiveQuestion[]> {
   await requireMember();
-  return (await inMock()) ? listDemoQuestions() : call("/api/questions");
+  return (await inMock()) ? listDemoQuestions() : call("/api/v1/questions");
 }
 
 export async function getQuestion(id: string): Promise<ArchiveQuestion | null> {
@@ -132,7 +132,7 @@ export async function likeQuestion(id: string, liked: boolean): Promise<boolean>
 export async function addQuestion(input: QuestionInput): Promise<string | null> {
   const { nickname, email } = await requireMember();
   if (await inMock()) return addDemoQuestion(input, { nickname, email });
-  return (await call<{ id: string }>("/api/questions", "POST", input)).id;
+  return (await call<{ id: string }>("/api/v1/questions", "POST", input)).id;
 }
 
 export async function updateQuestion(id: string, input: QuestionInput): Promise<boolean> {
@@ -161,11 +161,11 @@ export async function reportQuestion({ questionId, reason, detail }: ReportInput
 /** 면접 결과에서 좋아요한 질문 */
 export async function getLikedAnswers(): Promise<LikedAnswer[]> {
   await requireMember();
-  return (await inMock()) ? listDemoLikedAnswers() : call("/api/questions/liked-answers");
+  return (await inMock()) ? listDemoLikedAnswers() : call("/api/v1/questions/liked-answers");
 }
 
 export async function likeAnswer(id: string, liked: boolean) {
   await requireMember();
   if (await inMock()) await likeDemoAnswer(id, liked);
-  else await call(`/api/questions/liked-answers/${encodeURIComponent(id)}`, liked ? "PUT" : "DELETE");
+  else await call(`/api/v1/questions/liked-answers/${encodeURIComponent(id)}`, liked ? "PUT" : "DELETE");
 }

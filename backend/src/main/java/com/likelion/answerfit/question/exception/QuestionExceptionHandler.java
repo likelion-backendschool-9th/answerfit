@@ -8,6 +8,8 @@ import java.util.regex.Pattern;
 import org.hibernate.exception.ConstraintViolationException;
 import org.jspecify.annotations.Nullable;
 import org.springframework.context.MessageSourceResolvable;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +26,7 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @RestControllerAdvice(basePackages = "com.likelion.answerfit.question")
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class QuestionExceptionHandler extends ResponseEntityExceptionHandler {
 
     // Hibernate가 전달하는 제약명만 검사한다. H2의 생성 인덱스 접미사도 허용한다.

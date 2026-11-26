@@ -13,14 +13,14 @@ const inMock = async () => (await getDataMode()) === "mock";
 
 export async function getProfile(): Promise<Profile> {
   await requireMember();
-  const profile = (await inMock()) ? await demoProfile() : await call<Profile>("/api/members/me/profile");
+  const profile = (await inMock()) ? await demoProfile() : await call<Profile>("/api/v1/members/me/profile");
   if (!profile) redirect("/login");
   return profile;
 }
 
 export async function getLearning(): Promise<Learning> {
   await requireMember();
-  return (await inMock()) ? demoLearning() : call("/api/members/me/learning");
+  return (await inMock()) ? demoLearning() : call("/api/v1/members/me/learning");
 }
 
 /** 목업은 사진을 저장하지 않는다. photo가 null이면 사진을 그대로 두고, "default"면 기본 이미지로 바꾼다 */
@@ -31,7 +31,7 @@ export async function updateProfile(nickname: string, photo: File | "default" | 
   form.set("nickname", nickname);
   if (photo === "default") form.set("useDefaultPhoto", "true");
   else if (photo) form.set("photo", photo);
-  await call("/api/members/me/profile", "PUT", form);
+  await call("/api/v1/members/me/profile", "PUT", form);
 }
 
 /** 현재 비밀번호가 틀리면 false */
@@ -39,7 +39,7 @@ export async function changePassword(current: string, next: string): Promise<boo
   await requireMember();
   if (await inMock()) return isDemoPassword(current);
   try {
-    await call("/api/members/me/password", "PUT", { current, next });
+    await call("/api/v1/members/me/password", "PUT", { current, next });
     return true;
   } catch (error) {
     if (error instanceof ApiError && error.status === 400) return false;
@@ -50,12 +50,12 @@ export async function changePassword(current: string, next: string): Promise<boo
 export async function setLink(provider: LinkedLogin["provider"], linked: boolean) {
   await requireMember();
   if (await inMock()) return setDemoLink(provider, linked);
-  await call(`/api/members/me/links/${provider}`, linked ? "PUT" : "DELETE");
+  await call(`/api/v1/members/me/links/${provider}`, linked ? "PUT" : "DELETE");
 }
 
 export async function withdraw() {
   await requireMember();
   if (await inMock()) await clearDemoRecords();
-  else await call("/api/members/me", "DELETE");
+  else await call("/api/v1/members/me", "DELETE");
   await endSession();
 }

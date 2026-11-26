@@ -2,17 +2,10 @@
 
 import { redirect } from "next/navigation";
 import { ApiError, ApiNotConnectedError } from "@/lib/backend-http";
-import { safeNextPath } from "@/lib/next-path";
-import { getSession } from "@/features/session/session";
-import { isEmailTaken, login, loginWithSocial, logout, signup } from "./api";
+import { isEmailTaken, isNicknameTaken, login, loginWithSocial, logout, signup } from "./api";
+import { landing } from "./landing";
 import { SOCIAL_PROVIDERS, type AccountErrors, type LoginState, type SignupResult, type SocialProvider } from "./types";
 import { hasErrors, validateAccount, validateProfile } from "./validation";
-
-/** 갈 곳을 정하지 않은 관리자는 관리자 화면으로 보낸다 */
-async function landing(next: FormDataEntryValue | null) {
-  const path = safeNextPath(next);
-  return path === "/" && (await getSession())?.role === "admin" ? "/admin" : path;
-}
 
 const text = (form: FormData, name: string) => {
   const value = form.get(name);
@@ -44,12 +37,14 @@ export async function loginAction(_: LoginState, form: FormData): Promise<LoginS
 export async function socialLoginAction(_: LoginState, form: FormData): Promise<LoginState> {
   const provider = text(form, "provider") as SocialProvider;
   if (!SOCIAL_PROVIDERS.includes(provider)) return { error: "지원하지 않는 로그인 방식이에요." };
+  let redirectTo: string | undefined;
   try {
-    await loginWithSocial(provider);
+    redirectTo = await loginWithSocial(provider, form.get("next"));
   } catch (error) {
     return { error: messageOf(error) };
   }
-  redirect(await landing(form.get("next")));
+  // 실제 카카오 로그인은 카카오 동의 화면으로 보낸다. 돌아오면 /auth/kakao/callback이 로그인을 마친다
+  redirect(redirectTo ?? (await landing(form.get("next"))));
 }
 
 const readAccount = (form: FormData) => ({
@@ -86,6 +81,7 @@ export async function signupAction(form: FormData): Promise<SignupResult> {
     if (hasErrors(account)) return { ok: false, account };
     const profile = validateProfile({ nickname, photo });
     if (hasErrors(profile)) return { ok: false, profile };
+    if (await isNicknameTaken(nickname)) return { ok: false, profile: { nickname: "이미 사용 중인 닉네임이에요." } };
     await signup({ email: input.email, password: input.password, nickname, photo });
     return { ok: true };
   } catch (error) {

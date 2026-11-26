@@ -219,7 +219,7 @@ describe("기존 전체 배열 소비자", () => {
     expect(result.map(({ id }) => id)).toEqual(expected);
     expect(result.length).toBeGreaterThan(7);
     expect(mocks.fetch).toHaveBeenCalledTimes(1);
-    expect(fetchedUrl(0).pathname).toBe("/api/questions");
+    expect(fetchedUrl(0).pathname).toBe("/api/v1/questions");
     expect(fetchedUrl(0).search).toBe("");
     expect(mocks.demoQuestions).not.toHaveBeenCalled();
   });

@@ -7,7 +7,7 @@
 .word {
   color: var(--color-accent);
   font-family: var(--font-brand), var(--font-sans);
-  font-size: var(--text-brand);
+  font-size: var(--brand-size, var(--text-brand));
   font-weight: 700;
   line-height: var(--leading-none);
   letter-spacing: -0.055em;

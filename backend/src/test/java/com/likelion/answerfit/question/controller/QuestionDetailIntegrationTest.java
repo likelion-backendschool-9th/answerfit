@@ -37,7 +37,7 @@ import com.likelion.answerfit.user.entity.UserStatus;
 import jakarta.persistence.EntityManager;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 @Transactional
 class QuestionDetailIntegrationTest {
 
