@@ -46,7 +46,7 @@ class AuthApiTest {
     void 카카오_로그인은_토큰_없이_부를_수_있다() throws Exception {
         when(socialLoginService.loginWithKakao("code", "http://localhost:3000/auth/kakao/callback")).thenReturn("token");
 
-        mvc.perform(post("/api/auth/social/kakao").contentType(MediaType.APPLICATION_JSON).content(BODY))
+        mvc.perform(post("/api/v1/auth/social/kakao").contentType(MediaType.APPLICATION_JSON).content(BODY))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").value("token"));
     }
@@ -56,7 +56,7 @@ class AuthApiTest {
         when(socialLoginService.loginWithKakao("code", "http://localhost:3000/auth/kakao/callback"))
                 .thenThrow(new ApiException(ErrorCode.EMAIL_ALREADY_REGISTERED));
 
-        mvc.perform(post("/api/auth/social/kakao").contentType(MediaType.APPLICATION_JSON).content(BODY))
+        mvc.perform(post("/api/v1/auth/social/kakao").contentType(MediaType.APPLICATION_JSON).content(BODY))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("EMAIL_ALREADY_REGISTERED"))
                 .andExpect(jsonPath("$.message").value(ErrorCode.EMAIL_ALREADY_REGISTERED.getMessage()));
@@ -64,24 +64,24 @@ class AuthApiTest {
 
     @Test
     void 인가_코드가_없으면_400() throws Exception {
-        mvc.perform(post("/api/auth/social/kakao").contentType(MediaType.APPLICATION_JSON).content("{\"redirectUri\":\"x\"}"))
+        mvc.perform(post("/api/v1/auth/social/kakao").contentType(MediaType.APPLICATION_JSON).content("{\"redirectUri\":\"x\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
     void 깨진_JSON은_INVALID_REQUEST() throws Exception {
-        mvc.perform(post("/api/auth/social/kakao").contentType(MediaType.APPLICATION_JSON).content("{bad"))
+        mvc.perform(post("/api/v1/auth/social/kakao").contentType(MediaType.APPLICATION_JSON).content("{bad"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
     void 토큰이_없거나_틀리면_내_정보는_401() throws Exception {
-        mvc.perform(get("/api/members/me"))
+        mvc.perform(get("/api/v1/members/me"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
-        mvc.perform(get("/api/members/me").header("Authorization", "Bearer forged"))
+        mvc.perform(get("/api/v1/members/me").header("Authorization", "Bearer forged"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
     }
@@ -90,7 +90,7 @@ class AuthApiTest {
     void 로그인한_회원은_자기_정보를_받는다() throws Exception {
         when(userRepository.findActiveById(7L)).thenReturn(Optional.of(User.createSocial("jiwoo@kakao.com", "지우")));
 
-        mvc.perform(get("/api/members/me").with(jwt().jwt(token -> token.subject("7"))))
+        mvc.perform(get("/api/v1/members/me").with(jwt().jwt(token -> token.subject("7"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("jiwoo@kakao.com"))
                 .andExpect(jsonPath("$.nickname").value("지우"))
@@ -101,7 +101,7 @@ class AuthApiTest {
     void 탈퇴한_회원의_토큰은_401() throws Exception {
         when(userRepository.findActiveById(7L)).thenReturn(Optional.empty());
 
-        mvc.perform(get("/api/members/me").with(jwt().jwt(token -> token.subject("7"))))
+        mvc.perform(get("/api/v1/members/me").with(jwt().jwt(token -> token.subject("7"))))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
     }
