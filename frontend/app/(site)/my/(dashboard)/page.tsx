@@ -4,8 +4,10 @@ import { ButtonLink } from "@/components/ui/Button/Button";
 import { getRecords } from "@/features/interview/api";
 import { averageScore, PREVIOUS_LABEL, PERIODS, readPeriod, splitByPeriod, typeStats, type RecordQuery } from "@/features/interview/records";
 import { getLearning } from "@/features/member/api";
+import { radarCategories } from "@/features/member/learning";
 import { getLikedAnswers, getQuestions } from "@/features/question/api";
 import { requireMember } from "@/features/session/guard";
+import { cn } from "@/lib/cn";
 import { PageHeading } from "../_components/PageHeading/PageHeading";
 import { CategoryBars } from "./_components/CategoryBars/CategoryBars";
 import { CategoryRadar } from "./_components/CategoryRadar/CategoryRadar";
@@ -50,7 +52,8 @@ export default async function DashboardPage({ searchParams }: Props) {
           <PeriodTabs period={period} />
         </div>
         <TypeRings stats={SHOWN_TYPES.map((type) => ({ type, ...typeStats(records, type, period, now) }))} period={period} />
-        <div className={styles.categories}>
+        {/* 분야가 적어 레이더를 그리지 않으면 목록이 한 칸을 다 쓴다 */}
+        <div className={cn(styles.categories, radarCategories(learning.categories[period]).length === 0 && styles.listOnly)}>
           <CategoryRadar categories={learning.categories[period]} period={period} />
           <CategoryBars categories={learning.categories[period]} />
         </div>
