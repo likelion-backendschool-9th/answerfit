@@ -113,9 +113,10 @@ export function startedLabel(iso: string) {
   return `${date} (${weekday}) ${time}`;
 }
 
+/** 날짜와 시각이 한 덩어리로 읽히지 않게 | 로 나눈다 */
 export function defaultTitle(iso: string) {
   const { date, time } = seoulParts(iso);
-  return `${date} ${time} 면접`;
+  return `${date} | ${time} 면접`;
 }
 
 export const TITLE_MAX = 40;

@@ -47,7 +47,7 @@ it("날짜를 센다", () => {
 
 it("한국 시간으로 표시한다", () => {
   expect(startedLabel("2026-11-24T14:10:00Z")).toBe("2026.11.24 (화) 23:10");
-  expect(defaultTitle("2026-11-24T15:05:00Z")).toBe("2026.11.25 00:05 면접");
+  expect(defaultTitle("2026-11-24T15:05:00Z")).toBe("2026.11.25 | 00:05 면접");
   expect(duration(112)).toBe("1:52");
   expect(duration(5)).toBe("0:05");
 });
