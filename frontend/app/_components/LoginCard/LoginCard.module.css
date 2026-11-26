@@ -1,28 +1,4 @@
-.screen {
-  position: relative;
-  display: grid;
-  flex: 1;
-  place-items: center;
-  min-height: 100dvh;
-  padding: var(--space-6) var(--space-4);
-}
-
-.screen::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--color-overlay);
-}
-
-/* isolation: 배경 안의 헤더(sticky, z-index)가 어두운 막 위로 올라오지 않게 배경끼리만 쌓는다 */
-.backdrop {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  isolation: isolate;
-}
-
-.modal {
+.card {
   position: relative;
   z-index: 1;
   width: min(100%, 30rem);
@@ -48,8 +24,12 @@
   width: 2.5rem;
   height: 2.5rem;
   margin-right: calc(var(--space-2) * -1);
+  padding: 0;
+  border: 0;
   border-radius: var(--radius-sm);
+  background: none;
   color: var(--color-text-muted);
+  cursor: pointer;
 }
 
 .close:hover {

@@ -4,6 +4,7 @@ import { PATHS } from "@/app/_lib/paths";
 import { Icon } from "@/components/ui/Icon/Icon";
 import { getSession } from "@/features/session/session";
 import { BrandLogo } from "../BrandLogo/BrandLogo";
+import { LoginLink } from "../LoginLink/LoginLink";
 import { ThemeToggle } from "../ThemeToggle/ThemeToggle";
 import styles from "./TopBar.module.css";
 
@@ -46,9 +47,7 @@ async function Account() {
   if (!session) {
     return (
       <>
-        <Link href={PATHS.login} className={`${styles.text} ${styles.login}`}>
-          로그인
-        </Link>
+        <LoginLink className={`${styles.text} ${styles.login}`}>로그인</LoginLink>
         <Link href={PATHS.signup} className={styles.text}>
           회원가입
         </Link>

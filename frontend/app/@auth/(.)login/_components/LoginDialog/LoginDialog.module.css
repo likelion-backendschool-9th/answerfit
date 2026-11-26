@@ -1,0 +1,15 @@
+/* dialog 자체는 투명한 틀이고, 보이는 창은 안의 LoginCard가 그린다 */
+.dialog {
+  width: min(30rem, calc(100% - var(--space-8)));
+  max-height: calc(100dvh - var(--space-8));
+  margin: auto;
+  padding: 0;
+  overflow-y: auto;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: none;
+}
+
+.dialog::backdrop {
+  background: var(--color-overlay);
+}
