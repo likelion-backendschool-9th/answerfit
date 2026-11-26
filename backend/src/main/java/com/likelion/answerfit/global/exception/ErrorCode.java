@@ -9,6 +9,7 @@ public enum ErrorCode {
     SERVER_ERROR(ErrorDomain.GLOBAL, "102", HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다."),
     API_NOT_FOUND(ErrorDomain.GLOBAL, "103", HttpStatus.NOT_FOUND, "요청한 API를 찾을 수 없습니다."),
     METHOD_NOT_ALLOWED(ErrorDomain.GLOBAL, "104", HttpStatus.METHOD_NOT_ALLOWED, "지원하지 않는 요청 방식입니다."),
+    UNSUPPORTED_MEDIA_TYPE(ErrorDomain.GLOBAL, "105", HttpStatus.UNSUPPORTED_MEDIA_TYPE, "지원하지 않는 Content-Type입니다."),
 
     // ===== SECURITY: 인증·인가 =====
     // 1xx: 일반
@@ -32,8 +33,8 @@ public enum ErrorCode {
 
 
     private final static String SERVICE_DOMAIN = "BACKEND";
-    private final ErrorDomain domain;       // 도메인 (G, A, B 등)
-    private final String sequence;          // 해당 도메인/상태 내에서의 순번 (01, 02 등)
+    private final ErrorDomain domain;       // 도메인 (GLOBAL, SECURITY, BUSINESS, INFRA)
+    private final String sequence;          // 도메인 안의 순번 (101, 102 등). 백의 자리가 대역이다 (예: BUSINESS 1xx = 계정)
     private final HttpStatus httpStatus;    // HTTP 상태 코드 (400, 401 등)
     private final String message;           // 클라이언트용 메시지
 
