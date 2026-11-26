@@ -1,5 +1,5 @@
 .section {
-  padding: var(--space-fit) var(--space-5);
+  padding: var(--space-closing) var(--space-5);
   text-align: center;
 }
 

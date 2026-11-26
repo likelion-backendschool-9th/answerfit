@@ -225,8 +225,12 @@ h1:focus {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 100dvh;
     scroll-snap-align: start;
+  }
+
+  /* 마지막 구역(마무리)은 한 화면을 채우지 않고 원래 크기를 쓴다 */
+  [data-snap-sections] > section:not(:last-child) {
+    min-height: 100dvh;
   }
 
   html:has([data-snap-sections]) footer {
