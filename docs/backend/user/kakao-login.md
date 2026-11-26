@@ -16,22 +16,26 @@
 
 ## API
 
-| 요청 | 응답 |
-| --- | --- |
-| `POST /api/v1/auth/social/kakao` `{ code, redirectUri }` | 200 `{ accessToken }` |
-| `GET /api/v1/members/me` (Bearer) | 200 `{ email, nickname, role: "member" \| "admin" }` |
+응답은 [API 응답 형식](../../api-response.md)대로 `ApiResponse`로 감싼다. 아래 표는 `data`와 `error.errorCode`만 적는다.
 
-| 코드 | 상태 | 경우 |
-| --- | --- | --- |
-| `KAKAO_AUTH_FAILED` | 400 | 카카오가 인가 코드나 토큰을 거절했다(4xx) |
-| `KAKAO_UNAVAILABLE` | 502 | 카카오가 5xx로 답했거나, 연결하지 못했거나, 시간이 지났다(연결 3초, 응답 5초) |
-| `KAKAO_NOT_CONFIGURED` | 503 | `KAKAO_CLIENT_ID`·`KAKAO_CLIENT_SECRET`이 없다 |
-| `EMAIL_NOT_VERIFIED` | 403 | 카카오 이메일이 없거나 인증되지 않았다 |
-| `EMAIL_ALREADY_REGISTERED` | 409 | 같은 이메일의 회원이 있다 |
-| `SUSPENDED` | 403 | 이용 정지된 회원이다 |
-| `WITHDRAWN` | 403 | 탈퇴한 회원의 소셜 계정이다 |
-| `UNAUTHORIZED` | 401 | 토큰이 없거나 틀렸다 |
-| `INVALID_REQUEST` | 400 | 요청 값이 비었거나 JSON 형식이 깨졌다 |
+| 요청 | 성공 `data` |
+| --- | --- |
+| `POST /api/v1/auth/social/kakao` `{ code, redirectUri }` | `{ accessToken }` |
+| `GET /api/v1/members/me` (Bearer) | `{ email, nickname, role: "member" \| "admin" }` |
+
+| `ErrorCode` | 코드 | 상태 | 경우 |
+| --- | --- | --- | --- |
+| `KAKAO_AUTH_FAILED` | `BACKEND-INFRA-101` | 400 | 카카오가 인가 코드나 토큰을 거절했다(4xx) |
+| `KAKAO_UNAVAILABLE` | `BACKEND-INFRA-102` | 502 | 카카오가 5xx로 답했거나, 연결하지 못했거나, 시간이 지났다(연결 3초, 응답 5초) |
+| `KAKAO_NOT_CONFIGURED` | `BACKEND-INFRA-103` | 503 | `KAKAO_CLIENT_ID`·`KAKAO_CLIENT_SECRET`이 없다 |
+| `EMAIL_NOT_VERIFIED` | `BACKEND-BUSINESS-108` | 403 | 카카오 이메일이 없거나 인증되지 않았다 |
+| `EMAIL_ALREADY_REGISTERED` | `BACKEND-BUSINESS-109` | 409 | 같은 이메일의 회원이 있다 |
+| `SUSPENDED` | `BACKEND-BUSINESS-110` | 403 | 이용 정지된 회원이다. `detail`에 정지 사유를 붙인다 |
+| `WITHDRAWN` | `BACKEND-BUSINESS-111` | 403 | 탈퇴한 회원의 소셜 계정이다 |
+| `UNAUTHORIZED` | `BACKEND-SECURITY-101` | 401 | 토큰이 없거나 틀렸다 |
+| `INVALID_INPUT` | `BACKEND-GLOBAL-101` | 400 | 요청 값이 비었거나 JSON 형식이 깨졌다 |
+
+프론트는 이 코드를 로그인 화면의 안내 코드로 바꿔 쓴다(`frontend/features/auth/kakao.ts`의 `socialErrorOf`).
 
 ## 닉네임
 
@@ -47,7 +51,7 @@
 
 ## 작업 순서
 
-1. 보안 의존성, 오류 응답 형식, JWT 발급·검증
+1. 보안 의존성, JWT 발급·검증
 2. 회원·소셜 계정 저장소, 카카오 클라이언트, 소셜 로그인 서비스와 API
 3. `GET /api/v1/members/me`
 4. 프론트: 카카오 동의 화면으로 보내기, 콜백 처리, 로그인 화면의 안내
