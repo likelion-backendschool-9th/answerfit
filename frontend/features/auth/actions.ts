@@ -51,11 +51,15 @@ const readAccount = (form: FormData) => ({
   email: text(form, "email").trim(),
   password: text(form, "password"),
   passwordConfirm: text(form, "passwordConfirm"),
-  agreed: form.get("agreed") === "true",
+  consents: {
+    termsOfService: form.get("termsOfService") === "true",
+    privacyCollection: form.get("privacyCollection") === "true",
+    interviewRecording: form.get("interviewRecording") === "true",
+  },
 });
 
 async function checkAccount(account: ReturnType<typeof readAccount>): Promise<AccountErrors> {
-  const errors = validateAccount(account);
+  const errors = validateAccount({ ...account, agreed: Object.values(account.consents).every(Boolean) });
   if (!errors.email && (await isEmailTaken(account.email))) errors.email = "이미 가입한 이메일이에요.";
   return errors;
 }
@@ -82,9 +86,14 @@ export async function signupAction(form: FormData): Promise<SignupResult> {
     const profile = validateProfile({ nickname, photo });
     if (hasErrors(profile)) return { ok: false, profile };
     if (await isNicknameTaken(nickname)) return { ok: false, profile: { nickname: "이미 사용 중인 닉네임이에요." } };
-    await signup({ email: input.email, password: input.password, nickname, photo });
-    return { ok: true };
+    const signedIn = await signup({ email: input.email, password: input.password, nickname, photo, consents: input.consents });
+    return { ok: true, signedIn };
   } catch (error) {
+    if (error instanceof ApiError) {
+      if (error.code === "BACKEND-BUSINESS-104") return { ok: false, account: { email: error.message } };
+      if (error.code === "BACKEND-BUSINESS-105") return { ok: false, profile: { nickname: error.message } };
+      if (error.code === "BACKEND-BUSINESS-106") return { ok: false, account: { agreements: error.message } };
+    }
     return { ok: false, error: messageOf(error) };
   }
 }

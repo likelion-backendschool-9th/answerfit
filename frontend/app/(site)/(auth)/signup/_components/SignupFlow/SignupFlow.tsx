@@ -22,6 +22,7 @@ export function SignupFlow() {
   const [profileErrors, setProfileErrors] = useState<ProfileErrors>({});
   const [error, setError] = useState<string>();
   const [doneName, setDoneName] = useState("");
+  const [signedIn, setSignedIn] = useState(false);
   const [pending, startTransition] = useTransition();
   const content = useRef<HTMLDivElement>(null);
   const shownStep = useRef(step);
@@ -41,7 +42,9 @@ export function SignupFlow() {
     form.set("email", account.email);
     form.set("password", account.password);
     form.set("passwordConfirm", account.passwordConfirm);
-    form.set("agreed", String(agreed));
+    form.set("termsOfService", String(account.agreements[0] === true));
+    form.set("privacyCollection", String(account.agreements[1] === true));
+    form.set("interviewRecording", String(account.agreements[2] === true));
     return form;
   }
 
@@ -81,6 +84,7 @@ export function SignupFlow() {
       setAccount(EMPTY_ACCOUNT);
       setProfile(EMPTY_PROFILE);
       setDoneName(nickname);
+      setSignedIn(result.signedIn === true);
       setStep(3);
     });
   }
@@ -97,7 +101,7 @@ export function SignupFlow() {
       {step === 2 && (
         <ProfileStep values={profile} errors={profileErrors} error={error} pending={pending} onChange={setProfile} onBack={goBack} onSubmit={submitProfile} />
       )}
-      {step === 3 && <DoneStep nickname={doneName} />}
+      {step === 3 && <DoneStep nickname={doneName} signedIn={signedIn} />}
     </div>
   );
 }
