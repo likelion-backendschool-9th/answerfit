@@ -23,7 +23,7 @@ export class ApiError extends Error {
 
 type Options = { method?: string; body?: object | FormData; token?: string };
 
-/** 백엔드 호출. 오류 형식은 { code, message }로 가정한다(미확정) */
+/** 성공 응답은 호출자가 읽고, 공통 오류 응답과 기존 오류 형식은 여기서 처리한다. */
 export async function callBackend<T>(path: string, { method = "GET", body, token }: Options = {}): Promise<T> {
   const base = process.env.BACKEND_URL;
   if (!base) throw new ApiNotConnectedError(path);
@@ -42,7 +42,10 @@ export async function callBackend<T>(path: string, { method = "GET", body, token
 
   const data = await response.json().catch(() => null);
   if (response.ok) return data as T;
-  // Spring은 없는 주소에도 JSON으로 404를 준다. 우리 오류 형식(code)이 없으면 아직 없는 API로 본다
+  if (data?.success === false && typeof data.error?.errorCode === "string") {
+    throw new ApiError(response.status, data.error.errorCode, data.error.detail ?? "요청을 처리하지 못했어요.");
+  }
+  // 오류 코드 없는 Spring 기본 응답은 아직 없는 API로 본다.
   if ([404, 405, 501].includes(response.status) && !data?.code) throw new ApiNotConnectedError(path);
   throw new ApiError(response.status, data?.code, data?.message ?? "요청을 처리하지 못했어요.");
 }

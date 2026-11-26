@@ -49,11 +49,14 @@ export async function isEmailTaken(email: string): Promise<boolean> {
 export async function isNicknameTaken(nickname: string): Promise<boolean> {
   if ((await getDataMode()) === "mock") return isDemoNicknameTaken(nickname);
   const query = new URLSearchParams({ nickname });
-  const result = await callBackend<{ available?: unknown } | null>(`/api/v1/auth/nickname-available?${query}`);
-  if (typeof result?.available !== "boolean") {
+  const result = await callBackend<{ success?: unknown; data?: { available?: unknown } | null } | null>(
+    `/api/v1/auth/nickname-available?${query}`,
+  );
+  const available = result?.data?.available;
+  if (result?.success !== true || typeof available !== "boolean") {
     throw new ApiError(502, undefined, "닉네임 사용 가능 여부를 확인하지 못했어요.");
   }
-  return !result.available;
+  return !available;
 }
 
 export async function signup({ email, password, nickname, photo }: SignupInput) {
