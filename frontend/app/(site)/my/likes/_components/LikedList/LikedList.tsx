@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button/Button";
 import { Icon } from "@/components/ui/Icon/Icon";
-import { likeAction, unlikeAnswerAction } from "@/features/question/actions";
+import { likeAction, likeAnswerAction } from "@/features/question/actions";
 import styles from "./LikedList.module.css";
 
 const STEP = 6;
@@ -18,7 +18,7 @@ export function LikedList({ items }: { items: LikedItem[] }) {
 
   function unlike({ id, source }: LikedItem) {
     startTransition(async () => {
-      const result = await (source === "interview" ? unlikeAnswerAction(id) : likeAction(id, false)).catch(() => ({ error: "좋아요를 바꾸지 못했어요." }));
+      const result = await (source === "interview" ? likeAnswerAction(id, false) : likeAction(id, false)).catch(() => ({ error: "좋아요를 바꾸지 못했어요." }));
       setError(result.error);
     });
   }

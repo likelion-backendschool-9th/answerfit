@@ -1,0 +1,53 @@
+.pager {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: fit-content;
+  max-width: 100%;
+  margin: var(--space-4) 0 var(--space-4) auto;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+
+.list {
+  display: flex;
+  gap: var(--space-1);
+  overflow-x: auto;
+}
+
+.arrow,
+.number {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.number {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.number:hover,
+.arrow:hover:not(:disabled) {
+  background: var(--color-surface-subtle);
+}
+
+.number[aria-current] {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  font-weight: 700;
+}
+
+.arrow:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

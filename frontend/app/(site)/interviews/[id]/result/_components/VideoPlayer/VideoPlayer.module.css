@@ -83,10 +83,22 @@
   accent-color: var(--color-dark-accent);
 }
 
-.download {
-  display: flex;
-  padding: 0;
-  border: 0;
-  background: none;
+.save {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 2.75rem;
+  margin-top: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-decoration: none;
   cursor: pointer;
+}
+
+.save:hover {
+  background: var(--color-surface-subtle);
 }

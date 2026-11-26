@@ -48,6 +48,7 @@ export function PrintReport({ result }: { result: InterviewResult }) {
           <p>{item.transcript}</p>
           <h3>총평</h3>
           <p>{item.comment}</p>
+          {item.keywordChecks.length > 0 && <p>핵심 키워드: {item.keywordChecks.map(({ keyword, said }) => `${said ? "✓" : "✗"} ${keyword}`).join(", ")}</p>}
           <p>심화 학습 키워드: {item.keywords.join(", ")}</p>
           <p>면접관 팁: {item.tip}</p>
           <p>

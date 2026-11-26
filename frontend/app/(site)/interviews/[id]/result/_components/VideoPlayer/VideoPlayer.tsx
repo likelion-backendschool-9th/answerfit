@@ -26,58 +26,60 @@ export function VideoPlayer({ interviewId, item }: { interviewId: string; item: 
   }
 
   return (
-    <div className={styles.player}>
-      {url ? (
-        <video
-          ref={video}
-          className={styles.video}
-          src={url}
-          playsInline
-          onPlay={() => setPlaying(true)}
-          onPause={() => setPlaying(false)}
-          onEnded={() => setPlaying(false)}
-          onTimeUpdate={(event) => setPosition(event.currentTarget.currentTime)}
-        />
-      ) : (
-        <CameraStage stream={null} className={styles.stage} />
-      )}
-      <button type="button" className={playing ? styles.surface : styles.play} aria-label={playing ? "영상 멈추기" : "영상 재생"} onClick={toggle}>
-        {!playing && <Icon name="play" />}
-      </button>
-      {notice && (
-        <p className={styles.notice} role="status">
-          {notice}
-        </p>
-      )}
-      <div className={styles.controls}>
-        <span className={styles.time}>
-          {clock(Math.floor(Math.min(position, total)))} / {clock(item.seconds)}
-        </span>
-        <input
-          type="range"
-          className={styles.range}
-          aria-label="재생 위치"
-          min={0}
-          max={total}
-          step={0.1}
-          value={Math.min(position, total)}
-          disabled={!url}
-          onChange={(event) => {
-            const next = Number(event.target.value);
-            setPosition(next);
-            if (video.current) video.current.currentTime = next;
-          }}
-        />
+    <>
+      <div className={styles.player}>
         {url ? (
-          <a href={url} download={`${item.label}.webm`} className={styles.download} aria-label="영상 내려받기">
-            <Icon name="download" size={20} />
-          </a>
+          <video
+            ref={video}
+            className={styles.video}
+            src={url}
+            playsInline
+            onPlay={() => setPlaying(true)}
+            onPause={() => setPlaying(false)}
+            onEnded={() => setPlaying(false)}
+            onTimeUpdate={(event) => setPosition(event.currentTarget.currentTime)}
+          />
         ) : (
-          <button type="button" className={styles.download} aria-label="영상 내려받기" onClick={() => setNotice("영상이 이 탭에 없어요. 영상 저장은 아직 준비 중이에요.")}>
-            <Icon name="download" size={20} />
-          </button>
+          <CameraStage stream={null} className={styles.stage} />
         )}
+        <button type="button" className={playing ? styles.surface : styles.play} aria-label={playing ? "영상 멈추기" : "영상 재생"} onClick={toggle}>
+          {!playing && <Icon name="play" />}
+        </button>
+        {notice && (
+          <p className={styles.notice} role="status">
+            {notice}
+          </p>
+        )}
+        <div className={styles.controls}>
+          <span className={styles.time}>
+            {clock(Math.floor(Math.min(position, total)))} / {clock(item.seconds)}
+          </span>
+          <input
+            type="range"
+            className={styles.range}
+            aria-label="재생 위치"
+            min={0}
+            max={total}
+            step={0.1}
+            value={Math.min(position, total)}
+            disabled={!url}
+            onChange={(event) => {
+              const next = Number(event.target.value);
+              setPosition(next);
+              if (video.current) video.current.currentTime = next;
+            }}
+          />
+        </div>
       </div>
-    </div>
+      {url ? (
+        <a href={url} download={`${item.label}.webm`} className={styles.save}>
+          이 문항 영상 PC에 저장
+        </a>
+      ) : (
+        <button type="button" className={styles.save} onClick={() => setNotice("영상이 이 탭에 없어요. 영상 저장은 아직 준비 중이에요.")}>
+          이 문항 영상 PC에 저장
+        </button>
+      )}
+    </>
   );
 }
