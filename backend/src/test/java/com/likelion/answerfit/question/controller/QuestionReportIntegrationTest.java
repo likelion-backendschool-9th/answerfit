@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.likelion.answerfit.question.auth.QuestionPrincipal;
+import com.likelion.answerfit.question.dto.response.QuestionReportResponse;
 import com.likelion.answerfit.question.entity.Category;
 import com.likelion.answerfit.question.entity.ModerationType;
 import com.likelion.answerfit.question.entity.Question;
@@ -76,7 +77,7 @@ class QuestionReportIntegrationTest {
                 .andReturn().getResponse().getContentAsString();
         flushAndClear();
 
-        Long id = Long.valueOf(objectMapper.readTree(response).get("id").asText());
+        Long id = Long.valueOf(objectMapper.readValue(response, QuestionReportResponse.class).id());
         QuestionReport saved = questionReportRepository.findById(id).orElseThrow();
         assertThat(saved.getQuestion().getId()).isEqualTo(question.getId());
         assertThat(saved.getReporterId()).isEqualTo(1L);
