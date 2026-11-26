@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import { Button } from "@/components/ui/Button/Button";
 import { StepBar } from "@/components/ui/StepBar/StepBar";
 import { startInterviewAction } from "@/features/interview/actions";
 import { setupError } from "@/features/interview/setup";
 import type { DocumentGroup, InterviewSetup as Setup } from "@/features/interview/types";
 import { CheckStep } from "../CheckStep/CheckStep";
 import { InfoStep } from "../InfoStep/InfoStep";
-import { SummaryCard } from "../SummaryCard/SummaryCard";
 import styles from "./InterviewSetup.module.css";
 
 type Props = { initial: Setup; groups: DocumentGroup[]; gazeReady: boolean; today: string };
@@ -28,9 +28,8 @@ export function InterviewSetup({ initial, groups, gazeReady, today }: Props) {
     window.scrollTo(0, 0);
   }, [step]);
 
-  // CS 면접은 서류를 쓰지 않는다
-  const effective: Setup = setup.type === "experience" ? setup : { ...setup, groupId: null, deleteAfter: null };
-  const group = groups.find(({ id }) => id === effective.groupId) ?? null;
+  // 서류는 경험 면접에서만 쓴다. 영상 보관 기간은 모든 유형에 쓴다
+  const effective: Setup = setup.type === "experience" ? setup : { ...setup, groupId: null };
 
   function goNext() {
     const problem = setupError(effective, groups, today);
@@ -53,24 +52,34 @@ export function InterviewSetup({ initial, groups, gazeReady, today }: Props) {
   }
 
   return (
-    <div className={styles.layout}>
-      <div className={styles.content}>
-        <h1 className={styles.title} ref={title} tabIndex={-1}>
-          모의 면접 준비
-        </h1>
-        <p className={styles.description}>두 단계만 확인하면 바로 시작해요. 고른 내용은 오른쪽 요약에서 바로 확인할 수 있어요.</p>
-        <div className={styles.steps}>
-          <StepBar steps={["면접 정보", "환경 점검"]} current={step} />
-        </div>
+    <div className={styles.content}>
+      <h1 className={styles.title} ref={title} tabIndex={-1}>
+        모의 면접 준비
+      </h1>
+      <p className={styles.description}>두 단계만 확인하면 바로 시작해요.</p>
+      <div className={styles.steps}>
+        <StepBar steps={["면접 정보", "환경 점검"]} current={step} />
+      </div>
+      {step === 1 ? <InfoStep setup={setup} groups={groups} today={today} onChange={setSetup} /> : <CheckStep gazeReady={gazeReady} onReadyChange={setDevicesReady} />}
+      <div className={styles.actions}>
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
         {step === 1 ? (
-          <InfoStep setup={setup} groups={groups} today={today} onChange={setSetup} />
+          <Button className={styles.primary} onClick={goNext}>
+            다음 · 환경 점검
+          </Button>
         ) : (
-          <CheckStep mode={setup.mode} gazeReady={gazeReady} onReadyChange={setDevicesReady} />
+          <>
+            <Button variant="outline" className={styles.secondary} onClick={goBack} disabled={pending}>
+              이전 단계
+            </Button>
+            <Button className={styles.primary} onClick={start} disabled={pending || !devicesReady}>
+              {pending ? "준비 중" : "면접 시작하기"}
+            </Button>
+          </>
         )}
       </div>
-      <SummaryCard setup={effective} group={group} error={error}>
-        {step === 1 ? { next: goNext } : { start, back: goBack, pending, ready: devicesReady }}
-      </SummaryCard>
     </div>
   );
 }

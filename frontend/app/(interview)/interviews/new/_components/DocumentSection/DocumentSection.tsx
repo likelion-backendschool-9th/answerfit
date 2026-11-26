@@ -3,14 +3,13 @@
 import { useState } from "react";
 import { ChoiceCard } from "@/components/ui/ChoiceCard/ChoiceCard";
 import { Icon } from "@/components/ui/Icon/Icon";
-import { KEEP_DAYS } from "@/features/interview/setup";
 import type { DocumentGroup, InterviewSetup } from "@/features/interview/types";
 import { Section } from "../Section/Section";
 import styles from "./DocumentSection.module.css";
 
-type Props = { setup: InterviewSetup; groups: DocumentGroup[]; today: string; onChange: (change: Partial<InterviewSetup>) => void };
+type Props = { setup: InterviewSetup; groups: DocumentGroup[]; onChange: (change: Partial<InterviewSetup>) => void };
 
-export function DocumentSection({ setup, groups, today, onChange }: Props) {
+export function DocumentSection({ setup, groups, onChange }: Props) {
   const [notice, setNotice] = useState("");
   return (
     <div className={styles.panel}>
@@ -49,20 +48,6 @@ export function DocumentSection({ setup, groups, today, onChange }: Props) {
             {notice}
           </p>
         </div>
-      </Section>
-      <Section title="영상 보관 기간">
-        <input
-          type="date"
-          className={styles.date}
-          aria-label="영상 보관 기간"
-          aria-describedby="keep-hint"
-          min={today}
-          value={setup.deleteAfter ?? ""}
-          onChange={(event) => onChange({ deleteAfter: event.target.value || null })}
-        />
-        <p id="keep-hint" className={styles.hint}>
-          비워 두면 면접일로부터 {KEEP_DAYS}일 뒤 자동 삭제돼요
-        </p>
       </Section>
     </div>
   );
