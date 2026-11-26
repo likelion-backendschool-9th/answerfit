@@ -47,6 +47,13 @@
   gap: var(--space-2) var(--space-5);
 }
 
+/* 모드 토글과 계정 영역 사이의 세로 구분선 */
+.divider {
+  width: 1px;
+  height: 1.25rem;
+  background: var(--color-border);
+}
+
 .icon {
   display: grid;
   place-items: center;

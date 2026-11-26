@@ -8,12 +8,12 @@
   height: 100dvh;
   overflow-y: auto;
   padding: var(--space-6) var(--space-4) var(--space-5);
-  background: var(--color-primary);
-  color: var(--color-text-inverse);
+  background: var(--color-nav-bg);
+  color: var(--color-nav-text-strong);
 }
 
 .side :focus-visible {
-  outline-color: var(--color-text-inverse);
+  outline-color: var(--color-nav-text-strong);
 }
 
 /* 남색 배경이라 다크 워드마크를 쓴다 */
@@ -76,7 +76,7 @@
 .item:hover,
 .item[aria-current="page"] {
   background: var(--color-nav-active);
-  color: var(--color-text-inverse);
+  color: var(--color-nav-text-strong);
 }
 
 .item[aria-current="page"]::before {
@@ -94,7 +94,7 @@
   padding: 0 var(--space-px-6);
   border-radius: var(--radius-sm);
   background: var(--color-danger);
-  color: var(--color-text-inverse);
+  color: var(--color-nav-text-strong);
   font-family: var(--font-mono);
   font-size: var(--text-sm);
   font-weight: 500;
@@ -160,7 +160,7 @@
 }
 
 .link:hover {
-  color: var(--color-text-inverse);
+  color: var(--color-nav-text-strong);
 }
 
 @media (max-width: 64rem) {

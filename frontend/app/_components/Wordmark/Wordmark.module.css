@@ -1,4 +1,7 @@
-/* 로고 지침: ANSWER = color/accent, FIT = color/brand. 높이는 부르는 쪽이 --wordmark-height로 정한다(최소 14px) */
+/*
+ * 로고 지침: ANSWER = color/accent, FIT = color/brand. 야간 모드에서는 두 토큰이 Dark 값으로 바뀐다.
+ * dark는 모드와 관계없이 늘 어두운 면(관리자 메뉴 등)에 놓일 때 쓴다. 높이는 부르는 쪽이 --wordmark-height로 정한다(최소 14px)
+ */
 .wordmark {
   display: block;
   flex: none;
@@ -15,9 +18,9 @@
 }
 
 .dark .answer {
-  fill: var(--color-dark-accent);
+  fill: var(--palette-accent-dark);
 }
 
 .dark .fit {
-  fill: var(--color-brand-on-dark);
+  fill: var(--palette-brand-dark);
 }

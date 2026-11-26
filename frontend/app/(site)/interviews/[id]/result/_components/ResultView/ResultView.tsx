@@ -40,7 +40,7 @@ export function ResultView({ result, today, likedIds }: Props) {
   if (result.groupId) again.set("group", result.groupId);
 
   return (
-    <div className={styles.page} data-result-motion>
+    <div className={styles.page}>
       <div className={styles.content}>
         <nav aria-label="현재 위치" className={styles.crumb}>
           <Link href={PATHS.newInterview}>모의 면접</Link> › <span aria-current="page">면접 결과</span>
