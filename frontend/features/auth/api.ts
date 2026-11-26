@@ -1,6 +1,6 @@
 import "server-only";
 import { demoSuspensionMessage } from "@/demo/members";
-import { addDemoMember, demoSocialMember, findDemoMember, isDemoEmailTaken } from "@/demo/auth";
+import { addDemoMember, demoSocialMember, findDemoMember, isDemoEmailTaken, isDemoNicknameTaken } from "@/demo/auth";
 import { getDataMode } from "@/demo/mode";
 import { endSession, startSession } from "@/features/session/session";
 import { ApiError, ApiNotConnectedError, callBackend } from "@/lib/backend-http";
@@ -43,6 +43,13 @@ export async function loginWithSocial(provider: SocialProvider) {
 export async function isEmailTaken(email: string): Promise<boolean> {
   if ((await getDataMode()) === "mock") return isDemoEmailTaken(email);
   const { available } = await callBackend<{ available: boolean }>(`/api/auth/email-availability?email=${encodeURIComponent(email)}`);
+  return !available;
+}
+
+export async function isNicknameTaken(nickname: string): Promise<boolean> {
+  if ((await getDataMode()) === "mock") return isDemoNicknameTaken(nickname);
+  const query = new URLSearchParams({ nickname });
+  const { available } = await callBackend<{ available: boolean }>(`/api/v1/auth/nickname-available?${query}`);
   return !available;
 }
 

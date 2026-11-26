@@ -24,6 +24,10 @@ export async function isDemoEmailTaken(email: string) {
   return [DEMO_MEMBER, DEMO_ADMIN, ...(await readMembers())].some(same(email));
 }
 
+export async function isDemoNicknameTaken(nickname: string) {
+  return [DEMO_MEMBER, DEMO_ADMIN, ...(await readMembers())].some((member) => member.nickname === nickname);
+}
+
 /** 가입한 회원은 저장한 비밀번호가 없어 시연 비밀번호로 로그인한다 */
 export async function findDemoMember(email: string, password: string): Promise<Session | null> {
   if (password !== DEMO_PASSWORD) return null;

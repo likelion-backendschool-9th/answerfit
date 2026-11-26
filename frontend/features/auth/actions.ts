@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { ApiError, ApiNotConnectedError } from "@/lib/backend-http";
 import { safeNextPath } from "@/lib/next-path";
 import { getSession } from "@/features/session/session";
-import { isEmailTaken, login, loginWithSocial, logout, signup } from "./api";
+import { isEmailTaken, isNicknameTaken, login, loginWithSocial, logout, signup } from "./api";
 import { SOCIAL_PROVIDERS, type AccountErrors, type LoginState, type SignupResult, type SocialProvider } from "./types";
 import { hasErrors, validateAccount, validateProfile } from "./validation";
 
@@ -86,6 +86,7 @@ export async function signupAction(form: FormData): Promise<SignupResult> {
     if (hasErrors(account)) return { ok: false, account };
     const profile = validateProfile({ nickname, photo });
     if (hasErrors(profile)) return { ok: false, profile };
+    if (await isNicknameTaken(nickname)) return { ok: false, profile: { nickname: "이미 사용 중인 닉네임이에요." } };
     await signup({ email: input.email, password: input.password, nickname, photo });
     return { ok: true };
   } catch (error) {
