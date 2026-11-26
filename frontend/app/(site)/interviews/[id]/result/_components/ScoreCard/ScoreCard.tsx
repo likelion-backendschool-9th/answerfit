@@ -1,35 +1,39 @@
 import type { ReactNode } from "react";
-import { duration, rateScore, rateTime, timeNote, type ResultItem } from "@/features/interview/result";
+import { Icon, type IconName } from "@/components/ui/Icon/Icon";
+import { duration, rateScore, rateTime, timeNote, type Rating, type ResultItem } from "@/features/interview/result";
 import { cn } from "@/lib/cn";
+import { ScoreRing } from "../ScoreRing/ScoreRing";
 import styles from "./ScoreCard.module.css";
 
 /** 답변 시간 막대가 가득 차는 길이(초) */
 const FULL_SECONDS = 180;
 
 export function ScoreCard({ item }: { item: ResultItem }) {
+  const rating = rateScore(item.score);
   const time = rateTime(item.seconds);
   return (
-    <section className={styles.card} aria-label="점수">
+    <section className={styles.card} aria-label="문항 점수">
       <div className={styles.total}>
+        <ScoreRing score={item.score} />
         <div>
-          <p className={styles.name}>종합 점수</p>
-          <p className={styles.note}>답변 정확도와 전달 방식을 합친 점수예요</p>
+          <p className={styles.totalName}>이 문항 종합 점수</p>
+          <p className={cn(styles.rating, styles[rating.tone])}>{rating.label}</p>
         </div>
-        <p className={styles.score}>{item.score}</p>
       </div>
-      <Row name="답변 정확도" value={item.accuracy} unit="/ 100" percent={item.accuracy} tone={rateScore(item.accuracy).tone === "bad" ? "bad" : "accent"} note={item.accuracyNote} />
-      <Row name="시선 처리" value={item.gaze} unit="/ 100" percent={item.gaze} tone={rateScore(item.gaze).tone === "bad" ? "bad" : "good"} note={item.gazeNote} />
-      <Row name="답변 시간" value={duration(item.seconds)} unit={time.label} percent={Math.min(100, (item.seconds / FULL_SECONDS) * 100)} tone={time.tone === "good" ? "good" : "bad"} note={timeNote(item.seconds)} />
+      <Row icon="check" name="답변 정확도" value={item.accuracy} unit="/ 100" percent={item.accuracy} tone={rateScore(item.accuracy).tone} note={item.accuracyNote} />
+      <Row icon="eye" name="시선 처리" value={item.gaze} unit="/ 100" percent={item.gaze} tone={rateScore(item.gaze).tone} note={item.gazeNote} />
+      <Row icon="clock" name="답변 시간" value={duration(item.seconds)} unit={time.label} percent={Math.min(100, (item.seconds / FULL_SECONDS) * 100)} tone={time.tone} note={timeNote(item.seconds)} />
     </section>
   );
 }
 
-type RowProps = { name: string; value: ReactNode; unit: string; percent: number; tone: "accent" | "good" | "bad"; note: string };
+type RowProps = { icon: IconName; name: string; value: ReactNode; unit: string; percent: number; tone: Rating["tone"]; note: string };
 
-function Row({ name, value, unit, percent, tone, note }: RowProps) {
+function Row({ icon, name, value, unit, percent, tone, note }: RowProps) {
   return (
     <div className={styles.row}>
       <p className={styles.top}>
+        <Icon name={icon} size={16} />
         <span className={styles.rowName}>{name}</span>
         <span className={styles.value}>{value}</span>
         <span className={styles.unit}>{unit}</span>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Main } from "@/app/_components/Main/Main";
+import { SiteFrame } from "@/app/_components/SiteFrame/SiteFrame";
 import { TopBar } from "@/app/_components/TopBar/TopBar";
 import { PATHS } from "@/app/_lib/paths";
 import { getDocumentGroups, isGazeReady } from "@/features/interview/api";
@@ -12,15 +12,15 @@ export const metadata: Metadata = { title: "모의 면접 준비" };
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
-/** 푸터가 없는 화면이라 본문을 직접 그린다 */
+/** 면접실 레이아웃 그룹에 있지만, 준비 화면은 사이트 푸터까지 그린다 */
 export default function NewInterviewPage({ searchParams }: Props) {
   return (
-    <Main>
+    <SiteFrame>
       <TopBar current={PATHS.newInterview} />
       <Suspense>
         <Setup searchParams={searchParams} />
       </Suspense>
-    </Main>
+    </SiteFrame>
   );
 }
 

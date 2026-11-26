@@ -1,0 +1,73 @@
+.pager {
+  /* 번호 칸 한 개의 크기. 파란 칸이 움직이는 거리도 이것으로 센다 */
+  --cell: 2.25rem;
+  --ease: cubic-bezier(0.25, 1, 0.5, 1);
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: fit-content;
+  max-width: 100%;
+  margin: var(--space-4) 0 var(--space-3) auto;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+
+.list {
+  position: relative;
+  display: flex;
+  gap: var(--space-1);
+  overflow-x: auto;
+}
+
+/* 고른 번호 뒤의 파란 칸. --index만큼 옆으로 미끄러진다 */
+.indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--cell);
+  height: var(--cell);
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  transform: translateX(calc(var(--index) * (var(--cell) + var(--space-1))));
+  transition: transform 380ms var(--ease);
+}
+
+.arrow,
+.number {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--cell);
+  height: var(--cell);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+/* 굵기를 바꾸면 글자 폭이 튀어 깜빡여 보여서, 고른 번호도 굵기는 그대로 두고 색만 바꾼다 */
+.number {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition: color 380ms var(--ease);
+}
+
+.number:hover:not([aria-current]),
+.arrow:hover:not(:disabled) {
+  background: var(--color-surface-subtle);
+}
+
+.number[aria-current] {
+  color: var(--color-text-inverse);
+}
+
+.arrow:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

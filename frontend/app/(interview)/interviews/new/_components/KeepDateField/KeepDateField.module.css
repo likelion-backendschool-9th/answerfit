@@ -1,0 +1,173 @@
+.root {
+  position: relative;
+  width: min(100%, 30rem);
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  height: 3rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-accent);
+  text-align: left;
+  cursor: pointer;
+}
+
+.field[aria-expanded="true"],
+.field:focus-visible {
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+
+.value,
+.placeholder {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.value {
+  color: var(--color-text);
+}
+
+.placeholder {
+  color: var(--color-text-muted);
+}
+
+.dday {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-xs);
+  background: var(--color-chip);
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  line-height: var(--leading-xs);
+}
+
+.chevron {
+  display: flex;
+  transition: transform var(--duration-fast);
+}
+
+.up {
+  transform: rotate(180deg);
+}
+
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* 달력 카드. 칸 바로 아래에 뜬다 */
+.popover {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  left: 0;
+  z-index: 10;
+  width: 22.5rem;
+  max-width: calc(100vw - 2 * var(--space-5));
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.month {
+  font-weight: 700;
+}
+
+.nav {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.nav:hover:not(:disabled) {
+  background: var(--color-surface-subtle);
+}
+
+.nav:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.weekdays,
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  justify-items: center;
+}
+
+.weekdays {
+  margin-top: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-sm);
+}
+
+.days {
+  row-gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+
+.day {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.day:hover:not(:disabled, .selected) {
+  background: var(--color-surface-subtle);
+}
+
+.sunday {
+  color: var(--color-danger);
+}
+
+.day:disabled {
+  color: var(--color-border);
+  cursor: default;
+}
+
+.selected {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  font-weight: 700;
+}

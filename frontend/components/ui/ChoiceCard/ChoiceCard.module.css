@@ -13,6 +13,12 @@
 .choice:has(.input:checked) {
   border-color: var(--color-accent);
   box-shadow: inset 0 0 0 1px var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.choice:has(.input:checked) .avatar {
+  background: var(--color-surface);
+  color: var(--color-accent);
 }
 
 .choice:has(.input:focus-visible) {
@@ -93,4 +99,30 @@
 .error .description,
 .error .mark {
   color: var(--color-danger);
+}
+
+/* compact: 면접 준비처럼 카드를 여러 개 늘어놓는 화면 */
+.compact {
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.compact .avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.compact .title {
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.compact .description {
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+}
+
+.compact .mark svg {
+  width: 1.25rem;
+  height: 1.25rem;
 }

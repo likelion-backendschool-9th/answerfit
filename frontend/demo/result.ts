@@ -9,6 +9,14 @@ const NO_TRANSCRIPT = "시연용 결과라 실제로 말한 내용은 들어 있
 
 const TRAFFIC = {
   comment: "캐시 도입과 오토스케일링으로 장애를 해결한 흐름이 분명하고, 본인의 역할도 잘 드러났어요. 다만 병목 지점을 어떻게 찾았는지와 개선 결과를 숫자로 말하지 않아 설득력이 조금 약했어요.",
+  keywordChecks: [
+    { keyword: "캐시 도입", said: true },
+    { keyword: "오토스케일링", said: true },
+    { keyword: "트래픽 급증 상황", said: true },
+    { keyword: "본인 역할", said: true },
+    { keyword: "병목 지점 분석", said: false },
+    { keyword: "개선 결과 수치", said: false },
+  ],
   keywords: ["APM으로 병목 찾기", "Redis 캐시 전략", "DB 커넥션 풀", "부하 테스트"],
   tip: "\"평균 응답 시간이 1.2초에서 0.3초로 줄었다\"처럼 전후 수치를 한 문장으로 붙이면, 같은 경험도 훨씬 구체적으로 들려요.",
 };
@@ -49,8 +57,13 @@ export function buildItem({ question, label, parentId, seconds }: Row): ResultIt
     accuracyNote: accuracyNote(scores.accuracy),
     gazeNote: gazeNote(scores.gaze),
     seconds,
-    reviewNote: "근거와 결과를 더 말해 보세요",
     comment: detail?.comment ?? `${topic}에 대해 핵심을 짚어 답했어요. 다만 판단한 근거와 결과를 구체적인 예로 들지 않아 설득력이 조금 약했어요.`,
+    keywordChecks: detail?.keywordChecks ?? [
+      { keyword: topic, said: true },
+      { keyword: "상황 설명", said: true },
+      { keyword: "판단 근거", said: scores.accuracy >= 80 },
+      { keyword: "결과 수치", said: false },
+    ],
     keywords: detail?.keywords ?? [topic, "근거와 예시", "결과 수치화"],
     tip: detail?.tip ?? "결론을 먼저 한 문장으로 말하고, 근거와 예시를 하나씩 붙이면 듣는 사람이 따라오기 쉬워요.",
     transcript: NO_TRANSCRIPT,
@@ -74,10 +87,10 @@ const SAMPLE_ITEMS: ResultItem[] = [
     transcript:
       "작년 학교 축제 예매 서비스를 운영할 때 오픈 직후 접속자가 평소의 열 배 정도로 몰리면서 API 응답이 크게 느려졌습니다. 저는 백엔드 담당으로 먼저 조회가 많은 공연 목록 API에 Redis 캐시를 붙였고, 서버는 오토스케일링 그룹으로 옮겨서 트래픽에 따라 늘어나게 했습니다. 그 뒤로는 같은 상황에서도 서비스가 멈추지 않았습니다.",
   }),
-  sample(2, "Q2-1", "sample-Q2", "응답 시간 개선 결과", "직무 역량 · 대용량 트래픽 처리", "응답 시간 개선 결과를 숫자로 설명해 주세요.", 98, { reviewNote: "결과 수치가 빠졌어요" }),
+  sample(2, "Q2-1", "sample-Q2", "응답 시간 개선 결과", "직무 역량 · 대용량 트래픽 처리", "응답 시간 개선 결과를 숫자로 설명해 주세요.", 98),
   sample(3, "Q3", null, "기술 의견이 갈렸던 경험", "협업 · 의견 조율", "팀원과 기술적 의견이 갈렸던 경험을 말씀해 주세요.", 126),
-  sample(4, "Q4", null, "가장 어려웠던 버그 해결", "문제 해결 · 디버깅", "가장 어려웠던 버그와 해결 과정을 설명해 주세요.", 131, { reviewNote: "원인을 찾은 근거가 부족해요" }),
-  sample(5, "Q4-1", "sample-Q4", "같은 문제를 막기 위해 바꾼 점", "문제 해결 · 디버깅", "같은 문제를 막기 위해 바꾼 점을 말씀해 주세요.", 94, { reviewNote: "재발 방지 방법을 더 말해 보세요" }),
+  sample(4, "Q4", null, "가장 어려웠던 버그 해결", "문제 해결 · 디버깅", "가장 어려웠던 버그와 해결 과정을 설명해 주세요.", 131),
+  sample(5, "Q4-1", "sample-Q4", "같은 문제를 막기 위해 바꾼 점", "문제 해결 · 디버깅", "같은 문제를 막기 위해 바꾼 점을 말씀해 주세요.", 94),
   sample(6, "Q5", null, "입사 후 1년 목표", "마무리 · 목표", "입사 후 1년 동안 이루고 싶은 목표를 말씀해 주세요.", 118),
   ];
 

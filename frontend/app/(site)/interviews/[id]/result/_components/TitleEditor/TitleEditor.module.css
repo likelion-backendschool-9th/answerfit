@@ -8,9 +8,9 @@
 }
 
 .title {
-  font-size: var(--text-2xl);
+  font-size: var(--text-xl);
   font-weight: 700;
-  line-height: var(--leading-2xl);
+  line-height: var(--leading-xl);
   letter-spacing: -0.02em;
 }
 

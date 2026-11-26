@@ -1,8 +1,7 @@
 .badge {
   display: inline-block;
   padding: 0 var(--space-2);
-  border: 1px solid currentColor;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-xs);
   font-size: var(--text-sm);
   font-weight: 500;
   line-height: var(--leading-sm);
@@ -10,13 +9,16 @@
 }
 
 .good {
+  background: var(--color-success-badge);
   color: var(--color-success);
 }
 
 .neutral {
-  color: var(--color-text-muted);
+  background: var(--color-chip);
+  color: var(--color-accent);
 }
 
 .bad {
+  background: var(--color-warning-badge);
   color: var(--color-warning);
 }

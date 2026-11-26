@@ -33,7 +33,7 @@ export default async function LikesPage({ searchParams }: Props) {
   }));
   return (
     <>
-      <PageHeading title="좋아요한 질문" description={`면접 결과와 질문 아카이브에서 좋아요한 질문 ${items.length}개예요. 하트를 다시 누르면 목록에서 빠져요.`} />
+      <PageHeading title="좋아요한 질문" description={`면접 결과와 질문 아카이브에서 좋아요한 질문 ${items.length}개예요. 하트를 누르면 좋아요가 풀리고, 새로고침하면 목록에서 빠져요.`} />
       <div className={styles.chips}>
         <FilterChips label="분야" chips={chips} />
       </div>

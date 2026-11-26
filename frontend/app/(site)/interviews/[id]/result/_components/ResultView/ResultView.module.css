@@ -1,13 +1,32 @@
-.content {
-  width: min(100%, 77.5rem);
-  margin: 0 auto;
-  padding: var(--space-12) var(--space-5) var(--space-section-sm);
+.page {
+  background: var(--color-surface-subtle);
 }
 
-.section {
-  margin-top: var(--space-10);
-  scroll-margin-top: var(--space-6);
-  outline: none;
+.content {
+  width: min(100%, 75rem);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5) var(--space-section-sm);
+}
+
+.crumb {
+  margin-bottom: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  text-align: right;
+}
+
+.crumb a {
+  color: inherit;
+}
+
+.card {
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.detail {
+  scroll-margin-top: var(--space-16);
 }
 
 .buttons {
@@ -15,15 +34,25 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--space-2);
-  margin-top: var(--space-10);
-  padding-top: var(--space-10);
-  border-top: 1px solid var(--color-border);
+  margin-top: var(--space-8);
+}
+
+.my,
+.again {
+  min-height: 3rem;
 }
 
 .my {
-  width: min(100%, 15rem);
+  width: min(100%, 11rem);
+  background: var(--color-surface);
 }
 
 .again {
-  width: min(100%, 17.5rem);
+  width: min(100%, 13rem);
+}
+
+@media (max-width: 40rem) {
+  .card {
+    padding: var(--space-5);
+  }
 }

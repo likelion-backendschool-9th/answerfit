@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { analysisAt } from "@/features/interview/analysis";
-import { addDays, bestItem, daysUntil, defaultTitle, duration, itemsToReview, rateScore, rateTime, startedLabel, summarize, titleError, type ResultItem } from "@/features/interview/result";
+import { addDays, daysUntil, defaultTitle, duration, followUpOf, itemNumber, rateScore, rateTime, startedLabel, summarize, titleError, totalDuration, type ResultItem } from "@/features/interview/result";
 
 const item = (id: string, score: number, gaze = 50, seconds = 100) => ({ id, score, gaze, seconds, parentId: null }) as ResultItem;
 
@@ -23,14 +23,19 @@ it.each([
 describe("요약", () => {
   it("평균을 반올림한다", () => expect(summarize([item("1", 84, 60, 105), item("2", 79, 57, 112)])).toEqual({ score: 82, gaze: 59, seconds: 109 }));
   it("답변이 없으면 0이다", () => expect(summarize([])).toEqual({ score: 0, gaze: 0, seconds: 0 }));
-  it("낮은 점수 2개를 고르고 우수한 답변은 뺀다", () => {
-    expect(itemsToReview([item("a", 84), item("b", 78), item("c", 69), item("d", 74)]).map(({ id }) => id)).toEqual(["c", "d"]);
-    expect(itemsToReview([item("a", 84)])).toEqual([]);
+  it("원래 질문에서 이어진 꼬리 질문을 찾는다", () => {
+    const follow = { ...item("a-1", 70), parentId: "a" };
+    expect(followUpOf([item("a", 84), follow, item("b", 80)], item("a", 84))).toBe(follow);
+    expect(followUpOf([item("a", 84), follow], item("b", 80))).toBeNull();
   });
-  it("가장 잘한 답변을 고른다", () => {
-    expect(bestItem([item("a", 84), item("b", 86)])?.id).toBe("b");
-    expect(bestItem([])).toBeNull();
-  });
+});
+
+it("총 시간과 문항 번호를 표시한다", () => {
+  expect(totalDuration(1452)).toBe("24분 12초");
+  expect(totalDuration(120)).toBe("2분");
+  expect(totalDuration(45)).toBe("45초");
+  expect(itemNumber(0)).toBe("01");
+  expect(itemNumber(10)).toBe("11");
 });
 
 it("날짜를 센다", () => {
@@ -42,7 +47,7 @@ it("날짜를 센다", () => {
 
 it("한국 시간으로 표시한다", () => {
   expect(startedLabel("2026-11-24T14:10:00Z")).toBe("2026.11.24 (화) 23:10");
-  expect(defaultTitle("2026-11-24T15:05:00Z")).toBe("2026.11.25 00:05 면접");
+  expect(defaultTitle("2026-11-24T15:05:00Z")).toBe("2026.11.25 | 00:05 면접");
   expect(duration(112)).toBe("1:52");
   expect(duration(5)).toBe("0:05");
 });

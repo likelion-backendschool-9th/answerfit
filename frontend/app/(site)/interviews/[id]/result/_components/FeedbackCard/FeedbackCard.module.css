@@ -1,0 +1,88 @@
+.heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: var(--leading-sm);
+}
+
+.heading svg {
+  color: var(--color-accent);
+}
+
+.card {
+  border-radius: var(--radius-md);
+  background: var(--color-surface-subtle);
+}
+
+.part {
+  padding: var(--space-4) var(--space-5);
+}
+
+.part + .part {
+  border-top: 1px solid var(--color-border);
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: var(--leading-sm);
+}
+
+.tipLabel {
+  color: var(--color-warning);
+}
+
+.comment {
+  font-size: var(--text-sm);
+  line-height: var(--leading-md);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.check,
+.keyword {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-xs);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  line-height: var(--leading-xs);
+}
+
+.said {
+  background: var(--color-success-badge);
+  color: var(--color-success);
+}
+
+.missed {
+  background: var(--color-danger-surface);
+  color: var(--color-danger);
+}
+
+.keyword {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

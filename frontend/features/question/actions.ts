@@ -31,9 +31,10 @@ export async function likeAction(id: string, liked: boolean): Promise<ActionResu
   return attempt(() => likeQuestion(id, liked), "질문을 찾지 못했어요.");
 }
 
-export async function unlikeAnswerAction(id: string): Promise<ActionResult> {
+/** 면접 결과의 질문. id는 "면접 id/문항 id" */
+export async function likeAnswerAction(id: string, liked: boolean): Promise<ActionResult> {
   return attempt(async () => {
-    await likeAnswer(id, false);
+    await likeAnswer(id, liked);
     return true;
   }, "");
 }

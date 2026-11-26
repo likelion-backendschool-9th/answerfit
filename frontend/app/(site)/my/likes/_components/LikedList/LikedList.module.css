@@ -64,6 +64,16 @@
   cursor: pointer;
 }
 
+/* 좋아요를 푼 줄. 새로고침하기 전까지 흐리게 남는다 */
+.off .category,
+.off .question {
+  opacity: 0.45;
+}
+
+.off .heart {
+  color: var(--color-text-muted);
+}
+
 .more {
   display: flex;
   width: 12.5rem;

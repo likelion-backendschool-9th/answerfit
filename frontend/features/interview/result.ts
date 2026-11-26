@@ -1,5 +1,7 @@
 import type { InterviewMode, RecordType } from "./types";
 
+export type KeywordCheck = { keyword: string; said: boolean };
+
 /** 백엔드 형식은 모두 미확정 */
 export type ResultItem = {
   id: string;
@@ -17,9 +19,10 @@ export type ResultItem = {
   gaze: number;
   gazeNote: string;
   seconds: number;
-  /** 다시 볼 이유 한 줄 */
-  reviewNote: string;
   comment: string;
+  /** 답변에 꼭 들어가야 할 키워드와 실제로 말했는지 */
+  keywordChecks: KeywordCheck[];
+  /** 심화 학습 키워드 */
   keywords: string[];
   tip: string;
   transcript: string;
@@ -73,18 +76,24 @@ export function summarize(items: ResultItem[]) {
   };
 }
 
-/** 점수가 낮은 순으로 최대 2개. 우수한 답변은 다시 보라고 하지 않는다 */
-export const itemsToReview = (items: ResultItem[]) => items.filter(({ score }) => score < 80).sort((a, b) => a.score - b.score).slice(0, 2);
-
-export const bestItem = (items: ResultItem[]) => items.reduce<ResultItem | null>((best, item) => (!best || item.score > best.score ? item : best), null);
-
 export const mainItems = (items: ResultItem[]) => items.filter(({ parentId }) => parentId === null);
 
-/** 꼬리 질문을 보고 있으면 원래 질문의 자리 */
-export const mainIdOf = ({ id, parentId }: ResultItem) => parentId ?? id;
+/** 이 질문에서 이어진 꼬리 질문 */
+export const followUpOf = (items: ResultItem[], { id }: ResultItem) => items.find(({ parentId }) => parentId === id) ?? null;
 
 /** 112 → 1:52 */
 export const duration = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+
+/** 1452 → 24분 12초 */
+export function totalDuration(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+  if (minutes === 0) return `${rest}초`;
+  return rest === 0 ? `${minutes}분` : `${minutes}분 ${rest}초`;
+}
+
+/** 01, 02 … 문항 번호 */
+export const itemNumber = (index: number) => String(index + 1).padStart(2, "0");
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -104,9 +113,10 @@ export function startedLabel(iso: string) {
   return `${date} (${weekday}) ${time}`;
 }
 
+/** 날짜와 시각이 한 덩어리로 읽히지 않게 | 로 나눈다 */
 export function defaultTitle(iso: string) {
   const { date, time } = seoulParts(iso);
-  return `${date} ${time} 면접`;
+  return `${date} | ${time} 면접`;
 }
 
 export const TITLE_MAX = 40;
