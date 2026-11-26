@@ -2,7 +2,7 @@
 
 WBS 3의 `problem-bank-101`부터 `problem-bank-109`까지 9개 API를 구현해 기존 질문 아카이브 화면에 연결한다. 기존 질문 엔티티를 재사용하고, 검색·페이지 조회·소유권·상태 전이·좋아요·신고 규칙을 백엔드에서 보장한다.
 
-이 문서는 구현 전 설계 초안이다. WBS에 명시된 요구와 기존 화면의 동작을 구분하며, 아래의 응답 형식·인증 공개 범위·경계값은 구현 전에 담당자와 확정할 제안이다. 기능 코드는 이 작업에서 변경하지 않는다.
+이 문서는 문제은행의 구현 계획이다. QB-01에서 코드에 적용한 기본 정책과 외부 연계 조건은 [공통 계약](contracts.md)에 기록한다. 나머지 API 응답 형식과 후속 연결 방식은 각 TODO를 구현할 때 구체화한다.
 
 ## 1. 요구사항과 범위
 
@@ -34,9 +34,9 @@ WBS 3의 `problem-bank-101`부터 `problem-bank-109`까지 9개 API를 구현해
 
 | 영역 | 확인한 기반 | 필요한 작업 |
 | --- | --- | --- |
-| 백엔드 | Java 21, Spring Boot 4.2.0, JPA·Validation·WebMVC, H2 | Repository, 조회/변경 로직, Controller, 요청/응답 DTO |
+| 백엔드 | Java 21, Spring Boot 4.2.0, JPA·Validation·WebMVC, H2, 질문 요청 DTO·입력 검증 | Repository, 조회/변경 로직, Controller, API별 응답 DTO |
 | 질문 데이터 | `Question`, `Category`, `QuestionKeyword`, `QuestionLike`, `QuestionReport`, `QuestionModeration` | 기존 모델 활용, 필요한 불변식·경합 처리 보강 |
-| 공통 기반 | 인증 처리·전역 업무 오류 형식·DB migration은 아직 없음 | 인증 담당과 principal 계약, 공통 오류 응답, DB 실행 정책 합의 |
+| 공통 기반 | 문제은행 범위의 오류 응답, 검증된 principal 소비 계약, 공개·소유권 정책 | 공통 인증·회원 세션 API 및 운영 DB/migration 연계 |
 | 프론트 통신 | Next 서버가 Bearer 토큰을 붙여 `BACKEND_URL` 호출 | WBS 경로·메서드·DTO에 맞춘 adapter 연결 |
 | 프론트 목록/상세 | 전체 배열을 받아 검색·집계·7개 페이지 조회·상세 탐색 | 서버 페이지 응답과 전용 상세 조회를 사용하도록 데이터 조회부 전환 |
 
@@ -244,6 +244,8 @@ git switch -c feature/question-bank-backend-01-contracts feature/question-bank-b
 
   완료 기준: 이 문서의 제안 중 구현에 필요한 항목이 확정되고, 문제은행의 공통 오류 응답과 길이·분류·페이지 검증 테스트가 통과한다. 실제 인증이 아직 연결되지 않았다면 해당 연계 조건을 기록한다. 관련 시나리오: S3·S4·S9·S11.
 
+  구현 계약과 남은 연계 조건: [공통 계약](contracts.md). 체크박스는 작업 결과를 부모 브랜치에 반영한 뒤 완료 처리한다.
+
 - [ ] **QB-02 카테고리 조회** — `feature/question-bank-backend-02-categories`
 
   선행: QB-01. `problem-bank-105`의 `GET /api/v1/categories`와 분류별 공개 질문 집계를 구현한다. 합의한 seed를 적용하고 관리자·면접에서 같은 ID와 표시 순서를 재사용할 수 있게 한다.
@@ -322,9 +324,9 @@ git switch -c feature/question-bank-backend-01-contracts feature/question-bank-b
 
 ### 구현 전에 확정할 항목
 
-1. **공통 인증과 회원 연결**: principal 계약, 세션 API, 실제 토큰 발급/검증 경로, 읽기 API의 익명 허용 범위.
+1. **공통 인증과 회원 연결**: [QB-01 principal 계약](contracts.md)에 맞춘 인증 adapter, 세션 API와 실제 토큰 발급/검증 경로. 현재 기본 정책은 읽기까지 회원 전용이다.
 2. **DB 실행 정책**: 운영 DB, migration 담당, 공유 카테고리 seed와 FK/인덱스 적용 방식.
-3. **정책 초안**: 승인 직후 공개, 최소 10자, 중복 신고 불가, 페이지 상한 100 및 범위 초과 보정에 대한 팀 확인.
+3. **후속 정책 연결**: QB-01에서 적용한 승인 직후 공개·최소 10자·페이지 상한 100을 각 API에서 사용한다. 중복 신고 불가와 범위 초과 페이지 보정은 해당 API 구현 시 확정한다.
 4. **화면 연결 범위**: 반려/실패 표시와 생성 후 상세 연결, 내 질문·좋아요 API 담당과 연결 순서, 유사 질문 후보 검색 방식.
 
 ## 8. 검증 시나리오
@@ -348,4 +350,4 @@ git switch -c feature/question-bank-backend-01-contracts feature/question-bank-b
 
 저장소의 [테스트 규칙](../../testing.md)을 따른다. 조회 조건과 집계는 Repository 테스트, 소유권·상태 전이·경합은 서비스 테스트, 경로·인증·입력·응답·오류는 HTTP 테스트로 확인한다. 새 코드에 맞춘 권한 테스트가 있어야 하며 기존 엔티티 테스트도 유지한다.
 
-문서만 바꾸는 이번 작업은 `git diff --check`로 검증한다. 후속 백엔드 코드 변경은 `./gradlew test`, 빌드/의존성 변경은 `./gradlew build`, 프론트 연결 변경은 규칙에 명시된 타입·lint·구조·단위 검사를 실행한다. 실제 인증·관리자·AI 연결을 거치지 않은 상태에서 전체 기능 연결 완료로 보고하지 않는다.
+문서 변경은 `git diff --check`, 백엔드 코드 변경은 `./gradlew test`, 빌드/의존성 변경은 `./gradlew build`, 프론트 연결 변경은 규칙에 명시된 타입·lint·구조·단위 검사를 실행한다. 실제 인증·관리자·AI 연결을 거치지 않은 상태에서 전체 기능 연결 완료로 보고하지 않는다.
