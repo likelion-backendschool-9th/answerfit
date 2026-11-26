@@ -39,14 +39,15 @@
 | `SECURITY` | 1xx | 인증·인가 일반 |
 | `SECURITY` | 2xx | 리프레시 토큰 |
 | `BUSINESS` | 1xx | 회원가입·로그인·계정 |
-| `INFRA` | - | 아직 없음 |
+| `INFRA` | 1xx | 카카오 연동 (#12) |
 
 ## 예외를 던지는 법
 - 서비스는 `throw new CustomException(ErrorCode.XXX)`만 던진다. `ResponseStatusException`은 쓰지 않는다. 던지더라도 상태별로 아래처럼 바뀌므로 원래 상태(예: 409)가 사라진다.
 - 스프링 MVC가 내는 예외는 `GlobalExceptionHandler.handleExceptionInternal` 한 곳에서 상태로 코드를 고른다: 404 `API_NOT_FOUND`, 405 `METHOD_NOT_ALLOWED`, 415 `UNSUPPORTED_MEDIA_TYPE`, 그 밖의 4xx `INVALID_INPUT`(400), 5xx `SERVER_ERROR`(500).
 - 처리하지 못한 예외는 `SERVER_ERROR`로 응답하고 `log.error`로 스택을 남긴다.
+- 기본 문장 대신 보여 줄 문장이 있으면 `new CustomException(ErrorCode.XXX, detail)`로 던진다(예: 정지 사유). `detail`에는 화면에 그대로 보여도 되는 문장만 넣는다. (#12, 2026-11-26)
+- Security: 컨트롤러 안에서 난 `AuthenticationException`은 `UNAUTHORIZED`, `AccessDeniedException`은 `FORBIDDEN`으로 응답한다. 필터에서 막힌 401·403은 `SecurityConfig`가 같은 `ApiResponse`로 응답한다. (#12, 2026-11-26)
 - DTO 검증 애너테이션에는 `message`를 한글로 적는다(예: `@NotBlank(message = "이메일을 입력해 주세요.")`). 적지 않으면 Hibernate Validator 기본 메시지(`must not be blank` 등)가 그대로 화면에 보일 수 있다.
 
 ## 아직 정하지 않은 것
-- Spring Security가 들어오면 컨트롤러 안에서 난 `AccessDeniedException`·`AuthenticationException`이 `@ExceptionHandler(Exception.class)`에 잡혀 500이 된다. Security를 넣는 PR에서 `FORBIDDEN`·`UNAUTHORIZED`로 따로 받거나 다시 던져 Security가 처리하게 한다.
 - `ErrorCode`의 약관 동의 코드(`REQUIRED_CONSENT_MISSING`, `DUPLICATE_CONSENT_TYPE`)에 맞는 약관 테이블이 ERD에 없다.

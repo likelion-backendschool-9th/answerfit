@@ -7,7 +7,7 @@ import { getAccessToken } from "@/features/session/session";
 import { callBackend } from "@/lib/backend-http";
 import type { AdminMember, BankQuestion, MemberSummary, PendingQuestion, QuestionDraft, ReportedQuestion, ReportStatus, Suspension } from "./types";
 
-const call = async <T>(path: string, method = "GET", body?: object) => callBackend<T>(`/api/admin${path}`, { method, body, token: await getAccessToken() });
+const call = async <T>(path: string, method = "GET", body?: object) => callBackend<T>(`/api/v1/admin${path}`, { method, body, token: await getAccessToken() });
 const segment = encodeURIComponent;
 
 /** 모든 데이터 함수가 부른다. 화면의 확인을 믿지 않는다 */

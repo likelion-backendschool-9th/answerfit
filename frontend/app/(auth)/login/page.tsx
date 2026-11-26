@@ -8,7 +8,7 @@ import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: "로그인" };
 
-type Props = { searchParams: Promise<{ next?: string | string[] }> };
+type Props = { searchParams: Promise<{ next?: string | string[]; error?: string | string[] }> };
 
 /**
  * 주소로 직접 들어오거나 새로고침했을 때의 로그인 화면. 홈을 배경으로 깐다.

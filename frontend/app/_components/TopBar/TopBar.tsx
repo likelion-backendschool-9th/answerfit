@@ -5,6 +5,7 @@ import { Icon } from "@/components/ui/Icon/Icon";
 import { getSession } from "@/features/session/session";
 import { BrandLogo } from "../BrandLogo/BrandLogo";
 import { LoginLink } from "../LoginLink/LoginLink";
+import { ThemeToggle } from "../ThemeToggle/ThemeToggle";
 import styles from "./TopBar.module.css";
 
 const MENU = [
@@ -28,6 +29,8 @@ export function TopBar({ current }: { current: string }) {
         ))}
       </nav>
       <div className={styles.icons}>
+        <ThemeToggle />
+        <span className={styles.divider} aria-hidden="true" />
         {/* 세션을 읽는 동안에는 비워 둔다. 회원에게 로그인 버튼이 잠깐 보이지 않게 하기 위해서다 */}
         <Suspense>
           <Account />

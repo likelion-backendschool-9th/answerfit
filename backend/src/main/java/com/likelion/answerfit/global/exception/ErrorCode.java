@@ -29,7 +29,17 @@ public enum ErrorCode {
     DUPLICATE_EMAIL(ErrorDomain.BUSINESS, "104", HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
     DUPLICATE_NICKNAME(ErrorDomain.BUSINESS, "105", HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다."),
     REQUIRED_CONSENT_MISSING(ErrorDomain.BUSINESS, "106", HttpStatus.BAD_REQUEST, "필수 약관에 모두 동의해야 가입할 수 있습니다."),
-    DUPLICATE_CONSENT_TYPE(ErrorDomain.BUSINESS, "107", HttpStatus.BAD_REQUEST, "같은 약관 항목이 중복으로 전달되었습니다.");
+    DUPLICATE_CONSENT_TYPE(ErrorDomain.BUSINESS, "107", HttpStatus.BAD_REQUEST, "같은 약관 항목이 중복으로 전달되었습니다."),
+    EMAIL_NOT_VERIFIED(ErrorDomain.BUSINESS, "108", HttpStatus.FORBIDDEN, "카카오 계정의 이메일 인증을 마친 뒤 다시 시도해 주세요."),
+    EMAIL_ALREADY_REGISTERED(ErrorDomain.BUSINESS, "109", HttpStatus.CONFLICT, "이메일로 가입한 계정이에요. 이메일로 로그인해 주세요."),
+    SUSPENDED(ErrorDomain.BUSINESS, "110", HttpStatus.FORBIDDEN, "이용이 정지된 계정이에요."),
+    WITHDRAWN(ErrorDomain.BUSINESS, "111", HttpStatus.FORBIDDEN, "탈퇴한 계정이에요."),
+
+    // ===== INFRA: 외부 연동 =====
+    // 1xx: 카카오
+    KAKAO_AUTH_FAILED(ErrorDomain.INFRA, "101", HttpStatus.BAD_REQUEST, "카카오 인증에 실패했어요. 다시 시도해 주세요."),
+    KAKAO_UNAVAILABLE(ErrorDomain.INFRA, "102", HttpStatus.BAD_GATEWAY, "카카오 서버와 연결하지 못했어요. 잠시 뒤 다시 시도해 주세요."),
+    KAKAO_NOT_CONFIGURED(ErrorDomain.INFRA, "103", HttpStatus.SERVICE_UNAVAILABLE, "카카오 로그인이 아직 설정되지 않았어요.");
 
 
     private final static String SERVICE_DOMAIN = "BACKEND";

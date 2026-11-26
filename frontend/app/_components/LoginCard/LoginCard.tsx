@@ -2,13 +2,14 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { BrandLogo } from "@/app/_components/BrandLogo/BrandLogo";
 import { PATHS } from "@/app/_lib/paths";
+import { socialLoginNotice } from "@/features/auth/api";
 import { safeNextPath } from "@/lib/next-path";
 import { LoginForm } from "../LoginForm/LoginForm";
 import { ModalClose } from "../ModalClose/ModalClose";
 import { SocialButtons } from "../SocialButtons/SocialButtons";
 import styles from "./LoginCard.module.css";
 
-type SearchParams = Promise<{ next?: string | string[] }>;
+type SearchParams = Promise<{ next?: string | string[]; error?: string | string[] }>;
 
 /**
  * 로그인 창. /login 페이지와, 화면 안에서 로그인을 눌렀을 때 뜨는 모달(@auth/(.)login)이 같이 쓴다.
@@ -55,14 +56,16 @@ function CloseIcon() {
   );
 }
 
-/** 돌아갈 주소를 폼과 함께 그린다. 서버 액션이 주소를 다시 검사한다 */
+/** 돌아갈 주소를 폼과 함께 그린다. 서버 액션이 주소를 다시 검사한다. 카카오 로그인이 실패해 돌아오면 error가 붙는다 */
 async function Forms({ searchParams }: { searchParams: SearchParams }) {
-  const next = safeNextPath((await searchParams).next);
+  const params = await searchParams;
+  const next = safeNextPath(params.next);
+  const notice = await socialLoginNotice(params.error);
   return (
     <>
       <LoginForm next={next} />
       <p className={styles.divider}>또는 소셜 계정으로</p>
-      <SocialButtons next={next} />
+      <SocialButtons next={next} notice={notice} />
     </>
   );
 }

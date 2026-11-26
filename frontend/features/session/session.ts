@@ -18,7 +18,7 @@ export async function getSession(): Promise<Session | null> {
   const token = await getAccessToken();
   if (!token) return null;
   try {
-    return await callBackend<Session>("/api/members/me", { token });
+    return await callBackend<Session>("/api/v1/members/me", { token });
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) return null;
     throw error;

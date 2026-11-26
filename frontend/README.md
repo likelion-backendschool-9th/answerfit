@@ -22,6 +22,8 @@ npm test             # 단위 테스트
 | --- | --- |
 | `APP_ENV` | `local`·`test`에서만 푸터에 모드 전환기가 보인다. `production`에서는 숨기고 항상 실제 API를 쓴다. 없으면 `npm run dev`는 `local`, 빌드 결과는 `production`과 같다 |
 | `BACKEND_URL` | 개발 모드에서 부를 백엔드 주소 |
+| `SITE_URL` | 이 사이트의 주소. 카카오 Redirect URI `{SITE_URL}/auth/kakao/callback`을 만든다 |
+| `KAKAO_CLIENT_ID` | 카카오 앱 REST API 키(`AnswerFit`). 없으면 개발 모드의 카카오 버튼이 "설정되지 않았어요"라고 안내한다 |
 
 ## 데이터 모드
 
