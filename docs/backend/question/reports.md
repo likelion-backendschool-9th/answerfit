@@ -57,7 +57,9 @@ WBS `problem-bank-109`, [청사진의 QB-09](README.md#7-브랜치별-todo와-�
 
 관리자 승인·숨김·삭제는 [공통 잠금·첫 조회 규칙](update.md#승인과-수정의-잠금-규칙)을 공유해야 한다. 관리자가 먼저 숨김·삭제를 커밋하면 기다린 신고는 404이며 저장되지 않는다. 신고가 먼저 커밋하면 관리자는 이후 숨김·삭제할 수 있고 기존 신고는 남는다. 선조회한 managed Question을 잠금 쿼리가 자동 갱신한다고 가정하지 않는다.
 
-`ReportReasonType`은 문자열로 저장한다. 기존 네 코드 이름은 유지하고 WRONG_QUESTION을 추가했다. 운영 DB에 enum 또는 check 제약이 있다면 허용 값 확대 migration이 필요하다. 운영 DB와 migration 도구는 담당과 연결할 때 확정한다.
+`ReportReasonType`은 문자열로 저장한다. 기존 네 코드 이름은 유지하고 WRONG_QUESTION을 추가했다. 운영 DB에 enum 또는 check 제약이 있다면 허용 값 확대 migration이 필요하다.
+
+신고 상세 컬럼의 저장 용량은 기존 VARCHAR(500)에서 VARCHAR(600)으로 넓혔다. H2는 보조평면 문자 한 개를 UTF-16 두 단위로 계산하므로 300개 이모지는 기존 컬럼에 저장되지 않았다. 입력 제한은 300 code point로 유지하며 저장 공간을 최대 600단위까지 확보한다. 기존 DB에도 `question_reports.reason` 컬럼 확대 migration이 필요하다. 운영 DB와 migration 도구는 담당과 연결할 때 확정한다.
 
 ## 검증과 후속 연결
 
