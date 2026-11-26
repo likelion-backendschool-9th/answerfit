@@ -16,6 +16,20 @@ export function longDateLabel(date: string) {
   return `${year}년 ${month}월 ${day}일 (${WEEKDAYS[new Date(Date.UTC(year, month - 1, day)).getUTCDay()]})`;
 }
 
+/** "2026-12" → 달력 칸. 1일 앞의 요일 수만큼 빈칸(null)을 두고 날짜(YYYY-MM-DD)를 잇는다. 첫 칸은 일요일 */
+export function monthDays(month: string): (string | null)[] {
+  const [year, index] = month.split("-").map(Number);
+  const blanks = new Date(Date.UTC(year, index - 1, 1)).getUTCDay();
+  const count = new Date(Date.UTC(year, index, 0)).getUTCDate();
+  return [...Array<null>(blanks).fill(null), ...Array.from({ length: count }, (_, i) => `${month}-${String(i + 1).padStart(2, "0")}`)];
+}
+
+/** "2026-12"에서 by달 옮긴 달 */
+export function shiftMonth(month: string, by: number) {
+  const [year, index] = month.split("-").map(Number);
+  return new Date(Date.UTC(year, index - 1 + by, 1)).toISOString().slice(0, 7);
+}
+
 /** 실제로 있는 날짜인지 본다. 2026-02-30 같은 값은 막는다 */
 export function isDate(value: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
