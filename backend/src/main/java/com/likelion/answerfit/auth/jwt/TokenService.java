@@ -20,6 +20,7 @@ public class TokenService {
 
     // 리프레시 토큰이 생기기 전까지 프론트의 "로그인 상태 유지"(14일)와 맞춘다
     public static final Duration ACCESS_TOKEN_TTL = Duration.ofDays(14);
+    public static final String ISSUER = "answerfit";
 
     private final JwtEncoder jwtEncoder;
 
@@ -27,7 +28,7 @@ public class TokenService {
     public String issue(User user) {
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer("answerfit")
+                .issuer(ISSUER)
                 .subject(String.valueOf(user.getId()))
                 .issuedAt(now)
                 .expiresAt(now.plus(ACCESS_TOKEN_TTL))

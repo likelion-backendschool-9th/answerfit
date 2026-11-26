@@ -5,8 +5,9 @@ import java.util.function.IntSupplier;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionOperations;
 
 import com.likelion.answerfit.auth.jwt.TokenService;
 import com.likelion.answerfit.auth.kakao.KakaoClient;
@@ -22,7 +23,6 @@ import com.likelion.answerfit.user.repository.UserSocialAccountRepository;
 
 /** docs/backend/user/kakao-login.md */
 @Service
-@Transactional
 public class SocialLoginService {
 
     /** 프론트 회원가입과 같은 규칙 */
@@ -33,16 +33,19 @@ public class SocialLoginService {
     private final UserRepository userRepository;
     private final UserSocialAccountRepository socialAccountRepository;
     private final TokenService tokenService;
-    private final IntSupplier fourDigits;
+    private final TransactionOperations transaction;
+    private final IntSupplier nicknameNumber;
 
     @Autowired
     public SocialLoginService(
             KakaoClient kakaoClient,
             UserRepository userRepository,
             UserSocialAccountRepository socialAccountRepository,
-            TokenService tokenService) {
-        this(kakaoClient, userRepository, socialAccountRepository, tokenService,
-                () -> ThreadLocalRandom.current().nextInt(1000, 10000));
+            TokenService tokenService,
+            TransactionOperations transaction) {
+        // "회원" 뒤 숫자 후보를 넉넉히 둬서 회원이 늘어도 겹칠 일이 드물게 한다
+        this(kakaoClient, userRepository, socialAccountRepository, tokenService, transaction,
+                () -> ThreadLocalRandom.current().nextInt(1000, 1_000_000));
     }
 
     SocialLoginService(
@@ -50,25 +53,40 @@ public class SocialLoginService {
             UserRepository userRepository,
             UserSocialAccountRepository socialAccountRepository,
             TokenService tokenService,
-            IntSupplier fourDigits) {
+            TransactionOperations transaction,
+            IntSupplier nicknameNumber) {
         this.kakaoClient = kakaoClient;
         this.userRepository = userRepository;
         this.socialAccountRepository = socialAccountRepository;
         this.tokenService = tokenService;
-        this.fourDigits = fourDigits;
+        this.transaction = transaction;
+        this.nicknameNumber = nicknameNumber;
     }
 
-    /** 연결된 회원이면 로그인하고, 처음 온 카카오 계정이면 가입시킨다. 우리 서비스의 액세스 토큰을 돌려준다. */
+    /**
+     * 연결된 회원이면 로그인하고, 처음 온 카카오 계정이면 가입시킨다. 우리 서비스의 액세스 토큰을 돌려준다.
+     * 카카오 호출은 DB 커넥션을 잡지 않도록 트랜잭션 밖에서 하고, 회원 찾기·가입만 트랜잭션으로 묶는다.
+     */
     public String loginWithKakao(String code, String redirectUri) {
         KakaoUser kakao = kakaoClient.fetchUser(code, redirectUri);
-        User user = socialAccountRepository.findByProviderAndProviderUserId(SocialProvider.KAKAO, kakao.id())
-                .map(account -> userRepository.findActiveById(account.getUser().getId())
-                        .orElseThrow(() -> new ApiException(ErrorCode.WITHDRAWN)))
-                .orElseGet(() -> signUp(kakao));
+        User user;
+        try {
+            user = transaction.execute(status -> findOrSignUp(kakao));
+        } catch (DataIntegrityViolationException e) {
+            // 같은 카카오 계정이나 같은 닉네임으로 동시에 가입하면 유일 조건에 걸린다. 새 트랜잭션으로 한 번만 다시 한다.
+            user = transaction.execute(status -> findOrSignUp(kakao));
+        }
         if (user.getStatus() == UserStatus.SUSPENDED) {
             throw new ApiException(ErrorCode.SUSPENDED, suspendedMessage(user));
         }
         return tokenService.issue(user);
+    }
+
+    private User findOrSignUp(KakaoUser kakao) {
+        return socialAccountRepository.findByProviderAndProviderUserId(SocialProvider.KAKAO, kakao.id())
+                .map(account -> userRepository.findActiveById(account.getUser().getId())
+                        .orElseThrow(() -> new ApiException(ErrorCode.WITHDRAWN)))
+                .orElseGet(() -> signUp(kakao));
     }
 
     private User signUp(KakaoUser kakao) {
@@ -88,14 +106,14 @@ public class SocialLoginService {
         return user;
     }
 
-    /** 카카오 닉네임이 규칙에 맞고 비어 있으면 쓰고, 아니면 "회원" 뒤에 네 자리 숫자를 붙인다 */
+    /** 카카오 닉네임이 규칙에 맞고 비어 있으면 쓰고, 아니면 "회원" 뒤에 숫자를 붙인다 */
     private String nicknameFor(String kakaoNickname) {
         if (kakaoNickname != null && NICKNAME.matcher(kakaoNickname).matches()
                 && !userRepository.existsByNickname(kakaoNickname)) {
             return kakaoNickname;
         }
         for (int i = 0; i < NICKNAME_TRIES; i++) {
-            String candidate = "회원" + fourDigits.getAsInt();
+            String candidate = "회원" + nicknameNumber.getAsInt();
             if (!userRepository.existsByNickname(candidate)) {
                 return candidate;
             }
