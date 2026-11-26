@@ -24,8 +24,8 @@ export function InfoStep({ setup, groups, today, onChange }: Props) {
     <>
       <Section title="진행 방식">
         <div className={styles.modes} role="radiogroup" aria-label="진행 방식">
-          <ChoiceCard name="mode" icon="bulb" title="연습 모드" description="시간 제한 없음 · 힌트 보기 · 꼬리 질문 직접 선택" checked={setup.mode === "practice"} onSelect={() => set({ mode: "practice" })} />
-          <ChoiceCard name="mode" icon="timer" title="실전 모드" description="답변당 1~2분 · 힌트 없음 · 꼬리 질문 자동 진행" checked={setup.mode === "real"} onSelect={() => set({ mode: "real" })} />
+          <ChoiceCard compact name="mode" icon="bulb" title="연습 모드" description="시간 제한 없음 · 힌트 보기 · 꼬리 질문 직접 선택" checked={setup.mode === "practice"} onSelect={() => set({ mode: "practice" })} />
+          <ChoiceCard compact name="mode" icon="timer" title="실전 모드" description="답변당 1~2분 · 힌트 없음 · 꼬리 질문 자동 진행" checked={setup.mode === "real"} onSelect={() => set({ mode: "real" })} />
         </div>
       </Section>
       <Section title="질문 수" description="3~8개 중에서 골라 주세요. 꼬리 질문은 개수에 포함되지 않아요.">
@@ -41,7 +41,7 @@ export function InfoStep({ setup, groups, today, onChange }: Props) {
       <Section title="면접 유형" description="어떤 면접을 연습할지 골라 주세요.">
         <div className={styles.types} role="radiogroup" aria-label="면접 유형">
           {TYPES.map(({ type, icon, description }) => (
-            <ChoiceCard key={type} name="type" icon={icon} title={TYPE_LABEL[type]} description={description} checked={setup.type === type} onSelect={() => set({ type })} />
+            <ChoiceCard compact key={type} name="type" icon={icon} title={TYPE_LABEL[type]} description={description} checked={setup.type === type} onSelect={() => set({ type })} />
           ))}
         </div>
       </Section>

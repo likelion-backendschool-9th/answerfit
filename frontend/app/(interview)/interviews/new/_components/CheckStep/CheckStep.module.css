@@ -1,15 +1,15 @@
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 22.5rem;
+  grid-template-columns: minmax(0, 1fr) 20rem;
   align-items: stretch;
-  gap: var(--space-6);
+  gap: var(--space-5);
 }
 
 .stage {
   display: grid;
   place-items: center;
   height: 100%;
-  min-height: 22rem;
+  min-height: 18rem;
   border-radius: var(--radius-md);
 }
 
@@ -52,7 +52,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  min-height: 22rem;
+  min-height: 18rem;
   padding: var(--space-8);
   border-radius: var(--radius-md);
   background: var(--color-stage-edge);
@@ -93,7 +93,7 @@
 .card {
   display: flex;
   flex-direction: column;
-  padding: var(--space-6) var(--space-5);
+  padding: var(--space-5) var(--space-4);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
@@ -112,7 +112,7 @@
 .check {
   display: flex;
   gap: var(--space-3);
-  padding: var(--space-4) 0;
+  padding: var(--space-3) 0;
 }
 
 .check + .check {
@@ -190,8 +190,9 @@
 
 .listen {
   width: 100%;
-  min-height: 3rem;
+  min-height: 2.75rem;
   margin-top: var(--space-3);
+  font-size: var(--text-sm);
 }
 
 @media (max-width: 64rem) {

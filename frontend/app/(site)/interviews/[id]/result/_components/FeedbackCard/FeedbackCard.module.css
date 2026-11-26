@@ -18,7 +18,7 @@
 }
 
 .part {
-  padding: var(--space-5) var(--space-6);
+  padding: var(--space-4) var(--space-5);
 }
 
 .part + .part {
@@ -41,7 +41,8 @@
 }
 
 .comment {
-  line-height: var(--leading-body);
+  font-size: var(--text-sm);
+  line-height: var(--leading-md);
 }
 
 .chips {
@@ -57,9 +58,9 @@
   gap: var(--space-1);
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-xs);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   font-weight: 500;
-  line-height: var(--leading-sm);
+  line-height: var(--leading-xs);
 }
 
 .said {

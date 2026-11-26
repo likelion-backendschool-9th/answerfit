@@ -12,19 +12,21 @@ type Props = {
   checked: boolean;
   /** locked는 아직 열리지 않은 선택지, error는 고를 수 없는 이유가 있는 선택지 */
   state?: "locked" | "error";
+  /** 한 화면에 여러 개를 늘어놓을 때 쓰는 작은 크기 */
+  compact?: boolean;
   onSelect: () => void;
 };
 
-export function ChoiceCard({ name, title, description, icon, preview, checked, state, onSelect }: Props) {
+export function ChoiceCard({ name, title, description, icon, preview, checked, state, compact = false, onSelect }: Props) {
   const mark: IconName = state === "locked" ? "lock" : state === "error" ? "error" : checked ? "check" : "circle";
   return (
-    <label className={cn(styles.choice, state && styles[state])}>
+    <label className={cn(styles.choice, compact && styles.compact, state && styles[state])}>
       <span className={styles.avatar}>
         {preview ? (
           // eslint-disable-next-line @next/next/no-img-element -- 아직 올리지 않은 파일이라 이미지 최적화를 쓸 수 없다
           <img src={preview} alt="" className={styles.preview} />
         ) : (
-          <Icon name={icon} />
+          <Icon name={icon} size={compact ? 20 : 24} />
         )}
       </span>
       <span className={styles.text}>

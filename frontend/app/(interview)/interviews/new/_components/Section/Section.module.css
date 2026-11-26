@@ -1,20 +1,21 @@
 .section + .section {
-  margin-top: var(--space-10);
+  margin-top: var(--space-8);
 }
 
 .title {
-  font-size: var(--text-xl);
-  font-weight: 500;
-  line-height: var(--leading-xl);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  line-height: var(--leading-lg);
   letter-spacing: -0.02em;
 }
 
 .description {
   margin-top: var(--space-1);
   color: var(--color-text-muted);
-  line-height: var(--leading-body);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
 }
 
 .body {
-  margin-top: var(--space-4);
+  margin-top: var(--space-3);
 }

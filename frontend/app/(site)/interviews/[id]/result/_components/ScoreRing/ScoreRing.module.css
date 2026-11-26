@@ -1,13 +1,13 @@
 .ring {
   position: relative;
   flex: none;
-  width: 5.5rem;
-  height: 5.5rem;
+  width: 4.5rem;
+  height: 4.5rem;
 }
 
 .large {
-  width: 8.5rem;
-  height: 8.5rem;
+  width: 6.5rem;
+  height: 6.5rem;
 }
 
 .ring svg {
@@ -41,18 +41,18 @@
 }
 
 .score {
-  font-size: var(--text-xl);
+  font-size: var(--text-lg);
   font-weight: 700;
-  line-height: var(--leading-xl);
+  line-height: var(--leading-lg);
 }
 
 .large .score {
-  font-size: var(--text-2xl);
-  line-height: var(--leading-2xl);
+  font-size: var(--text-xl);
+  line-height: var(--leading-xl);
 }
 
 .unit {
   color: var(--color-text-muted);
-  font-size: var(--text-sm);
-  line-height: var(--leading-sm);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
 }

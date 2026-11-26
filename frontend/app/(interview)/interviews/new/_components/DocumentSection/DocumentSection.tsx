@@ -29,6 +29,7 @@ export function DocumentSection({ setup, groups, onChange }: Props) {
         <div className={styles.groups} role="radiogroup" aria-label="서류 그룹">
           {groups.map(({ id, name, description, interviewDate, error }) => (
             <ChoiceCard
+              compact
               key={id}
               name="group"
               icon="folder"

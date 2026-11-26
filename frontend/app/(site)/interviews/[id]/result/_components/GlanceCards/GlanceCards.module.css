@@ -1,6 +1,6 @@
 .glance {
-  margin-top: var(--space-8);
-  padding-top: var(--space-8);
+  margin-top: var(--space-6);
+  padding-top: var(--space-6);
   border-top: 1px solid var(--color-border);
 }
 
@@ -28,8 +28,8 @@
 .card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-6);
+  gap: var(--space-2h);
+  padding: var(--space-5);
   border-radius: var(--radius-md);
   background: var(--color-surface-subtle);
 }
@@ -43,8 +43,8 @@
 .icon {
   display: grid;
   place-items: center;
-  width: 2rem;
-  height: 2rem;
+  width: 1.75rem;
+  height: 1.75rem;
   border-radius: var(--radius-sm);
   background: var(--color-surface);
 }
@@ -64,9 +64,9 @@
 }
 
 .value {
-  font-size: var(--text-2xl);
+  font-size: var(--text-xl);
   font-weight: 700;
-  line-height: var(--leading-2xl);
+  line-height: var(--leading-xl);
 }
 
 .unit,
