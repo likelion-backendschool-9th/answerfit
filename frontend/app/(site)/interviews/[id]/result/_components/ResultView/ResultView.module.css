@@ -29,6 +29,46 @@
   scroll-margin-top: var(--space-6);
 }
 
+/* 들어오는 카드가 옆으로 삐져나와 가로 스크롤이 생기지 않게 자른다 */
+.clip {
+  overflow-x: clip;
+}
+
+/* 이름 없는 animation 축약은 CSS 모듈 변환에서 시간이 빠져 나눠 쓴다 */
+.slide {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: both;
+}
+
+.next {
+  animation-name: from-right;
+}
+
+.previous {
+  animation-name: from-left;
+}
+
+@keyframes from-right {
+  from {
+    opacity: 0;
+    transform: translateX(3rem);
+  }
+}
+
+@keyframes from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-3rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide {
+    animation: none;
+  }
+}
+
 .buttons {
   display: flex;
   flex-wrap: wrap;

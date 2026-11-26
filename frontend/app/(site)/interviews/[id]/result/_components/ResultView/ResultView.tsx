@@ -5,6 +5,8 @@ import Link from "next/link";
 import { PATHS } from "@/app/_lib/paths";
 import { ButtonLink } from "@/components/ui/Button/Button";
 import { mainItems, type InterviewResult } from "@/features/interview/result";
+import { needsDocuments } from "@/features/interview/setup";
+import { cn } from "@/lib/cn";
 import { GlanceCards } from "../GlanceCards/GlanceCards";
 import { QuestionDetail } from "../QuestionDetail/QuestionDetail";
 import { QuestionPager } from "../QuestionPager/QuestionPager";
@@ -16,12 +18,21 @@ type Props = { result: InterviewResult; today: string; likedIds: string[] };
 export function ResultView({ result, today, likedIds }: Props) {
   const { items } = result;
   const [selectedId, setSelectedId] = useState(items[0].id);
+  /** 상세가 들어오는 방향. 뒤 번호로 가면 오른쪽에서, 앞 번호로 가면 왼쪽에서 */
+  const [direction, setDirection] = useState<"next" | "previous">("next");
   const detail = useRef<HTMLDivElement>(null);
   const selected = items.find(({ id }) => id === selectedId) ?? items[0];
+  const indexOf = (id: string) => items.findIndex((item) => item.id === id);
+
+  function select(id: string) {
+    if (id === selected.id) return;
+    setDirection(indexOf(id) > indexOf(selected.id) ? "next" : "previous");
+    setSelectedId(id);
+  }
 
   /** 꼬리 질문 카드에서 고르면 상세 맨 위로 올려 준다 */
   function showDetail(id: string) {
-    setSelectedId(id);
+    select(id);
     detail.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -39,15 +50,19 @@ export function ResultView({ result, today, likedIds }: Props) {
           <GlanceCards items={items} />
         </section>
         <div className={styles.detail} ref={detail}>
-          <QuestionPager items={items} currentId={selected.id} onSelect={setSelectedId} />
-          <QuestionDetail key={selected.id} interviewId={result.id} items={items} item={selected} liked={likedIds.includes(`${result.id}/${selected.id}`)} onSelect={showDetail} />
+          <QuestionPager items={items} currentId={selected.id} onSelect={select} />
+          <div className={styles.clip}>
+            <div key={selected.id} className={cn(styles.slide, styles[direction])}>
+              <QuestionDetail interviewId={result.id} items={items} item={selected} liked={likedIds.includes(`${result.id}/${selected.id}`)} onSelect={showDetail} />
+            </div>
+          </div>
         </div>
         <div className={styles.buttons}>
           <ButtonLink href={PATHS.my} variant="outline" className={styles.my}>
             마이페이지로 가기
           </ButtonLink>
           <ButtonLink href={`${PATHS.newInterview}?${again}`} className={styles.again}>
-            {result.type === "experience" ? "같은 서류로 다시 연습하기" : "같은 설정으로 다시 연습하기"}
+            {needsDocuments(result.type) ? "같은 서류로 다시 연습하기" : "같은 설정으로 다시 연습하기"}
           </ButtonLink>
         </div>
       </div>

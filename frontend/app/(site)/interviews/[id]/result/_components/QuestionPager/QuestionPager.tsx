@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Icon } from "@/components/ui/Icon/Icon";
 import { itemNumber, type ResultItem } from "@/features/interview/result";
 import styles from "./QuestionPager.module.css";
@@ -14,7 +15,8 @@ export function QuestionPager({ items, currentId, onSelect }: Props) {
       <button type="button" className={styles.arrow} aria-label="이전 문항" disabled={!previous} onClick={() => previous && onSelect(previous.id)}>
         <Icon name="back" size={18} />
       </button>
-      <ol className={styles.list}>
+      <ol className={styles.list} style={{ "--index": index } as CSSProperties}>
+        <li className={styles.indicator} aria-hidden="true" />
         {items.map(({ id, label, title }, i) => (
           <li key={id}>
             <button type="button" className={styles.number} aria-current={id === currentId ? "true" : undefined} aria-label={`${itemNumber(i)} ${label} ${title}`} onClick={() => onSelect(id)}>
