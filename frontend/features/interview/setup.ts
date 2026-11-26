@@ -2,14 +2,16 @@ import type { DocumentGroup, InterviewMode, InterviewSetup, InterviewType } from
 
 export const COUNTS = [3, 4, 5, 6, 7, 8];
 export const MODE_LABEL: Record<InterviewMode, string> = { practice: "연습 모드", real: "실전 모드" };
-export const TYPE_LABEL: Record<InterviewType, string> = { experience: "경험 면접", cs: "CS 면접" };
+export const TYPE_LABEL: Record<InterviewType, string> = { experience: "경험 면접", cs: "CS 면접", personality: "인성 · 컬쳐핏 면접", pt: "PT 면접" };
 export const KEEP_DAYS = 30;
-const MINUTES_PER_QUESTION = 5;
 
-export const estimateMinutes = (count: number) => count * MINUTES_PER_QUESTION;
+const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
-/** 2026-12-10 → 2026.12.10 이후 */
-export const deleteLabel = (date: string | null) => (date ? `${date.replaceAll("-", ".")} 이후` : `면접일부터 ${KEEP_DAYS}일 뒤`);
+/** 2026-12-10 → 2026년 12월 10일 (목) */
+export function longDateLabel(date: string) {
+  const [year, month, day] = date.split("-").map(Number);
+  return `${year}년 ${month}월 ${day}일 (${WEEKDAYS[new Date(Date.UTC(year, month - 1, day)).getUTCDay()]})`;
+}
 
 /** 실제로 있는 날짜인지 본다. 2026-02-30 같은 값은 막는다 */
 export function isDate(value: string) {
@@ -50,7 +52,7 @@ export function initialSetup(groups: DocumentGroup[], params: Params, today: str
   const date = group?.interviewDate ?? null;
   return {
     mode: params.mode === "real" ? "real" : "practice",
-    type: params.type === "cs" ? "cs" : "experience",
+    type: typeof params.type === "string" && Object.hasOwn(TYPE_LABEL, params.type) ? (params.type as InterviewType) : "experience",
     count: COUNTS.includes(count) ? count : 5,
     groupId: group?.id ?? null,
     // 지난 면접일은 보관 날짜로 쓸 수 없다

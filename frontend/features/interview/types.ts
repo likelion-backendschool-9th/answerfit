@@ -1,8 +1,8 @@
 /** 백엔드 형식은 모두 미확정 */
 export type InterviewMode = "practice" | "real";
-export type InterviewType = "experience" | "cs";
-/** 기록에 남는 유형. 인성과 PT는 아직 새로 볼 수 없다 */
-export type RecordType = InterviewType | "personality" | "pt";
+export type InterviewType = "experience" | "cs" | "personality" | "pt";
+/** 기록에 남는 유형 */
+export type RecordType = InterviewType;
 
 export type DocumentGroup = {
   id: string;
