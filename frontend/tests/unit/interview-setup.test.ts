@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { initialSetup, isDate, longDateLabel, setupError, todayInSeoul } from "@/features/interview/setup";
+import { initialSetup, isDate, longDateLabel, monthDays, setupError, shiftMonth, todayInSeoul } from "@/features/interview/setup";
 import type { DocumentGroup, InterviewSetup } from "@/features/interview/types";
 
 const group = (id: string, error: string | null = null): DocumentGroup => ({ id, name: id, shortName: id, description: "", interviewDate: null, error, createdOn: "2026-11-01", files: [] });
@@ -35,6 +35,23 @@ it("없는 날짜를 거른다", () => {
 it("표시 문구", () => {
   expect(longDateLabel("2026-12-10")).toBe("2026년 12월 10일 (목)");
   expect(longDateLabel("2026-03-01")).toBe("2026년 3월 1일 (일)");
+});
+
+describe("달력", () => {
+  it("1일 앞을 요일 수만큼 비운다", () => {
+    const days = monthDays("2026-12");
+    expect(days.slice(0, 3)).toEqual([null, null, "2026-12-01"]);
+    expect(days).toHaveLength(2 + 31);
+    expect(days.at(-1)).toBe("2026-12-31");
+  });
+  it("윤년 2월과 일요일에 시작하는 달", () => {
+    expect(monthDays("2028-02").at(-1)).toBe("2028-02-29");
+    expect(monthDays("2026-02")[0]).toBe("2026-02-01");
+  });
+  it("해를 넘겨 달을 옮긴다", () => {
+    expect(shiftMonth("2026-12", 1)).toBe("2027-01");
+    expect(shiftMonth("2026-01", -1)).toBe("2025-12");
+  });
 });
 
 it("오늘은 한국 시간으로 계산한다", () => {
