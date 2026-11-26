@@ -2,7 +2,7 @@
 
 WBS 3의 `problem-bank-101`부터 `problem-bank-109`까지 9개 API를 구현해 기존 질문 아카이브 화면에 연결한다. 기존 질문 엔티티를 재사용하고, 검색·페이지 조회·소유권·상태 전이·좋아요·신고 규칙을 백엔드에서 보장한다.
 
-이 문서는 문제은행의 구현 계획이다. 확정 계약은 [공통 계약](contracts.md), [카테고리 조회](categories.md), [질문 목록](list.md), [질문 상세](detail.md), [사용자 등록](create.md), [수정·재제출](update.md), [본인 질문 삭제](delete.md), [좋아요 등록·취소](likes.md), [질문 신고](reports.md)에 기록한다. 후속 연결 방식은 각 TODO를 구현할 때 구체화한다.
+이 문서는 문제은행의 구현 계획이다. 확정 계약은 [공통 계약](contracts.md), [카테고리 조회](categories.md), [질문 목록](list.md), [질문 상세](detail.md), [사용자 등록](create.md), [수정·재제출](update.md), [본인 질문 삭제](delete.md), [좋아요 등록·취소](likes.md), [질문 신고](reports.md)에 기록한다. 화면의 조회 연결과 남은 인증 조건은 [프론트 아카이브](../../frontend/question/archive.md)에 기록한다. 후속 변경 액션 연결은 해당 TODO에서 구체화한다.
 
 ## 1. 요구사항과 범위
 
@@ -316,13 +316,13 @@ git switch -c feature/question-bank-backend-01-contracts feature/question-bank-b
 
   구현 계약과 반복 요청·잠금 규칙: [좋아요 등록·취소](likes.md). 구현과 테스트를 마치고 부모 브랜치에 반영했다.
 
-- [ ] **QB-09 질문 신고와 5유형 검증** — `feature/question-bank-backend-09-reports`
+- [x] **QB-09 질문 신고와 5유형 검증** — `feature/question-bank-backend-09-reports`
 
   선행: QB-04. `problem-bank-109`의 신고 API를 구현한다. 질문 내용 오류용 enum을 추가해 5유형을 구분하고 상세 사유를 검증해 PENDING 신고를 저장한다.
 
   완료 기준: 빈 상세·300/301자·잘못된 사유·본인/중복 신고·비공개 질문을 검증한다. 유일 제약과 공개 상태 경합 오류를 합의한 업무 오류로 반환한다. 관련 시나리오: S9.
 
-  구현 계약과 중복·잠금 규칙: [질문 신고](reports.md). 체크박스는 작업 결과를 부모 브랜치에 반영한 뒤 완료 처리한다.
+  구현 계약과 중복·잠금 규칙: [질문 신고](reports.md). 구현과 테스트를 마치고 부모 브랜치에 반영했다.
 
 ### 프론트 연결과 전체 검증
 
@@ -331,6 +331,8 @@ git switch -c feature/question-bank-backend-01-contracts feature/question-bank-b
   선행: QB-02·QB-03·QB-04, 실제 인증·세션 조회 연계. API adapter·자료형·페이지 데이터 조회부를 WBS 계약에 맞춘다. 서버 페이지/집계, 전용 상세, 반려 사유·답안 상태·앞뒤 질문과 중분류 없는 인성 질문 표시를 연결한다.
 
   완료 기준: 실제 API 응답으로 목록/상세가 표시되고 중복 검색·페이지 나누기가 없다. 기존 `getQuestions()` 소비자를 분리해 내 질문·좋아요·대시보드가 첫 페이지 데이터로 대체되지 않게 한다. 관련 시나리오: S2·S3·S10·S12.
+
+  조회 adapter·화면·목업 호환과 검증 범위: [프론트 아카이브](../../frontend/question/archive.md). 실제 로그인·회원 세션 API와 검증된 principal 공급이 준비되지 않아 개발 모드의 실제 인증 흐름 검증과 완료 체크는 보류한다. 인증 연계 후 완료 기준을 확인하고 부모 브랜치에 반영한다.
 
 - [ ] **QB-11 등록·수정·삭제·좋아요·신고 프론트 연결** — `feature/question-bank-backend-11-connect-actions`
 
