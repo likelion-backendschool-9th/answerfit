@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.context.MessageSourceResolvable;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,12 @@ public class QuestionExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(QuestionException.class)
     public ResponseEntity<QuestionErrorResponse> handleQuestionException(QuestionException exception) {
         QuestionErrorCode code = exception.getErrorCode();
+        return ResponseEntity.status(code.getStatus()).body(QuestionErrorResponse.from(code));
+    }
+
+    @ExceptionHandler(PessimisticLockingFailureException.class)
+    public ResponseEntity<QuestionErrorResponse> handleConcurrentChange(PessimisticLockingFailureException exception) {
+        QuestionErrorCode code = QuestionErrorCode.QUESTION_STATE_CHANGED;
         return ResponseEntity.status(code.getStatus()).body(QuestionErrorResponse.from(code));
     }
 

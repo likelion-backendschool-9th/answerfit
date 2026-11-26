@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -14,7 +15,17 @@ import com.likelion.answerfit.question.entity.QuestionMajor;
 import com.likelion.answerfit.question.repository.projection.QuestionInteractionCount;
 import com.likelion.answerfit.question.repository.projection.QuestionNeighbor;
 
+import jakarta.persistence.LockModeType;
+
 public interface QuestionRepository extends JpaRepository<Question, Long>, QuestionSearchRepository {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select question
+            from Question question
+            where question.id = :questionId and question.deletedAt is null
+            """)
+    Optional<Question> findForUpdateById(@Param("questionId") Long questionId);
 
     @Query("""
             select question

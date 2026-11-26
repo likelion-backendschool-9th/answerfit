@@ -5,7 +5,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.likelion.answerfit.question.auth.QuestionMember;
 import com.likelion.answerfit.question.dto.request.CreateQuestionRequest;
+import com.likelion.answerfit.question.dto.request.UpdateQuestionRequest;
 import com.likelion.answerfit.question.dto.response.QuestionCreateResponse;
+import com.likelion.answerfit.question.dto.response.QuestionUpdateResponse;
 import com.likelion.answerfit.question.entity.Category;
 import com.likelion.answerfit.question.entity.Question;
 import com.likelion.answerfit.question.entity.QuestionMajor;
@@ -35,5 +37,29 @@ public class QuestionCommandService {
         Question question = Question.createByUser(QuestionMajor.CS, category, request.content(), member.userId());
         Question saved = questionRepository.save(question);
         return new QuestionCreateResponse(saved.getId().toString(), saved.getStatus());
+    }
+
+    public QuestionUpdateResponse updateQuestion(Long questionId, UpdateQuestionRequest request, QuestionMember member) {
+        Question question = questionRepository.findForUpdateById(questionId)
+                .orElseThrow(() -> new QuestionException(QuestionErrorCode.QUESTION_NOT_FOUND));
+        if (!QuestionPolicy.canView(question, member)) {
+            throw new QuestionException(QuestionErrorCode.QUESTION_NOT_FOUND);
+        }
+        if (!QuestionPolicy.isMine(question, member)) {
+            throw new QuestionException(QuestionErrorCode.ACCESS_DENIED);
+        }
+        if (!QuestionPolicy.canEdit(question, member)) {
+            throw new QuestionException(QuestionErrorCode.QUESTION_NOT_EDITABLE);
+        }
+
+        Category category = request.categoryId() == null ? question.getCategory()
+                : categoryRepository.findById(request.categoryId())
+                        .orElseThrow(() -> new QuestionException(QuestionErrorCode.INVALID_CATEGORY));
+        QuestionPolicy.requireCsCategory(category);
+        String content = request.content() == null ? question.getContent() : request.content();
+        question.update(category, content);
+
+        boolean editable = QuestionPolicy.canEdit(question, member);
+        return new QuestionUpdateResponse(question.getId().toString(), question.getStatus(), editable, editable);
     }
 }
