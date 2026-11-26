@@ -66,7 +66,7 @@ export function HomeHero({ backdrop = false }: { backdrop?: boolean }) {
         {/* 면접 화면 예시. 읽을 내용이 아니라 장식이다 */}
         <div className={styles.visual} aria-hidden="true">
           <div className={styles.photoBox}>
-            <Image src="/images/hero.jpg" alt="" fill priority sizes="(max-width: 64rem) 100vw, 40rem" className={styles.photo} />
+            <Image src="/images/hero.png" alt="" fill priority sizes="(max-width: 64rem) 100vw, 40rem" className={styles.photo} />
             <span className={styles.rec}>REC 연습 모드 · 질문 2 / 5</span>
           </div>
           <div className={cn(styles.card, styles.questionCard)}>
