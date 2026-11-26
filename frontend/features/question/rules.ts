@@ -3,6 +3,8 @@ import type { ArchiveQuestion, QuestionInput, QuestionKind, ReportInput } from "
 export const CS_CATEGORIES = ["운영체제", "네트워크", "데이터베이스", "자료구조", "알고리즘", "웹"];
 export const KIND_LABEL: Record<QuestionKind, string> = { cs: "CS", personality: "인성 면접" };
 export const REPORT_REASONS = ["질문 내용이 사실과 달라요", "모범답안이 틀렸어요", "이미 있는 질문과 중복돼요", "부적절한 표현이 있어요", "기타"];
+const REPORT_REASON_CODES = ["WRONG_QUESTION", "WRONG_ANSWER", "DUPLICATE", "INAPPROPRIATE", "ETC"] as const;
+export const reportReasonType = (reason: string) => REPORT_REASON_CODES[REPORT_REASONS.indexOf(reason)] ?? null;
 export const TEXT_MIN = 10;
 export const TEXT_MAX = 200;
 export const DETAIL_MAX = 300;
@@ -73,8 +75,8 @@ export function neighbors(questions: ArchiveQuestion[], current: ArchiveQuestion
 
 const length = (text: string) => [...text].length;
 
-export function questionError({ category, text }: QuestionInput): string | undefined {
-  if (!CS_CATEGORIES.includes(category)) return "카테고리를 골라 주세요.";
+export function questionError({ categoryId, text }: QuestionInput): string | undefined {
+  if (!categoryId.trim()) return "카테고리를 골라 주세요.";
   if (length(text) < TEXT_MIN) return `질문을 ${TEXT_MIN}자 이상 써 주세요.`;
   if (length(text) > TEXT_MAX) return `질문은 ${TEXT_MAX}자까지 쓸 수 있어요.`;
 }
@@ -95,6 +97,19 @@ function pieces(text: string) {
 
 const SIMILAR_AT = 0.35;
 const ENOUGH_PIECES = 4;
+
+export const SIMILAR_CANDIDATE_LIMIT = 20;
+
+/** 기존 부분 검색으로 후보를 좁힌 뒤 전체 질문의 유사도를 비교한다. */
+export function similarityKeyword(text: string): string | null {
+  const input = [...text.trim()].slice(0, TEXT_MAX).join("");
+  if ([...input].length < ENOUGH_PIECES) return null;
+  const tokens = input.replace(COMMON, " ").split(/[^0-9a-z가-힣]+/i)
+    .map((token) => token.replace(/(?:에서|으로|와|과|은|는|이|가|을|를|의)$/u, ""))
+    .filter((token) => [...token].length >= 2);
+  const best = tokens.reduce((chosen, token) => [...token].length > [...chosen].length ? token : chosen, "");
+  return best ? [...best].slice(0, 100).join("") : null;
+}
 
 /** 조각이 가장 많이 겹치는 질문. 짧은 쪽의 조각이 3분의 1 넘게 겹쳐야 비슷하다고 본다 */
 export function findSimilar<T extends { text: string }>(questions: T[], text: string): T | null {

@@ -62,7 +62,7 @@ async function Question({ params }: Props) {
       <h1 className={styles.title}>{text}</h1>
       <div className={styles.actions}>
         {(canEdit || canDelete) && (
-          <PendingActions id={id} category={category} text={text} next={PATHS.archive} canEdit={canEdit} canDelete={canDelete} />
+          <PendingActions id={id} category={category} categoryId={categoryId} text={text} next={PATHS.archive} canEdit={canEdit} canDelete={canDelete} />
         )}
         {approved && (
           <>

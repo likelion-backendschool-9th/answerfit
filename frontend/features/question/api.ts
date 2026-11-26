@@ -6,11 +6,18 @@ import { requireMember } from "@/features/session/guard";
 import { getAccessToken } from "@/features/session/session";
 import { ApiError, callBackend } from "@/lib/backend-http";
 import { toArchiveQuestion, toQuestionCategories, toQuestionDetail, type CategoryResponse, type QuestionCategoryGroup, type QuestionDetailResponse, type QuestionDetailView, type QuestionListResponse } from "./read-model";
-import { CS_CATEGORIES, KIND_LABEL, neighbors, PAGE_SIZE, searchQuestions, type ArchiveQuery } from "./rules";
-import type { ArchiveQuestion, LikedAnswer, QuestionInput, QuestionKind, ReportInput } from "./types";
+import { CS_CATEGORIES, KIND_LABEL, neighbors, PAGE_SIZE, reportReasonType, searchQuestions, similarityKeyword, SIMILAR_CANDIDATE_LIMIT, type ArchiveQuery } from "./rules";
+import type { ArchiveQuestion, LikedAnswer, QuestionCategoryOption, QuestionInput, QuestionKind, QuestionLikeResult, ReportInput } from "./types";
 
 const call = async <T>(path: string, method = "GET", body?: object) => callBackend<T>(path, { method, body, token: await getAccessToken(), responseFormat: "plain" });
-const path = (id: string) => `/api/v1/questions/${encodeURIComponent(id)}`;
+const QUESTION_PATH = "/api/v1/learning/questions";
+const path = (id: string) => {
+  // URL의 점 경로 정규화로 다른 자원을 가리키지 않도록 쓰기 ID 형식을 먼저 검사한다.
+  if (typeof id !== "string" || !/^[0-9]+$/.test(id) || /^0+$/.test(id)) {
+    throw new ApiError(400, "INVALID_REQUEST", "질문 ID를 확인해 주세요.");
+  }
+  return `${QUESTION_PATH}/${encodeURIComponent(id)}`;
+};
 
 const inMock = async () => (await getDataMode()) === "mock";
 
@@ -18,10 +25,6 @@ const inMock = async () => (await getDataMode()) === "mock";
 async function getLegacyQuestions(): Promise<ArchiveQuestion[]> {
   await requireMember();
   return (await inMock()) ? listDemoQuestions() : call("/api/v1/questions");
-}
-
-export async function getQuestion(id: string): Promise<ArchiveQuestion | null> {
-  return (await getLegacyQuestions()).find((question) => question.id === id) ?? null;
 }
 
 export async function getMyQuestions() {
@@ -32,8 +35,24 @@ export async function getMyLikedQuestions() {
   return (await getLegacyQuestions()).filter((question) => question.liked);
 }
 
-export async function getSimilarityCandidates() {
-  return (await getLegacyQuestions()).filter(({ kind, status }) => kind === "cs" && status === "approved");
+export async function getQuestionCategories(): Promise<QuestionCategoryOption[]> {
+  await requireMember();
+  if (await inMock()) return CS_CATEGORIES.map((name) => ({ id: name, name }));
+  const groups = toQuestionCategories(await call<CategoryResponse>("/api/v1/categories"));
+  return groups.find(({ kind }) => kind === "cs")?.categories.map(({ id, name }) => ({ id, name })) ?? [];
+}
+
+export async function getSimilarityCandidates(text: string): Promise<ArchiveQuestion[]> {
+  await requireMember();
+  const keyword = similarityKeyword(text);
+  if (!keyword) return [];
+  if (await inMock()) {
+    const normalize = (value: string) => value.toLowerCase().replace(/\s+/g, "");
+    return (await listDemoQuestions()).filter((question) => question.kind === "cs" && question.status === "approved"
+      && normalize(question.text).includes(normalize(keyword))).slice(0, SIMILAR_CANDIDATE_LIMIT);
+  }
+  const params = new URLSearchParams({ major: "CS", keyword, sort: "LATEST", page: "1", pageSize: String(SIMILAR_CANDIDATE_LIMIT) });
+  return (await call<QuestionListResponse>(`${QUESTION_PATH}?${params}`)).items.map(toArchiveQuestion);
 }
 
 type ArchiveResult = {
@@ -115,46 +134,62 @@ export async function getQuestionDetail(id: string): Promise<QuestionDetailView 
   }
 }
 
-/** 승인 전인 내 질문인지. 수정과 삭제는 이때만 할 수 있다 */
-async function isEditable(id: string) {
-  const question = await getQuestion(id);
-  return Boolean(question?.mine && question.status === "pending");
+function demoCategoryName(id: string) {
+  if (!CS_CATEGORIES.includes(id)) throw new ApiError(400, "INVALID_CATEGORY", "올바른 카테고리를 선택해 주세요.");
+  return id;
 }
 
-export async function likeQuestion(id: string, liked: boolean): Promise<boolean> {
-  if (!(await getQuestion(id))) return false;
-  if (await inMock()) await likeDemoQuestion(id, liked);
-  else await call(`${path(id)}/like`, liked ? "PUT" : "DELETE");
-  return true;
+async function editableDemoQuestion(id: string) {
+  const question = (await listDemoQuestions()).find((one) => one.id === id);
+  return question?.mine && (question.status === "pending" || question.status === "rejected");
+}
+
+export async function likeQuestion(id: string, liked: boolean): Promise<QuestionLikeResult> {
+  await requireMember();
+  if (!(await inMock())) return call(`${path(id)}/likes`, liked ? "POST" : "DELETE");
+  const question = (await listDemoQuestions()).find((one) => one.id === id && one.status === "approved");
+  if (!question) throw new ApiError(404, "QUESTION_NOT_FOUND", "질문을 찾을 수 없습니다.");
+  await likeDemoQuestion(id, liked);
+  return { likeCount: question.likes + (question.liked === liked ? 0 : liked ? 1 : -1), isLiked: liked };
 }
 
 /** 더 등록할 수 없으면 null */
 export async function addQuestion(input: QuestionInput): Promise<string | null> {
   const { nickname, email } = await requireMember();
-  if (await inMock()) return addDemoQuestion(input, { nickname, email });
-  return (await call<{ id: string }>("/api/v1/questions", "POST", input)).id;
+  if (await inMock()) return addDemoQuestion({ category: demoCategoryName(input.categoryId), text: input.text }, { nickname, email });
+  return (await call<{ id: string; status: "PENDING" }>(QUESTION_PATH, "POST", { categoryId: input.categoryId, content: input.text })).id;
 }
 
 export async function updateQuestion(id: string, input: QuestionInput): Promise<boolean> {
-  if (!(await isEditable(id))) return false;
-  if (await inMock()) await updateDemoQuestion(id, input);
-  else await call(path(id), "PUT", input);
+  await requireMember();
+  if (await inMock()) {
+    if (!(await editableDemoQuestion(id))) return false;
+    await updateDemoQuestion(id, { category: demoCategoryName(input.categoryId), text: input.text });
+  } else await call(path(id), "PATCH", { categoryId: input.categoryId, content: input.text });
   return true;
 }
 
 export async function removeQuestion(id: string): Promise<boolean> {
-  if (!(await isEditable(id))) return false;
-  if (await inMock()) await removeDemoQuestion(id);
-  else await call(path(id), "DELETE");
+  await requireMember();
+  if (await inMock()) {
+    if (!(await editableDemoQuestion(id))) return false;
+    await removeDemoQuestion(id);
+  } else await call<null>(path(id), "DELETE");
   return true;
 }
 
 /** 내 질문과 이미 신고한 질문은 신고할 수 없다 */
 export async function reportQuestion({ questionId, reason, detail }: ReportInput): Promise<boolean> {
-  const question = await getQuestion(questionId);
-  if (!question || question.mine || question.reported) return false;
-  if (await inMock()) await reportDemoQuestion({ questionId, reason, detail });
-  else await call(`${path(questionId)}/reports`, "POST", { reason, detail });
+  await requireMember();
+  const reasonType = reportReasonType(reason);
+  if (!reasonType) throw new ApiError(400, "INVALID_REPORT_REASON", "올바른 신고 사유를 선택해 주세요.");
+  if (await inMock()) {
+    const question = (await listDemoQuestions()).find((one) => one.id === questionId && one.status === "approved");
+    if (!question) throw new ApiError(404, "QUESTION_NOT_FOUND", "질문을 찾을 수 없습니다.");
+    if (question.mine) throw new ApiError(403, "SELF_REPORT_NOT_ALLOWED", "본인이 등록한 질문은 신고할 수 없습니다.");
+    if (question.reported) throw new ApiError(409, "ALREADY_REPORTED", "이미 신고한 질문입니다.");
+    await reportDemoQuestion({ questionId, reason, detail });
+  } else await call(`${path(questionId)}/reports`, "POST", { reasonType, detail });
   return true;
 }
 
