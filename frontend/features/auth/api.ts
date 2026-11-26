@@ -117,18 +117,19 @@ export async function isNicknameTaken(nickname: string): Promise<boolean> {
   return !available;
 }
 
-export async function signup({ email, password, nickname, photo }: SignupInput) {
+export async function signup({ email, password, nickname, photo, consents }: SignupInput): Promise<boolean> {
   if ((await getDataMode()) === "mock") {
     await startSession({ demo: await addDemoMember(email, nickname) }, false);
-    return;
+    return true;
   }
   const form = new FormData();
   form.set("email", email);
   form.set("password", password);
   form.set("nickname", nickname);
+  for (const [name, accepted] of Object.entries(consents)) form.set(name, String(accepted));
   if (photo) form.set("photo", photo);
-  const { accessToken } = await callBackend<TokenResponse>("/api/v1/auth/signup", { method: "POST", body: form });
-  await startSession({ accessToken }, false);
+  await callBackend<null>("/api/v1/auth/signup", { method: "POST", body: form });
+  return false;
 }
 
 /** 이 브라우저의 세션만 지운다. 서버 토큰을 무효로 만드는 API는 미확정 */

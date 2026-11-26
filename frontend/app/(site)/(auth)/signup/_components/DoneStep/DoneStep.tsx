@@ -2,8 +2,7 @@ import { PATHS } from "@/app/_lib/paths";
 import { ButtonLink } from "@/components/ui/Button/Button";
 import styles from "./DoneStep.module.css";
 
-/** 면접과 마이페이지를 구현하기 전까지 두 주소는 준비 중 화면으로 간다 */
-export function DoneStep({ nickname }: { nickname: string }) {
+export function DoneStep({ nickname, signedIn }: { nickname: string; signedIn: boolean }) {
   return (
     <div>
       <span className={styles.badge}>
@@ -15,7 +14,7 @@ export function DoneStep({ nickname }: { nickname: string }) {
       <h1 className={styles.title} tabIndex={-1}>
         가입이 끝났어요, {nickname}님
       </h1>
-      <p className={styles.description}>이제 카메라를 켜고 말로 답하는 첫 모의 면접을 시작해 보세요.</p>
+      <p className={styles.description}>{signedIn ? "이제 카메라를 켜고 말로 답하는 첫 모의 면접을 시작해 보세요." : "가입한 이메일로 로그인할 수 있어요."}</p>
       <div className={styles.card}>
         <span className={styles.icon}>
           <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -29,10 +28,12 @@ export function DoneStep({ nickname }: { nickname: string }) {
         </span>
       </div>
       <div className={styles.buttons}>
-        <ButtonLink href={PATHS.newInterview}>첫 모의 면접 시작</ButtonLink>
-        <ButtonLink href={PATHS.my} variant="outline">
-          마이페이지로 가기
-        </ButtonLink>
+        {signedIn ? (
+          <>
+            <ButtonLink href={PATHS.newInterview}>첫 모의 면접 시작</ButtonLink>
+            <ButtonLink href={PATHS.my} variant="outline">마이페이지로 가기</ButtonLink>
+          </>
+        ) : <ButtonLink href={PATHS.login}>로그인으로 가기</ButtonLink>}
       </div>
     </div>
   );
