@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { averageScore, readRecordQuery, RECORD_PAGE_SIZE, recordsHref, searchRecords, splitByPeriod, typeStats, type InterviewRecord } from "@/features/interview/records";
-import { averageOf, radarPoint, weakest, withSubject } from "@/features/member/learning";
+import { averageOf, lowestOf, radarCategories, radarPoint, weakest, withSubject } from "@/features/member/learning";
 import { nicknameError, passwordChangeErrors } from "@/features/member/validation";
 
 const make = (id: string, startedAt: string, change: Partial<InterviewRecord> = {}): InterviewRecord => ({ id, title: `면접 ${id}`, type: "cs", mode: "practice", count: 5, score: 70, groupId: null, groupName: null, startedAt, deleteAfter: "2026-12-31", ...change });
@@ -53,9 +53,24 @@ describe("기간별 통계", () => {
 });
 
 describe("CS 분야", () => {
-  const list = [58, 64, 81].map((score, i) => ({ name: ["알고리즘", "데이터베이스", "네트워크"][i], score, previous: null }));
+  const list = [58, 64, 81].map((score, i) => ({ name: ["알고리즘", "데이터베이스", "네트워크"][i], score, previous: null, attempts: 1 }));
+  const many = (count: number) => Array.from({ length: count }, (_, i) => ({ name: `분야${i}`, score: 70 + i, previous: null, attempts: i % 4 }));
   it("약한 분야를 약한 것부터 고른다", () => expect(weakest(list).map(({ name }) => name)).toEqual(["알고리즘", "데이터베이스"]));
-  it("80점 이상은 약하다고 하지 않는다", () => expect(weakest([{ name: "웹", score: 80, previous: null }])).toEqual([]));
+  it("80점 이상은 약하다고 하지 않는다", () => expect(weakest([{ name: "웹", score: 80, previous: null, attempts: 1 }])).toEqual([]));
+  it("레이더는 3~10개를 그대로 그린다", () => {
+    expect(radarCategories(many(2))).toEqual([]);
+    expect(radarCategories(many(3))).toHaveLength(3);
+    expect(radarCategories(many(10))).toHaveLength(10);
+  });
+  it("10개를 넘으면 응시 횟수가 많은 8개를 원래 순서로 그린다", () => {
+    const picked = radarCategories(many(11));
+    expect(picked).toHaveLength(8);
+    expect(picked.map(({ name }) => name)).toEqual(["분야1", "분야2", "분야3", "분야5", "분야6", "분야7", "분야9", "분야10"]);
+  });
+  it("가장 낮은 분야", () => {
+    expect(lowestOf(list)?.name).toBe("알고리즘");
+    expect(lowestOf([])).toBeNull();
+  });
   it("평균", () => expect(averageOf(list)).toBe(68));
   it("조사를 맞춘다", () => {
     expect(withSubject("알고리즘")).toBe("알고리즘이");
