@@ -30,27 +30,27 @@ WBS 3의 `problem-bank-101`부터 `problem-bank-109`까지 9개 API를 구현해
 
 ## 2. 현재 기반과 연결 차이
 
-최신 `origin/develop`의 엔티티 작업까지 확인한 결과다.
+기존 엔티티와 QB-01~QB-10, 통합한 인증 브랜치 기준이다.
 
 | 영역 | 확인한 기반 | 필요한 작업 |
 | --- | --- | --- |
 | 백엔드 | Java 21, Spring Boot 4.2.0, JPA·Validation·WebMVC, H2, 질문 요청 DTO·입력 검증 | 질문 목록·상세·변경의 Repository·Service·Controller와 응답 DTO |
 | 질문 데이터 | `Question`, `Category`, `QuestionKeyword`, `QuestionLike`, `QuestionReport`, `QuestionModeration` | 기존 모델 활용, 필요한 불변식·경합 처리 보강 |
-| 공통 기반 | 문제은행 범위의 오류 응답, 검증된 principal 소비 계약, 공개·소유권 정책 | 공통 인증·회원 세션 API 및 운영 DB/migration 연계 |
-| 카테고리 | Controller → Service → Repository 조회, 공개 건수 집계, 기본 분류 초기화 | 프론트 연결(QB-10), 운영 seed/migration 정책 연계 |
-| 질문 목록 | 검색·분류·좋아요 필터, 정렬·페이지·개인화 정보·전체 건수 조회 | 프론트 연결(QB-10), 실제 인증 연계 |
-| 질문 상세 | 공개·본인 미승인 조회, 답안·키워드·반려 사유·권한·앞뒤 질문 | 프론트 연결(QB-10), 실제 인증 연계 |
+| 공통 기반 | 문제은행 오류 응답, JWT 검증 후 DB 회원 기반 principal, 공개·소유권 정책 | 실제 카카오 설정·계정 확인, 운영 DB/migration 연계 |
+| 카테고리 | 조회·공개 건수·초기 분류와 프론트 분류 ID 연결 | 운영 seed/migration 정책 연계 |
+| 질문 목록 | 검색·분류·좋아요 필터, 정렬·서버 페이지·집계를 프론트에 연결 | 실제 계정 전체 흐름 검증(QB-12) |
+| 질문 상세 | 공개·본인 미승인 조회, 반려·답안 상태·권한·앞뒤 질문을 화면에 연결 | 실제 계정 전체 흐름 검증(QB-12) |
 | 사용자 등록 | CS 질문 등록, 서버 소유권·초기 상태 설정, 생성 ID·Location 반환 | 프론트 변경 액션 연결(QB-11), 실제 인증 연계 |
 | 수정·재제출 | 본인 미승인 질문 부분 수정, 검토 정보 초기화, 질문 행 잠금 | 프론트 연결(QB-11), 관리자 쓰기의 동일 잠금 규칙 연계 |
 | 본인 질문 삭제 | 본인 미승인 USER 질문 soft delete, 기록 보존, 삭제 후 접근 차단 | 프론트 연결(QB-11), 관리자 쓰기의 동일 잠금 규칙 연계 |
 | 좋아요 등록·취소 | 공개 질문의 회원별 좋아요 설정·취소, 반복·동시 요청과 변경 후 집계 | 프론트 연결(QB-11), 관리자 쓰기의 동일 잠금 규칙 연계 |
 | 질문 신고 | 공개된 타인 질문의 5유형 신고, 상세 검증, 회원별 중복 방지 | 프론트 연결(QB-11), 관리자 신고 처리·공통 잠금 및 운영 DB 연계 |
 | 프론트 통신 | Next 서버가 Bearer 토큰을 붙여 `BACKEND_URL` 호출 | WBS 경로·메서드·DTO에 맞춘 adapter 연결 |
-| 프론트 목록/상세 | 전체 배열을 받아 검색·집계·7개 페이지 조회·상세 탐색 | 서버 페이지 응답과 전용 상세 조회를 사용하도록 데이터 조회부 전환 |
+| 프론트 목록/상세 | 서버 페이지 응답과 전용 상세 조회 사용, 개인 전체 배열 소비자 분리 | 개인 API와 변경 액션 연결(QB-11), 전체 흐름 검증(QB-12) |
 
 주요 근거: [빌드 설정](../../../backend/build.gradle), [질문 엔티티](../../../backend/src/main/java/com/likelion/answerfit/question/entity/Question.java), [현재 프론트 호출](../../../frontend/features/question/api.ts), [화면 자료형](../../../frontend/features/question/types.ts), [목록 데이터 조립](../../../frontend/app/(site)/archive/page.tsx), [상세 데이터 조립](../../../frontend/app/(site)/archive/[id]/page.tsx).
 
-현재 프론트의 `/api/questions`, `PUT /{id}`, `PUT /{id}/like`는 임시 계약이다. WBS의 `/api/v1/learning/questions`, `PATCH /{id}`, `POST /{id}/likes`에 맞춘다. 화면 배치와 스타일은 유지할 수 있지만 경로 문자열만 바꿔서는 서버 페이지 조회나 반려 상태를 연결할 수 없다.
+프론트의 개인 조회와 변경 액션에 남은 `/api/v1/questions`, `PUT /{id}`, `PUT /{id}/like`는 임시 계약이다. QB-11에서 `/api/v1/learning/questions`, `PATCH /{id}`, `POST /{id}/likes`에 맞춘다. 아카이브 조회는 QB-10에서 서버 페이지와 반려 상태를 연결했다.
 
 ## 3. 모듈과 책임
 
@@ -332,7 +332,7 @@ git switch -c feature/question-bank-backend-01-contracts feature/question-bank-b
 
   완료 기준: 실제 API 응답으로 목록/상세가 표시되고 중복 검색·페이지 나누기가 없다. 기존 `getQuestions()` 소비자를 분리해 내 질문·좋아요·대시보드가 첫 페이지 데이터로 대체되지 않게 한다. 관련 시나리오: S2·S3·S10·S12.
 
-  조회 adapter·화면·목업 호환과 검증 범위: [프론트 아카이브](../../frontend/question/archive.md). 실제 로그인·회원 세션 API와 검증된 principal 공급이 준비되지 않아 개발 모드의 실제 인증 흐름 검증과 완료 체크는 보류한다. 인증 연계 후 완료 기준을 확인하고 부모 브랜치에 반영한다.
+  조회 adapter·화면·목업 호환과 인증 통합 범위: [프론트 아카이브](../../frontend/question/archive.md). 사용자 요청에 따라 email-signup 인증 브랜치와 현재 DB 기반 principal을 연결한다. 체크박스는 검증한 결과를 부모 브랜치에 반영한 뒤 완료 처리한다. 실제 카카오 계정과 운영 설정의 브라우저 검증은 QB-12에 남긴다.
 
 - [ ] **QB-11 등록·수정·삭제·좋아요·신고 프론트 연결** — `feature/question-bank-backend-11-connect-actions`
 
@@ -348,7 +348,7 @@ git switch -c feature/question-bank-backend-01-contracts feature/question-bank-b
 
 ### 구현 시 공통 확인 사항
 
-인증이 합쳐지기 전에도 조회·변경 로직과 테스트는 진행할 수 있다. 다만 실제 화면 연결 검증에는 인증과 세션 조회가 필요하다. 현재 프론트 세션 조회는 `/api/members/me`를 호출하지만 WBS의 내 정보는 `/api/v1/users/me`이므로 인증/회원 담당과 경로·역할 값(`USER/ADMIN ↔ member/admin`)을 맞춰야 한다.
+QB-10은 통합한 인증 구현의 `/api/v1/members/me`와 member/admin 세션 값을 사용한다. WBS의 `/api/v1/users/me`는 별도 경로 결정 없이 동시에 사용하지 않는다. 질문 권한은 JWT 검증 뒤 현재 DB의 USER/ADMIN과 계정 상태를 읽는다.
 
 목록 조회는 페이지 ID/기본 정보와 집계를 분리해 키워드 컬렉션 fetch join으로 페이지가 깨지는 일을 피한다. 좋아요·신고 여부는 페이지 대상 ID를 묶어 조회해 N+1을 피하고, 좋아요 수는 관계를 기준으로 집계한다. 초기에는 별도 캐시 카운터를 만들지 않는다.
 
@@ -356,7 +356,7 @@ QB-06의 사용자 수정과 QB-07의 삭제는 쓰기 트랜잭션에서 질문
 
 ### 구현 전에 확정할 항목
 
-1. **공통 인증과 회원 연결**: [QB-01 principal 계약](contracts.md)에 맞춘 인증 adapter, 세션 API와 실제 토큰 발급/검증 경로. 현재 기본 정책은 읽기까지 회원 전용이다.
+1. **실제 인증 환경 확인**: [QB-01 principal 계약](contracts.md)에 맞춘 JWT adapter와 세션 API를 사용한다. 실제 카카오 설정과 계정 동의를 확인해야 하며 기본 정책은 읽기까지 회원 전용이다.
 2. **DB 실행 정책**: 운영 DB, migration 담당, 공유 카테고리 seed와 FK/인덱스 적용 방식.
 3. **후속 정책 연결**: 승인 직후 공개·최소 10자·페이지 상한 100을 각 API에서 사용한다. 범위 초과 페이지 보정은 QB-03에서 적용했다. QB-09 신고는 관리자 처리 후에도 같은 회원의 재신고를 허용하지 않는다.
 4. **화면 연결 범위**: 반려/실패 표시와 생성 후 상세 연결, 내 질문·좋아요 API 담당과 연결 순서, 유사 질문 후보 검색 방식.

@@ -4,7 +4,9 @@
 
 ## 데이터 조회와 주소
 
-브라우저는 Next 서버를 통해 조회한다. 기존 `BACKEND_URL`과 httpOnly access-token 쿠키의 Bearer 전달을 사용하며, 회원 확인은 기존 `requireMember`를 거친다. API 모드 실패를 목업이나 빈 목록으로 대체하지 않는다.
+브라우저는 Next 서버를 통해 조회한다. `BACKEND_URL`과 httpOnly access-token 쿠키의 Bearer 전달을 사용하며, 회원 확인은 `requireMember`와 `GET /api/v1/members/me`를 거친다. API 모드 실패를 목업이나 빈 목록으로 대체하지 않는다.
+
+인증·회원 API는 공통 `success/data/error` envelope를 사용한다. 기존 문제은행은 flat 응답 계약을 유지하므로 해당 도메인의 호출만 `responseFormat: "plain"`을 명시한다. 같은 요청이라도 Security 필터와 전역 오류는 envelope로 올 수 있어 두 형식을 구분해 처리한다. 그 밖의 호출은 기존처럼 envelope 성공만 허용한다.
 
 목록은 카테고리를 `GET /api/v1/categories`로 조회한 뒤 현재 대분류의 분류 ID를 확인한다. `GET /api/v1/learning/questions`에 major·categoryId·keyword·likedOnly·sort·page·pageSize를 보낸다. 기본 페이지 크기는 7이며 검색어는 공백 정리 후 최대 100 code point로 전달한다. 카테고리 ID는 문자열로 유지한다.
 
@@ -33,7 +35,7 @@
 | 등록 폼의 유사 질문 | getSimilarityCandidates | 기존 승인 CS 후보 집합 |
 | QB-11 변경 액션의 사전 확인 | 기존 getQuestion | 기존 전체 배열을 이용한 경로 |
 
-위 조회는 기존 `/api/questions` 계약과 목업을 유지한다. 회원 담당의 `my-114`·`my-105`·`my-106` API가 연결되기 전까지 해당 화면이 실제 백엔드와 연결됐다고 보지 않는다. 유사 질문 후보 선정과 변경 액션의 경로·메서드·요청 변환은 QB-11에서 바꾼다.
+위 조회는 인증 브랜치의 버전 경로 정리에 맞춘 기존 `/api/v1/questions` 계약과 목업을 유지한다. 회원 담당의 `my-114`·`my-105`·`my-106` API가 연결되기 전까지 해당 화면이 실제 백엔드와 연결됐다고 보지 않는다. 유사 질문 후보 선정과 변경 액션의 경로·메서드·요청 변환은 QB-11에서 바꾼다.
 
 목업 아카이브도 공개 승인 질문만 목록·집계에 포함한다. 본인 미승인 질문은 직접 상세와 내 질문에서 볼 수 있다. 목업의 로컬 검색·페이지 처리는 API 모드와 분리한다.
 
@@ -41,8 +43,12 @@
 
 단위 테스트에서 응답 변환, 큰 문자열 ID, KST 날짜, nullable 분류, 반려·답안 상태, 서버 권한과 이웃 질문을 확인한다. 조회 adapter 테스트는 고정된 응답으로 요청 URL·Bearer 전달·서버 정렬 및 페이지 결과 존중·오류 구분·기존 전체 데이터 소비자 보존을 확인한다. 이는 실제 로그인 서버를 검증하는 테스트가 아니다.
 
-현재 작업 브랜치의 백엔드에는 로그인·회원 세션 API와 토큰을 QuestionPrincipal로 바꾸는 처리 구현이 없다. 프론트는 `/api/auth/login`·`/api/members/me`를 사용하지만 이 경로와 WBS의 `/api/v1/users/me`는 현재 백엔드에 구현되어 있지 않다.
+사용자가 요청한 `origin/feature/email-signup`을 통합해 카카오 로그인·JWT 발급 및 검증·`GET /api/v1/members/me`를 연결했다. 세션은 실제 구현의 member/admin 값을 사용하며 WBS의 `/api/v1/users/me`로 임의 변경하지 않는다. 카카오 설정과 callback 등록은 [로그인 문서](../user/login.md)를 따른다. 이메일 로그인·다른 소셜 제공자의 후속 구현까지 완료한 것으로 보지 않는다.
 
-별도 `origin/feature/email-signup`의 로컬 ref에는 JWT 검증과 `GET /api/v1/members/me` 구현이 있다. 해당 브랜치는 `success/data/error` envelope와 이미 변환된 member/admin 세션 역할을 사용하므로 현재 flat 응답 가정·세션 경로와 함께 조정해야 한다. 검증된 JWT 인증 객체도 질문의 `QuestionPrincipal`과 다르므로 현재 User 계정 상태를 반영하는 adapter가 필요하다. 이 브랜치의 인증 기능은 QB-10 조회 연결에 임의 병합하지 않는다.
+JWT 서명·만료·issuer 검증을 통과한 뒤 `QuestionJwtAuthenticationConverter`가 현재 DB 회원을 조회한다. `QuestionJwtAuthenticationToken`은 기존 Jwt principal을 유지하면서 QuestionPrincipal의 회원 ID·DB 역할·계정 상태를 제공한다. 토큰의 오래된 role 값으로 현재 DB 권한을 덮어쓰지 않는다. 탈퇴·없는 회원·잘못된 subject는 401, 질문 API의 이용 정지는 403이다. 일반 Principal이나 임의 헤더를 회원 인증으로 바꾸지 않는다.
 
-조회 연결에서 인증 우회용 헤더·임시 principal·목업 자동 대체를 추가하지 않는다. 실제 개발 모드의 로그인 → 목록/상세 검증은 인증 담당의 API·principal 연계 후 수행하고, 그때 QB-10 완료 기준을 확인한다. 관리자·AI 연계를 포함한 전체 흐름은 QB-12에서 검증한다.
+질문 한정 오류 처리에 우선순위를 지정해 전역 예외 처리와 함께 있어도 기존 업무 오류 코드를 유지한다. 기존 질문 MVC 테스트는 검증된 principal 소비 계약에 집중하며, 별도 실제 JWT 테스트는 Security 필터·디코더·DB 회원 상태와 카카오 로그인 서비스부터 질문 조회까지의 연결을 검증한다. 이때 외부 KakaoClient만 고정 응답으로 대체하며 사용자 계정의 실제 OAuth 동의는 자동 실행하지 않는다.
+
+카카오 운영 설정과 실제 계정을 사용한 브라우저 로그인 확인, 관리자·AI 연계를 포함한 전체 흐름은 QB-12에서 검증한다.
+
+최종 검증은 프론트 단위 테스트 267개, typecheck·lint·structure·production build와 백엔드 build·테스트 614개가 통과했다. 백엔드에는 실제 JWT 통합 테스트 15개가 포함된다. 브라우저 미리보기는 이 실행 환경의 브라우저 연결 호스트가 제공되지 않아 확인하지 못했다.

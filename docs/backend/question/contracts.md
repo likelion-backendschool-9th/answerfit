@@ -35,7 +35,7 @@ Bean Validation은 후속 Controller의 `@Valid`에서 적용한다. 카테고�
 
 principal 없음·계약에 맞지 않는 principal·유효하지 않은 ID/권한/상태·탈퇴 계정은 `401 UNAUTHENTICATED`, 이용 정지는 `403 ACCESS_DENIED`다. 정상 USER와 ADMIN은 회원 접근이 가능하다. 관리자 전용 처리는 관리자 API의 별도 권한 규칙을 적용한다.
 
-`QuestionPrincipal` 타입은 인증 처리와의 연결 계약이다. 토큰 서명·만료·발급자 검증을 수행하지 않으며, 사용자 입력 ID나 별도 헤더로 principal을 만드는 인증 우회 경로도 제공하지 않는다. 실제 Bearer 검증기가 이 계약으로 회원 정보를 전달해야 개발 모드 화면까지 연결된다.
+`QuestionPrincipal` 타입은 인증 처리와의 연결 계약이다. 공통 Bearer 검증기가 토큰 서명·만료·issuer를 확인한 뒤 `QuestionJwtAuthenticationConverter`가 현재 DB 회원을 조회한다. 기존 Jwt principal을 유지하는 token 하위 타입으로 회원 ID·현재 역할·계정 상태를 전달한다. 토큰의 오래된 role 값은 DB 역할을 덮어쓰지 않는다. 사용자 입력 ID나 별도 헤더로 principal을 만드는 인증 우회 경로는 제공하지 않는다.
 
 ## 질문 접근 정책
 
@@ -63,11 +63,11 @@ principal 없음·계약에 맞지 않는 principal·유효하지 않은 ID/권�
 
 업무상 404도 `QUESTION_NOT_FOUND`를 포함해 프론트가 API 미연동 오류로 오인하지 않게 한다. 입력 오류는 400, 인증 정보 오류는 401, 접근 거절은 403, 업무 상태 충돌은 409로 구분한다. 서버 반환값의 검증 실패는 500이며 입력 오류로 바꾸지 않는다.
 
-예외 처리는 `com.likelion.answerfit.question`의 Controller에 한정한다. 다른 도메인의 오류 정책과 인증 필터의 entry point/access-denied 처리를 덮어쓰지 않는다. 인증 필터 단계의 오류는 인증 담당이 같은 응답 계약으로 연결해야 한다.
+예외 처리는 `com.likelion.answerfit.question`의 Controller에 한정하고 전역 catch-all보다 먼저 적용한다. 다른 도메인의 오류 정책과 인증 필터의 entry point/access-denied 처리를 덮어쓰지 않는다. 인증 필터 단계 오류는 통합한 공통 `ApiResponse` envelope를 따르며, 프론트 문제은행 호출은 이 형식과 기존 flat 업무 오류를 구분해 읽는다.
 
 ## 후속 연계 조건
 
-- **인증/회원**: 검증된 principal adapter와 실제 토큰 처리가 필요하다. 프론트의 현재 `/api/members/me`와 WBS의 `/api/v1/users/me`, `USER/ADMIN`과 화면의 `member/admin` 변환은 해당 담당과 연결한다.
+- **인증/회원**: QB-10에서 email-signup 인증 브랜치의 JWT·카카오 로그인·`/api/v1/members/me`와 현재 DB 기반 principal adapter를 연결했다. 세션 역할은 해당 API가 member/admin으로 반환한다. 실제 카카오 설정과 계정 동의 확인은 [조회 연결](../../frontend/question/archive.md)을 따른다.
 - **DB**: 현재 프로젝트의 H2 구성을 유지한다. 운영 DB·migration 방식과 담당은 별도 합의가 필요하며, 운영 테이블 생성이나 DDL 변경을 이번 작업에서 가정하지 않는다.
 - **카테고리**: QB-02에서 기존 프론트의 분류를 기준으로 초기 데이터와 표시 순서를 적용했다. ID는 조회 응답으로 공유한다. [카테고리 조회](categories.md)의 초기화 정책을 따르며, 운영 migration의 복합 FK 적용은 DB 담당과 확인한다.
 - **변경 API 계약**: [좋아요](likes.md)는 반복 가능한 상태 설정, [신고](reports.md)는 5유형과 회원별 한 번의 등록으로 처리한다. 관리자 쓰기도 각 문서의 공통 잠금 규칙을 적용해야 한다.

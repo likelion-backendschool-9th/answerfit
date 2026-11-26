@@ -76,4 +76,4 @@ answerfit.question.seed-enabled=false
 
 Repository 테스트는 실제 H2에서 공개 조건·0건 분류·동점 정렬·중분류 없는 인성 집계를 확인한다. Controller 테스트는 회원/관리자 응답과 미인증·정지·탈퇴 거절, 문자열 ID 및 오류 형식을 확인한다.
 
-통합 테스트는 실제 Controller → Service → Repository와 H2를 연결해 기본 분류 등록, 공개 건수, 초기화 반복·누락 보충·기존 ID/순서 보존을 확인한다. 테스트 principal은 인증 경계의 소비를 검증하며 실제 토큰 발급·검증을 대신하지 않는다. 프론트 연결은 QB-10에서 진행한다.
+통합 테스트는 실제 Controller → Service → Repository와 H2를 연결해 기본 분류 등록, 공개 건수, 초기화 반복·누락 보충·기존 ID/순서 보존을 확인한다. 테스트 principal은 인증 경계의 소비를 검증하며 실제 토큰 발급·검증을 대신하지 않는다. QB-10은 별도 실제 JWT 테스트와 [프론트 조회 연결](../../frontend/question/archive.md)을 추가했다.
