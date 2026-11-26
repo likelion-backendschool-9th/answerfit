@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { PATHS } from "@/app/_lib/paths";
 import { ButtonLink } from "@/components/ui/Button/Button";
-import { Chip } from "@/components/ui/Chip/Chip";
 import { Icon } from "@/components/ui/Icon/Icon";
 import { cn } from "@/lib/cn";
 import { SiteHeader } from "../SiteHeader/SiteHeader";
@@ -97,8 +96,8 @@ export function HomeHero({ backdrop = false }: { backdrop?: boolean }) {
             </ul>
             <ul className={styles.tags}>
               {TAGS.map((tag) => (
-                <li key={tag}>
-                  <Chip>{tag}</Chip>
+                <li key={tag} className={styles.tag}>
+                  {tag}
                 </li>
               ))}
             </ul>

@@ -92,6 +92,10 @@
   --space-24: 6rem;
   --space-section: 10rem;
   --space-section-sm: 5rem;
+  /* 홈 구역을 한 화면에 담기 위한 간격. 화면 높이에 따라 줄어든다 */
+  --space-fit: clamp(1.5rem, 6dvh, 5rem);
+  --space-fit-lg: clamp(1rem, 3.5dvh, 3.5rem);
+  --space-fit-md: clamp(0.5rem, 1.8dvh, 1.25rem);
   --space-flow: 8.75rem;
   --space-closing: 11.25rem;
 
@@ -208,19 +212,26 @@ h1:focus {
 }
 
 /*
- * 구역 단위 스크롤. data-snap-sections가 있는 화면(홈)에서만 켠다.
- * 화면보다 긴 구역은 안에서 자유롭게 스크롤된다. 푸터도 맞춤 지점이라 맨 아래까지 내려갈 수 있다.
+ * 구역 단위 스크롤. data-snap-sections가 있는 화면(홈)에서만, 모바일보다 넓을 때만 켠다.
+ * 구역마다 한 화면 높이를 차지하고 내용은 가운데에 둔다. 푸터도 맞춤 지점이라 맨 아래까지 내려갈 수 있다.
+ * 모바일에서는 스냅과 화면 높이 고정을 모두 풀어 자유롭게 스크롤한다.
  */
-html:has([data-snap-sections]) {
-  scroll-snap-type: y mandatory;
-}
+@media (min-width: 40rem) {
+  html:has([data-snap-sections]) {
+    scroll-snap-type: y mandatory;
+  }
 
-[data-snap-sections] > section {
-  scroll-snap-align: start;
-}
+  [data-snap-sections] > section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100dvh;
+    scroll-snap-align: start;
+  }
 
-html:has([data-snap-sections]) footer {
-  scroll-snap-align: end;
+  html:has([data-snap-sections]) footer {
+    scroll-snap-align: end;
+  }
 }
 
 @keyframes spin {

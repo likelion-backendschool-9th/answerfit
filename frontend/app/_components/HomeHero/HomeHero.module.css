@@ -11,14 +11,17 @@
   color: var(--color-text);
 }
 
+/* 헤더 아래 남은 높이를 채우고 내용을 세로 가운데에 둔다 */
 .inner {
   display: grid;
+  flex: 1;
   grid-template-columns: minmax(0, 1fr) minmax(0, 47.5rem);
+  align-content: center;
   align-items: center;
   gap: var(--space-12);
   width: min(100%, 100rem);
   margin: 0 auto;
-  padding: var(--space-10) var(--space-10) var(--space-22);
+  padding: var(--space-fit-md) var(--space-10) var(--space-fit);
 }
 
 /* 왼쪽: 소개 문구 */
@@ -130,15 +133,18 @@
   line-height: var(--leading-xs);
 }
 
-/* 오른쪽: 면접 화면 예시. 카드는 사진 바깥으로 조금씩 걸친다 */
+/*
+ * 오른쪽: 면접 화면 예시. 시안(오른쪽 영역 760px 기준)의 위치를 비율로 옮겼다.
+ * 사진은 좌 7.4% · 우 8.3% 안쪽, 질문 카드는 폭 50% · 위 9.5%, 분석 카드는 폭 64% · 위 36.7%에 둔다
+ */
 .visual {
   position: relative;
-  padding: 0 var(--space-16) 0 var(--space-14);
+  padding: 0 8.3% 0 7.4%;
 }
 
 .photoBox {
   position: relative;
-  height: 35.5rem;
+  height: min(35.625rem, 62dvh);
   overflow: hidden;
   border-radius: var(--radius-lg);
   background: var(--color-dark-surface);
@@ -150,16 +156,16 @@
 
 .rec {
   position: absolute;
-  top: var(--space-4);
-  right: var(--space-4);
+  top: var(--space-6);
+  right: var(--space-6);
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-1) var(--space-3);
+  padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-full);
   background: var(--color-scrim-light);
   color: var(--color-text-inverse);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
 }
 
 .rec::before {
@@ -172,31 +178,31 @@
 
 .card {
   position: absolute;
-  padding: var(--space-5);
-  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
-  box-shadow: 0 1.5rem 3rem rgb(21 23 28 / 12%);
+  box-shadow: 0 1rem 2.5rem rgb(21 23 28 / 14%);
 }
 
 .questionCard {
-  top: var(--space-4);
+  top: 9.5%;
   left: 0;
-  width: min(23.5rem, 60%);
+  width: 50%;
+  padding: var(--space-5) var(--space-6);
 }
 
 .reportCard {
-  top: 9.5rem;
+  top: 36.7%;
   right: 0;
-  width: min(30rem, 72%);
+  width: 64%;
+  padding: var(--space-6);
 }
 
 .cardLabel {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-2);
   color: var(--color-accent);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   font-weight: 500;
 }
 
@@ -204,15 +210,15 @@
 .reportTitle svg,
 .checks svg {
   flex: none;
-  width: 1rem;
-  height: 1rem;
+  width: 1.125rem;
+  height: 1.125rem;
 }
 
 .cardText {
-  margin-top: var(--space-2);
-  font-size: var(--text-sm);
+  margin-top: var(--space-3);
+  font-size: var(--text-md);
   font-weight: 600;
-  line-height: var(--leading-sm);
+  line-height: var(--leading-md);
 }
 
 .reportHead {
@@ -226,7 +232,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
   font-weight: 600;
 }
 
@@ -236,15 +242,15 @@
 
 .reportTime {
   color: var(--color-text-muted);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
 }
 
 .checks {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-3);
   margin-top: var(--space-4);
-  font-size: var(--text-xs);
-  line-height: var(--leading-xs);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
 }
 
 .checks li {
@@ -267,13 +273,24 @@
   flex-wrap: wrap;
   gap: var(--space-2);
   margin-top: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tag {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-subtle);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
 }
 
 .followUp {
   margin-top: var(--space-4);
-  padding: var(--space-4);
+  padding: var(--space-4) var(--space-5);
   border-radius: var(--radius-sm);
-  background: var(--color-accent-surface);
+  background: var(--color-surface-subtle);
 }
 
 @media (max-width: 80rem) {

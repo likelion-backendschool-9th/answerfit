@@ -1,5 +1,5 @@
 .section {
-  padding: var(--space-section) var(--space-5);
+  padding: var(--space-fit) var(--space-5);
   background: var(--color-dark-bg);
   color: var(--color-dark-text);
 }
@@ -14,7 +14,7 @@
   grid-template-columns: 920fr 648fr;
   align-items: start;
   gap: var(--space-8);
-  margin-top: var(--space-16);
+  margin-top: var(--space-fit-lg);
 }
 
 .card,
@@ -27,7 +27,7 @@
 .video {
   display: flex;
   flex-direction: column;
-  min-height: 32.375rem;
+  min-height: min(32.375rem, 50dvh);
   padding: var(--space-5) var(--space-7);
   background: linear-gradient(var(--color-dark-surface) 82%, var(--color-dark-bg));
 }
@@ -165,7 +165,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  padding: var(--space-7) var(--space-8);
+  padding: var(--space-fit-md) var(--space-8);
 }
 
 .label {
@@ -199,7 +199,7 @@
 }
 
 .tile {
-  padding: var(--space-5);
+  padding: var(--space-fit-md) var(--space-5);
 }
 
 .value {
@@ -231,10 +231,10 @@
 .comments {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
-  padding: var(--space-7) var(--space-8);
-  font-size: var(--text-lg);
-  line-height: var(--leading-lg);
+  gap: var(--space-fit-md);
+  padding: var(--space-fit-md) var(--space-8);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
 }
 
 .commentTitle {
@@ -252,7 +252,7 @@
 }
 
 .footnote {
-  margin-top: var(--space-16);
+  margin-top: var(--space-fit-lg);
   color: var(--color-dark-text-muted);
   font-size: var(--text-sm);
   font-weight: 500;
