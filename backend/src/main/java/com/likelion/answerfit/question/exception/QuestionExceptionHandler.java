@@ -2,9 +2,13 @@ package com.likelion.answerfit.question.exception;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.regex.Pattern;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.jspecify.annotations.Nullable;
 import org.springframework.context.MessageSourceResolvable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -22,6 +26,10 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestControllerAdvice(basePackages = "com.likelion.answerfit.question")
 public class QuestionExceptionHandler extends ResponseEntityExceptionHandler {
 
+    // Hibernate가 전달하는 제약명만 검사한다. H2의 생성 인덱스 접미사도 허용한다.
+    private static final Pattern REPORT_UNIQUE_CONSTRAINT = Pattern.compile(
+            "^(?:[a-z0-9_]+\\.)?uk_question_reports_question_reporter(?:_index_[a-z0-9]+)?(?:\\s|$)");
+
     @ExceptionHandler(QuestionException.class)
     public ResponseEntity<QuestionErrorResponse> handleQuestionException(QuestionException exception) {
         QuestionErrorCode code = exception.getErrorCode();
@@ -31,6 +39,20 @@ public class QuestionExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(PessimisticLockingFailureException.class)
     public ResponseEntity<QuestionErrorResponse> handleConcurrentChange(PessimisticLockingFailureException exception) {
         QuestionErrorCode code = QuestionErrorCode.QUESTION_STATE_CHANGED;
+        return ResponseEntity.status(code.getStatus()).body(QuestionErrorResponse.from(code));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<QuestionErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException exception) {
+        QuestionErrorCode code = QuestionErrorCode.INTERNAL_ERROR;
+        for (Throwable cause = exception; cause != null; cause = cause.getCause()) {
+            if (cause instanceof ConstraintViolationException violation && violation.getConstraintName() != null
+                    && REPORT_UNIQUE_CONSTRAINT.matcher(violation.getConstraintName()
+                            .replace("\"", "").toLowerCase(Locale.ROOT)).find()) {
+                code = QuestionErrorCode.ALREADY_REPORTED;
+                break;
+            }
+        }
         return ResponseEntity.status(code.getStatus()).body(QuestionErrorResponse.from(code));
     }
 
