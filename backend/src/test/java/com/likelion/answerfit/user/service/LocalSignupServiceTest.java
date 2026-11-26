@@ -15,18 +15,19 @@ import com.likelion.answerfit.global.exception.CustomException;
 import com.likelion.answerfit.global.exception.ErrorCode;
 import com.likelion.answerfit.user.entity.User;
 import com.likelion.answerfit.user.repository.UserRepository;
+import com.likelion.answerfit.user.repository.UserProfileImageRepository;
 import com.likelion.answerfit.user.service.LocalSignupService.RequiredConsents;
 
 class LocalSignupServiceTest {
     private final UserRepository users = mock(UserRepository.class);
-    private final LocalSignupService signup = new LocalSignupService(users);
+    private final LocalSignupService signup = new LocalSignupService(users, mock(UserProfileImageRepository.class));
 
     @Test
     void 이메일을_정규화하고_비밀번호_해시를_저장한다() {
-        signup.register(" TEST@example.com ", "password1", "재현", new RequiredConsents(true, true, true));
+        signup.register(" TEST@example.com ", "password1", "재현", new RequiredConsents(true, true, true), null);
 
         ArgumentCaptor<User> captured = ArgumentCaptor.forClass(User.class);
-        verify(users).save(captured.capture());
+        verify(users).saveAndFlush(captured.capture());
         User user = captured.getValue();
         assertThat(user.getEmail()).isEqualTo("test@example.com");
         assertThat(user.getProfileImageKey()).isNull();
@@ -36,7 +37,7 @@ class LocalSignupServiceTest {
     @Test
     void 필수_동의가_빠지면_저장하기_전에_거절한다() {
         assertThatThrownBy(() -> signup.register("test@example.com", "password1", "재현",
-                new RequiredConsents(true, true, false)))
+                new RequiredConsents(true, true, false), null))
                 .isInstanceOfSatisfying(CustomException.class, error ->
                         assertThat(error.getErrorCode()).isEqualTo(ErrorCode.REQUIRED_CONSENT_MISSING));
         verifyNoInteractions(users);
@@ -46,7 +47,7 @@ class LocalSignupServiceTest {
     void 대소문자를_무시하고_이메일_중복을_확인한다() {
         when(users.existsByEmailIgnoreCase("test@example.com")).thenReturn(true);
         assertThatThrownBy(() -> signup.register("TEST@example.com", "password1", "재현",
-                new RequiredConsents(true, true, true)))
+                new RequiredConsents(true, true, true), null))
                 .isInstanceOfSatisfying(CustomException.class, error ->
                         assertThat(error.getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_EMAIL));
     }
