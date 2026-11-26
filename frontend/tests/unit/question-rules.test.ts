@@ -8,6 +8,9 @@ const query = readQuery({});
 describe("readQuery", () => {
   it("값이 없으면 기본값", () => expect(query).toEqual({ kind: "cs", category: null, keyword: "", likedOnly: false, sort: "latest", page: 1 }));
   it("잘못된 값을 무시한다", () => expect(readQuery({ kind: "x", sort: "x", page: "-1", liked: "yes", q: ["a", "b"] })).toEqual(query));
+  it("검색어는 이모지도 한 글자로 세어 100 code point까지 전달한다", () => {
+    expect(readQuery({ q: " \uFEFF" + "😀".repeat(101) + " \u00A0" }).keyword).toBe("😀".repeat(100));
+  });
   it("주소로 만들었다가 다시 읽으면 같다", () => {
     const full = { kind: "personality" as const, category: "협업", keyword: "갈등 & 해결", likedOnly: true, sort: "likes" as const, page: 3 };
     expect(readQuery(Object.fromEntries(new URL(archiveHref(full, { page: 3 }), "http://x").searchParams))).toEqual(full);
