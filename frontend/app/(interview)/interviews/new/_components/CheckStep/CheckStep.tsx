@@ -66,7 +66,18 @@ export function CheckStep({ gazeReady, onReadyChange }: Props) {
   return (
     <Section title="시작 전에 카메라와 마이크를 확인할게요" description="영상은 분석에만 쓰이고, 시선 분석은 브라우저 안에서 처리돼요.">
       <div className={styles.layout}>
-        <div>
+        {blocked ? (
+          <div className={styles.noCamera} role="alert">
+            <span className={styles.noCameraIcon}>
+              <Icon name="cameraOff" size={28} />
+            </span>
+            <p className={styles.noCameraTitle}>카메라가 인식되지 않아요</p>
+            <p className={styles.noCameraText}>{status === "denied" ? "카메라와 마이크 사용을 허용해 주세요. 주소창의 권한 설정에서 바꿀 수 있어요." : "카메라나 마이크를 찾지 못했어요. 연결을 확인해 주세요."}</p>
+            <Button variant="outline" className={styles.retry} onClick={retry}>
+              다시 확인
+            </Button>
+          </div>
+        ) : (
           <CameraStage stream={stream} className={styles.stage}>
             <svg className={styles.guide} viewBox="0 0 210 274" aria-hidden="true">
               <ellipse cx="105" cy="137" rx="103" ry="135" />
@@ -80,15 +91,7 @@ export function CheckStep({ gazeReady, onReadyChange }: Props) {
               </p>
             )}
           </CameraStage>
-          {blocked && (
-            <div className={styles.problem} role="alert">
-              <p>{status === "denied" ? "카메라와 마이크 사용을 허용해 주세요. 주소창의 권한 설정에서 바꿀 수 있어요." : "카메라나 마이크를 찾지 못했어요. 연결을 확인해 주세요."}</p>
-              <Button variant="outline" onClick={retry}>
-                다시 확인
-              </Button>
-            </div>
-          )}
-        </div>
+        )}
         <section className={styles.card} aria-labelledby="checklist-title">
           <h3 id="checklist-title" className={styles.cardTitle}>
             체크리스트
