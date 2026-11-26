@@ -32,25 +32,31 @@ class NicknameAvailabilityControllerTest {
 
         mvc.perform(get(PATH).param("nickname", nickname))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.available").value(true));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.available").value(true))
+                .andExpect(jsonPath("$.error").isEmpty());
     }
 
     @Test
     void 사용_중인_닉네임은_사용_불가로_응답한다() throws Exception {
         mvc.perform(get(PATH).param("nickname", "지우"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.available").value(false));
+                .andExpect(jsonPath("$.data.available").value(false));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"a", "abc123abc1234", "지 우", "지우!"})
     void 유효하지_않은_닉네임은_거절한다(String nickname) throws Exception {
         mvc.perform(get(PATH).param("nickname", nickname))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.errorCode").value("BACKEND-GLOBAL-101"));
     }
 
     @Test
     void 닉네임이_없으면_거절한다() throws Exception {
-        mvc.perform(get(PATH)).andExpect(status().isBadRequest());
+        mvc.perform(get(PATH))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.errorCode").value("BACKEND-GLOBAL-101"));
     }
 }
