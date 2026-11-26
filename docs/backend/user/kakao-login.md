@@ -12,14 +12,14 @@
 - `#12-S6` 이용 정지된 회원은 정지 사유를 보고 로그인되지 않는다.
 - `#12-S7` 카카오 이메일이 인증되지 않았으면 가입하지 않고 안내한다.
 - `#12-S8` 같은 이메일의 회원이 이미 있으면 연결하지 않고 "이메일로 로그인해 주세요"라고 안내한다.
-- `#12-S9` 로그인한 회원은 `GET /api/members/me`로 자기 이메일, 닉네임, 역할을 받는다. 토큰이 없거나 틀리면 401이다.
+- `#12-S9` 로그인한 회원은 `GET /api/v1/members/me`로 자기 이메일, 닉네임, 역할을 받는다. 토큰이 없거나 틀리면 401이다.
 
 ## API
 
 | 요청 | 응답 |
 | --- | --- |
-| `POST /api/auth/social/kakao` `{ code, redirectUri }` | 200 `{ accessToken }` |
-| `GET /api/members/me` (Bearer) | 200 `{ email, nickname, role: "member" \| "admin" }` |
+| `POST /api/v1/auth/social/kakao` `{ code, redirectUri }` | 200 `{ accessToken }` |
+| `GET /api/v1/members/me` (Bearer) | 200 `{ email, nickname, role: "member" \| "admin" }` |
 
 | 코드 | 상태 | 경우 |
 | --- | --- | --- |
@@ -49,7 +49,7 @@
 
 1. 보안 의존성, 오류 응답 형식, JWT 발급·검증
 2. 회원·소셜 계정 저장소, 카카오 클라이언트, 소셜 로그인 서비스와 API
-3. `GET /api/members/me`
+3. `GET /api/v1/members/me`
 4. 프론트: 카카오 동의 화면으로 보내기, 콜백 처리, 로그인 화면의 안내
 5. 테스트 서버나 로컬에서 실제 카카오 계정으로 `#12-S1`, `#12-S4` 확인
 
