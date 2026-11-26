@@ -21,8 +21,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.likelion.answerfit.auth.jwt.TokenService;
 import com.likelion.answerfit.auth.kakao.KakaoClient;
 import com.likelion.answerfit.auth.kakao.KakaoUser;
-import com.likelion.answerfit.global.error.ApiException;
-import com.likelion.answerfit.global.error.ErrorCode;
+import com.likelion.answerfit.global.exception.CustomException;
+import com.likelion.answerfit.global.exception.ErrorCode;
 import com.likelion.answerfit.user.entity.SocialProvider;
 import com.likelion.answerfit.user.entity.User;
 import com.likelion.answerfit.user.entity.UserSocialAccount;
@@ -54,7 +54,7 @@ class SocialLoginServiceImplTest {
     }
 
     private static ErrorCode codeOf(Throwable e) {
-        return ((ApiException) e).getErrorCode();
+        return ((CustomException) e).getErrorCode();
     }
 
     private UserSocialAccount linked(User user, long id) {

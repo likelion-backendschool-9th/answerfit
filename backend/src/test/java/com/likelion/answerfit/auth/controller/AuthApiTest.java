@@ -18,8 +18,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.likelion.answerfit.auth.jwt.JwtConfig;
 import com.likelion.answerfit.auth.service.SocialLoginService;
 import com.likelion.answerfit.global.config.SecurityConfig;
-import com.likelion.answerfit.global.error.ApiException;
-import com.likelion.answerfit.global.error.ErrorCode;
+import com.likelion.answerfit.global.exception.CustomException;
+import com.likelion.answerfit.global.exception.ErrorCode;
 import com.likelion.answerfit.user.controller.MemberController;
 import com.likelion.answerfit.user.dto.MemberResponse;
 import com.likelion.answerfit.user.service.MemberService;
@@ -46,42 +46,58 @@ class AuthApiTest {
 
         mvc.perform(post("/api/v1/auth/social/kakao").contentType(MediaType.APPLICATION_JSON).content(BODY))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").value("token"));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.accessToken").value("token"))
+                .andExpect(jsonPath("$.error").doesNotExist());
     }
 
     @Test
-    void 거절은_code와_message로_답한다() throws Exception {
+    void 거절은_ApiResponse_실패_형식으로_답한다() throws Exception {
         when(socialLoginService.loginWithKakao("code", "http://localhost:3000/auth/kakao/callback"))
-                .thenThrow(new ApiException(ErrorCode.EMAIL_ALREADY_REGISTERED));
+                .thenThrow(new CustomException(ErrorCode.EMAIL_ALREADY_REGISTERED));
 
         mvc.perform(post("/api/v1/auth/social/kakao").contentType(MediaType.APPLICATION_JSON).content(BODY))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("EMAIL_ALREADY_REGISTERED"))
-                .andExpect(jsonPath("$.message").value(ErrorCode.EMAIL_ALREADY_REGISTERED.getMessage()));
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.errorCode").value(ErrorCode.EMAIL_ALREADY_REGISTERED.getCode()))
+                .andExpect(jsonPath("$.error.detail").value(ErrorCode.EMAIL_ALREADY_REGISTERED.getMessage()));
+    }
+
+    @Test
+    void 정지_사유처럼_바꾼_문장은_detail로_나간다() throws Exception {
+        when(socialLoginService.loginWithKakao("code", "http://localhost:3000/auth/kakao/callback"))
+                .thenThrow(new CustomException(ErrorCode.SUSPENDED, "이용이 정지된 계정이에요. 사유: 반복 등록"));
+
+        mvc.perform(post("/api/v1/auth/social/kakao").contentType(MediaType.APPLICATION_JSON).content(BODY))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error.errorCode").value(ErrorCode.SUSPENDED.getCode()))
+                .andExpect(jsonPath("$.error.detail").value("이용이 정지된 계정이에요. 사유: 반복 등록"));
     }
 
     @Test
     void 인가_코드가_없으면_400() throws Exception {
         mvc.perform(post("/api/v1/auth/social/kakao").contentType(MediaType.APPLICATION_JSON).content("{\"redirectUri\":\"x\"}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
+                .andExpect(jsonPath("$.error.errorCode").value(ErrorCode.INVALID_INPUT.getCode()));
     }
 
     @Test
-    void 깨진_JSON은_INVALID_REQUEST() throws Exception {
+    void 깨진_JSON은_INVALID_INPUT() throws Exception {
         mvc.perform(post("/api/v1/auth/social/kakao").contentType(MediaType.APPLICATION_JSON).content("{bad"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
+                .andExpect(jsonPath("$.error.errorCode").value(ErrorCode.INVALID_INPUT.getCode()));
     }
 
     @Test
     void 토큰이_없거나_틀리면_내_정보는_401() throws Exception {
         mvc.perform(get("/api/v1/members/me"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.errorCode").value(ErrorCode.UNAUTHORIZED.getCode()));
         mvc.perform(get("/api/v1/members/me").header("Authorization", "Bearer forged"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.errorCode").value(ErrorCode.UNAUTHORIZED.getCode()));
     }
 
     @Test
@@ -90,17 +106,18 @@ class AuthApiTest {
 
         mvc.perform(get("/api/v1/members/me").with(jwt().jwt(token -> token.subject("7"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value("jiwoo@kakao.com"))
-                .andExpect(jsonPath("$.nickname").value("지우"))
-                .andExpect(jsonPath("$.role").value("member"));
+                .andExpect(jsonPath("$.data.email").value("jiwoo@kakao.com"))
+                .andExpect(jsonPath("$.data.nickname").value("지우"))
+                .andExpect(jsonPath("$.data.role").value("member"));
     }
 
     @Test
     void 탈퇴한_회원의_토큰은_401() throws Exception {
-        when(memberService.getMe(7L)).thenThrow(new ApiException(ErrorCode.UNAUTHORIZED));
+        when(memberService.getMe(7L)).thenThrow(new CustomException(ErrorCode.UNAUTHORIZED));
 
         mvc.perform(get("/api/v1/members/me").with(jwt().jwt(token -> token.subject("7"))))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.errorCode").value(ErrorCode.UNAUTHORIZED.getCode()));
     }
 }

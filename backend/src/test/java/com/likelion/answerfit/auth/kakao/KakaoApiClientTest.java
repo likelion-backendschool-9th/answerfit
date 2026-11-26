@@ -20,8 +20,8 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestClient;
 
-import com.likelion.answerfit.global.error.ApiException;
-import com.likelion.answerfit.global.error.ErrorCode;
+import com.likelion.answerfit.global.exception.CustomException;
+import com.likelion.answerfit.global.exception.ErrorCode;
 
 class KakaoApiClientTest {
 
@@ -74,20 +74,20 @@ class KakaoApiClientTest {
                 .andRespond(withBadRequest().body("{\"error\":\"invalid_grant\",\"error_code\":\"KOE320\"}").contentType(MediaType.APPLICATION_JSON));
 
         assertThatThrownBy(() -> client.fetchUser("code", REDIRECT))
-                .satisfies(e -> assertThat(((ApiException) e).getErrorCode()).isEqualTo(ErrorCode.KAKAO_AUTH_FAILED));
+                .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.KAKAO_AUTH_FAILED));
     }
 
     @Test
     void 카카오_5xx나_연결_실패는_KAKAO_UNAVAILABLE() {
         server.expect(requestTo(KakaoApiClient.TOKEN_URL)).andRespond(withServerError());
         assertThatThrownBy(() -> client.fetchUser("code", REDIRECT))
-                .satisfies(e -> assertThat(((ApiException) e).getErrorCode()).isEqualTo(ErrorCode.KAKAO_UNAVAILABLE));
+                .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.KAKAO_UNAVAILABLE));
 
         server.reset();
         tokenOk();
         server.expect(requestTo(KakaoApiClient.USER_URL)).andRespond(withException(new SocketTimeoutException("Read timed out")));
         assertThatThrownBy(() -> client.fetchUser("code", REDIRECT))
-                .satisfies(e -> assertThat(((ApiException) e).getErrorCode()).isEqualTo(ErrorCode.KAKAO_UNAVAILABLE));
+                .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.KAKAO_UNAVAILABLE));
     }
 
     @Test
@@ -95,7 +95,7 @@ class KakaoApiClientTest {
         KakaoApiClient unconfigured = new KakaoApiClient(builder, "", "");
 
         assertThatThrownBy(() -> unconfigured.fetchUser("code", REDIRECT))
-                .satisfies(e -> assertThat(((ApiException) e).getErrorCode()).isEqualTo(ErrorCode.KAKAO_NOT_CONFIGURED));
+                .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.KAKAO_NOT_CONFIGURED));
         server.verify();
     }
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { decodeKakaoCookie, encodeKakaoCookie, encodeNotice, kakaoAuthorizeUrl, kakaoRedirectUri, noticeFor, readKakaoCallback, socialLoginMessage } from "@/features/auth/kakao";
+import { decodeKakaoCookie, encodeKakaoCookie, encodeNotice, kakaoAuthorizeUrl, kakaoRedirectUri, noticeFor, readKakaoCallback, socialErrorOf, socialLoginMessage } from "@/features/auth/kakao";
 
 const STATE = "0b7c1d3e-5f6a-4b8c-9d0e-1f2a3b4c5d6e";
 const cookie = encodeKakaoCookie({ state: STATE, next: "/interviews/new" });
@@ -78,5 +78,23 @@ describe("로그인 화면 안내", () => {
     expect(socialLoginMessage("toString")).toBeUndefined();
     expect(socialLoginMessage("<script>")).toBeUndefined();
     expect(socialLoginMessage(["SUSPENDED"])).toBeUndefined();
+  });
+});
+
+describe("백엔드 오류 코드 → 안내 코드", () => {
+  it.each([
+    ["BACKEND-BUSINESS-108", "EMAIL_NOT_VERIFIED"],
+    ["BACKEND-BUSINESS-109", "EMAIL_ALREADY_REGISTERED"],
+    ["BACKEND-BUSINESS-110", "SUSPENDED"],
+    ["BACKEND-BUSINESS-111", "WITHDRAWN"],
+    ["BACKEND-INFRA-101", "KAKAO_AUTH_FAILED"],
+    ["BACKEND-INFRA-102", "KAKAO_UNAVAILABLE"],
+    ["BACKEND-INFRA-103", "KAKAO_NOT_CONFIGURED"],
+    ["KAKAO_NOT_CONFIGURED", "KAKAO_NOT_CONFIGURED"],
+    ["BACKEND-GLOBAL-102", "KAKAO_AUTH_FAILED"],
+    [undefined, "KAKAO_AUTH_FAILED"],
+    ["toString", "KAKAO_AUTH_FAILED"],
+  ])("%s → %s", (code, expected) => {
+    expect(socialErrorOf(code)).toBe(expected);
   });
 });

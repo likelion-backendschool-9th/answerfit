@@ -10,8 +10,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.likelion.answerfit.global.error.ApiException;
-import com.likelion.answerfit.global.error.ErrorCode;
+import com.likelion.answerfit.global.exception.CustomException;
+import com.likelion.answerfit.global.exception.ErrorCode;
 import com.likelion.answerfit.user.dto.MemberResponse;
 import com.likelion.answerfit.user.entity.Role;
 import com.likelion.answerfit.user.entity.User;
@@ -38,6 +38,6 @@ class MemberServiceImplTest {
         when(userRepository.findActiveById(7L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> memberService.getMe(7L))
-                .satisfies(e -> assertThat(((ApiException) e).getErrorCode()).isEqualTo(ErrorCode.UNAUTHORIZED));
+                .satisfies(e -> assertThat(((CustomException) e).getErrorCode()).isEqualTo(ErrorCode.UNAUTHORIZED));
     }
 }
