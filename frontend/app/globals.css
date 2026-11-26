@@ -1,22 +1,60 @@
-/* 디자인 가이드 PNG가 비어 있어, 값은 로그인·회원가입 목업에서 잰 것이다. 가이드를 받으면 맞춘다 */
 :root {
-  --color-text: #15171c;
-  --color-text-muted: #676b74;
-  --color-text-inverse: #ffffff;
-  --color-surface: #ffffff;
-  --color-surface-subtle: #f5f6f8;
-  --color-border: #e5e6ea;
-  --color-primary: #1d2c6b;
+  /*
+   * 디자인 규칙 색상표. 화면 코드는 이 값을 직접 쓰지 않고 아래 --color-* 토큰을 쓴다.
+   * 대표 색: Suit Navy(Brand 주간) · Shirt White(Brand 야간, 야간 CTA) · Tie Blue(Accent 주간)
+   */
+  --palette-suit-navy: #1d2c6b;
+  --palette-shirt-white: #e9edf6;
+  --palette-tie-blue: #3567db;
+  /* 01 Brand: 메인 CTA 버튼 · 로고 · 헤더 강조 */
+  --palette-brand-light: var(--palette-suit-navy);
+  --palette-brand-dark: var(--palette-shirt-white);
+  /* 02 Accent: 링크 · 진행 바 · 포커스 링 · 선택 상태 */
+  --palette-accent-light: var(--palette-tie-blue);
+  --palette-accent-dark: #7ea1f7;
+  /* 03 Text: 제목 · 본문 */
+  --palette-text-light: #15171c;
+  --palette-text-dark: #ecedf0;
+  /* 04 Text Sub: 보조 텍스트 · 캡션 · 플레이스홀더 */
+  --palette-text-sub-light: #676b74;
+  --palette-text-sub-dark: #9c9fa7;
+  /* 05 Line: 구분선 · 카드 · 입력창 테두리 (장식 전용) */
+  --palette-line-light: #e5e6ea;
+  --palette-line-dark: #2b2d33;
+  /* 06 Background: 페이지 바탕 */
+  --palette-background-light: #ffffff;
+  --palette-background-dark: #121316;
+  /* 07 Fill: 입력창 · 섹션 구분 면 / 다크 카드 면 */
+  --palette-fill-light: #f5f6f8;
+  --palette-fill-dark: #1b1c20;
+  /* 08 Success: 높은 점수 · "준수" · 완료 · 승인 */
+  --palette-success-light: #11845b;
+  --palette-success-dark: #43cc98;
+  /* 09 Caution: 개선 필요 점수 · 빠름/느림 · 시간 임박 */
+  --palette-caution-light: #b5600a;
+  --palette-caution-dark: #f2ae4e;
+  /* 10 Alert: 녹화 중(REC) · 오류 · 시간 초과 (한정 사용) */
+  --palette-alert-light: #d7342c;
+  --palette-alert-dark: #ff6b60;
+
+  /* 화면이 쓰는 토큰(주간). 야간 값은 아래 html[data-theme="dark"]에 있다 */
+  --color-text: var(--palette-text-light);
+  --color-text-muted: var(--palette-text-sub-light);
+  --color-text-inverse: var(--palette-background-light);
+  --color-surface: var(--palette-background-light);
+  --color-surface-subtle: var(--palette-fill-light);
+  --color-border: var(--palette-line-light);
+  --color-primary: var(--palette-brand-light);
   --color-primary-hover: #16225a;
-  --color-accent: #3567db;
-  --color-success: #11845b;
-  --color-danger: #d7342c;
+  --color-accent: var(--palette-accent-light);
+  --color-success: var(--palette-success-light);
+  --color-danger: var(--palette-alert-light);
   --color-danger-surface: #fae6e5;
   --color-danger-row: #fdf7f7;
   /* 목업에 없는 값 */
   --color-kakao: #fee500;
   --color-overlay: rgb(21 23 28 / 56%);
-  --color-warning: #b5600a;
+  --color-warning: var(--palette-caution-light);
   --color-chip: #e6ecfa;
   --color-warning-surface: #f9f3ec;
   --color-warning-border: #ead0b7;
@@ -33,23 +71,25 @@
   --color-track: #e5e6ea;
 
   /* 어두운 면. 다크모드가 아니라 라이트 화면 안의 어두운 부분이다 */
-  --color-dark-bg: #121316;
-  --color-dark-surface: #1b1c20;
-  --color-dark-border: #2b2d33;
-  --color-dark-text: #ecedf0;
-  --color-dark-text-muted: #9c9fa7;
-  --color-dark-accent: #7ea1f7;
+  --color-dark-bg: var(--palette-background-dark);
+  --color-dark-surface: var(--palette-fill-dark);
+  --color-dark-border: var(--palette-line-dark);
+  --color-dark-text: var(--palette-text-dark);
+  --color-dark-text-muted: var(--palette-text-sub-dark);
+  --color-dark-accent: var(--palette-accent-dark);
   --color-dark-chip: #272c3a;
-  --color-dark-success: #43cc98;
-  --color-dark-warning: #f2ae4e;
-  --color-rec: #ff6b60;
+  --color-dark-success: var(--palette-success-dark);
+  --color-dark-warning: var(--palette-caution-dark);
+  --color-rec: var(--palette-alert-dark);
   --color-rec-surface: #2f1e1f;
-  --color-light-button: #e9edf6;
+  --color-light-button: var(--palette-shirt-white);
   --color-scrim-page: rgb(21 23 28 / 48%);
   --color-scrim: rgb(8 9 11 / 82%);
   --color-scrim-light: rgb(8 9 11 / 60%);
 
-  /* 관리자 메뉴 */
+  /* 관리자 메뉴. 야간에도 남색 메뉴를 유지하려고 Brand와 따로 고정한다 */
+  --color-nav-bg: var(--palette-suit-navy);
+  --color-nav-text-strong: #ffffff;
   --color-nav-active: #38467d;
   --color-nav-border: #404d82;
   --color-nav-text: #c3c8dc;
@@ -134,6 +174,8 @@
   --shadow-sm: 0 1px 3px rgb(21 23 28 / 8%);
   --duration-fast: 120ms;
   --duration-slow: 600ms;
+  /* 주간·야간 전환. 화면 전체가 이 시간 동안 서서히 겹쳐 바뀐다 */
+  --duration-theme: 400ms;
   --animate-spin: spin 1s linear infinite;
 }
 
@@ -170,6 +212,47 @@ fieldset {
 
 html {
   color-scheme: light;
+}
+
+/*
+ * 야간 모드. layout.tsx의 스크립트가 저장된 선택(없으면 기기 설정)을 보고 data-theme을 단다.
+ * 디자인 규칙 색상표(Brand·Accent·Text·Text Sub·Line·Background·Fill·Success·Caution·Alert)의 Dark 값이다.
+ * --color-dark-*(라이트 화면 안의 어두운 면)·--color-stage-*(카메라 화면)·--color-nav-*(관리자 메뉴)는 두 모드에서 같다.
+ */
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --color-primary: var(--palette-brand-dark);
+  --color-accent: var(--palette-accent-dark);
+  --color-text: var(--palette-text-dark);
+  --color-text-muted: var(--palette-text-sub-dark);
+  --color-border: var(--palette-line-dark);
+  --color-surface: var(--palette-background-dark);
+  --color-surface-subtle: var(--palette-fill-dark);
+  --color-success: var(--palette-success-dark);
+  --color-warning: var(--palette-caution-dark);
+  --color-danger: var(--palette-alert-dark);
+  /* 진하게 채운 바탕(Brand·Text·Accent·Alert)이 밝아지므로 그 위 글자는 남색이다 */
+  --color-text-inverse: var(--palette-suit-navy);
+
+  /* 색상표에 없는 값. 색상표의 Dark 값을 Background에 섞어 만든다 */
+  --color-primary-hover: color-mix(in srgb, var(--palette-brand-dark) 88%, var(--palette-background-dark));
+  --color-accent-hover: color-mix(in srgb, var(--palette-accent-dark) 85%, #ffffff);
+  --color-accent-surface: color-mix(in srgb, var(--palette-accent-dark) 10%, var(--palette-background-dark));
+  --color-accent-soft: color-mix(in srgb, var(--palette-accent-dark) 8%, var(--palette-background-dark));
+  --color-chip: var(--color-dark-chip);
+  --color-success-surface: color-mix(in srgb, var(--palette-success-dark) 12%, var(--palette-background-dark));
+  --color-success-badge: color-mix(in srgb, var(--palette-success-dark) 16%, var(--palette-background-dark));
+  --color-danger-surface: color-mix(in srgb, var(--palette-alert-dark) 14%, var(--palette-background-dark));
+  --color-danger-row: color-mix(in srgb, var(--palette-alert-dark) 7%, var(--palette-background-dark));
+  --color-warning-surface: color-mix(in srgb, var(--palette-caution-dark) 10%, var(--palette-background-dark));
+  --color-warning-border: color-mix(in srgb, var(--palette-caution-dark) 30%, var(--palette-background-dark));
+  --color-warning-badge: color-mix(in srgb, var(--palette-caution-dark) 14%, var(--palette-background-dark));
+  --color-warning-tag: color-mix(in srgb, var(--palette-caution-dark) 16%, var(--palette-background-dark));
+  --color-pending-surface: color-mix(in srgb, var(--palette-caution-dark) 6%, var(--palette-background-dark));
+  --color-pending-badge: color-mix(in srgb, var(--palette-caution-dark) 14%, var(--palette-background-dark));
+  --color-muted-badge: var(--palette-line-dark);
+  --color-light-button: var(--color-dark-chip);
+  --color-track: var(--palette-line-dark);
 }
 
 body {
@@ -236,6 +319,16 @@ h1:focus {
   html:has([data-snap-sections]) footer {
     scroll-snap-align: end;
   }
+}
+
+/*
+ * 주간·야간 전환. ThemeToggle이 View Transition으로 바꾸면 이전·새 화면이 은은하게 겹쳐 바뀐다.
+ * 동작 줄이기 설정을 켠 사용자는 ThemeToggle이 전환 없이 바로 바꾼다.
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--duration-theme);
+  animation-timing-function: ease;
 }
 
 @keyframes spin {
