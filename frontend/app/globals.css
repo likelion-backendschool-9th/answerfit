@@ -39,6 +39,8 @@
   --color-dark-text: #ecedf0;
   --color-dark-text-muted: #9c9fa7;
   --color-dark-accent: #7ea1f7;
+  /* 어두운 배경 위 워드마크의 FIT(로고 지침 color/brand Dark) */
+  --color-brand-on-dark: #e9edf6;
   --color-dark-chip: #272c3a;
   --color-dark-success: #43cc98;
   --color-dark-warning: #f2ae4e;
@@ -107,7 +109,6 @@
   --text-xl: 1.5rem;
   --text-2xl: 2.25rem;
   --text-hero: 3.5rem;
-  --text-brand: 1.6875rem;
 
   --leading-none: 1;
   --leading-tight: 1.3;
