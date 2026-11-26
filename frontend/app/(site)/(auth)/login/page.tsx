@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { BrandLogo } from "@/app/_components/BrandLogo/BrandLogo";
 import { safeNextPath } from "@/lib/next-path";
+import { socialLoginNotice } from "@/features/auth/api";
 import { HomeHero } from "@/app/_components/HomeHero/HomeHero";
 import { TopBar } from "@/app/_components/TopBar/TopBar";
 import { PATHS } from "@/app/_lib/paths";
@@ -12,7 +13,7 @@ import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: "로그인" };
 
-type Props = { searchParams: Promise<{ next?: string | string[] }> };
+type Props = { searchParams: Promise<{ next?: string | string[]; error?: string | string[] }> };
 
 export default function LoginPage({ searchParams }: Props) {
   return (
@@ -49,14 +50,16 @@ export default function LoginPage({ searchParams }: Props) {
   );
 }
 
-/** 돌아갈 주소를 폼과 함께 그린다. 서버 액션이 주소를 다시 검사한다 */
+/** 돌아갈 주소를 폼과 함께 그린다. 서버 액션이 주소를 다시 검사한다. 카카오 로그인이 실패해 돌아오면 error가 붙는다 */
 async function Forms({ searchParams }: Props) {
-  const next = safeNextPath((await searchParams).next);
+  const params = await searchParams;
+  const next = safeNextPath(params.next);
+  const notice = await socialLoginNotice(params.error);
   return (
     <>
       <LoginForm next={next} />
       <p className={styles.divider}>또는 소셜 계정으로</p>
-      <SocialButtons next={next} />
+      <SocialButtons next={next} notice={notice} />
     </>
   );
 }
