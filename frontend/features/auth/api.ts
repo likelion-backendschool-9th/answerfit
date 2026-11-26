@@ -2,7 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { demoSuspensionMessage } from "@/demo/members";
-import { addDemoMember, demoSocialMember, findDemoMember, isDemoEmailTaken } from "@/demo/auth";
+import { addDemoMember, demoSocialMember, findDemoMember, isDemoEmailTaken, isDemoNicknameTaken } from "@/demo/auth";
 import { getDataMode, isSwitchable } from "@/demo/mode";
 import { safeNextPath } from "@/lib/next-path";
 import { endSession, startSession } from "@/features/session/session";
@@ -101,6 +101,19 @@ export async function socialLoginNotice(error: unknown): Promise<string | undefi
 export async function isEmailTaken(email: string): Promise<boolean> {
   if ((await getDataMode()) === "mock") return isDemoEmailTaken(email);
   const { available } = await callBackend<{ available: boolean }>(`/api/v1/auth/email-availability?email=${encodeURIComponent(email)}`);
+  return !available;
+}
+
+export async function isNicknameTaken(nickname: string): Promise<boolean> {
+  if ((await getDataMode()) === "mock") return isDemoNicknameTaken(nickname);
+  const query = new URLSearchParams({ nickname });
+  const result = await callBackend<{ available?: unknown } | null>(
+    `/api/v1/auth/nickname-available?${query}`,
+  );
+  const available = result?.available;
+  if (typeof available !== "boolean") {
+    throw new ApiError(502, undefined, "닉네임 사용 가능 여부를 확인하지 못했어요.");
+  }
   return !available;
 }
 
