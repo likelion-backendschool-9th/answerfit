@@ -4,6 +4,8 @@ import Link from "next/link";
 import { BrandLogo } from "@/app/_components/BrandLogo/BrandLogo";
 import { safeNextPath } from "@/lib/next-path";
 import { HomeHero } from "@/app/_components/HomeHero/HomeHero";
+import { TopBar } from "@/app/_components/TopBar/TopBar";
+import { PATHS } from "@/app/_lib/paths";
 import { LoginForm } from "./_components/LoginForm/LoginForm";
 import { SocialButtons } from "./_components/SocialButtons/SocialButtons";
 import styles from "./page.module.css";
@@ -16,7 +18,8 @@ export default function LoginPage({ searchParams }: Props) {
   return (
     <div className={styles.screen}>
       <div className={styles.backdrop} inert>
-        <HomeHero backdrop />
+        <TopBar current={PATHS.home} />
+        <HomeHero />
       </div>
       <section className={styles.modal} aria-labelledby="login-title">
         <div className={styles.body}>

@@ -5,18 +5,17 @@ import { BrandLogo } from "../BrandLogo/BrandLogo";
 import styles from "./TopBar.module.css";
 
 const MENU = [
-  { href: PATHS.newInterview, label: "모의 면접" },
+  { href: PATHS.newInterview, label: "모의면접" },
   { href: PATHS.archive, label: "질문 아카이브" },
-  { href: PATHS.my, label: "마이페이지" },
+  { href: PATHS.experiences, label: "이력 관리" },
 ];
 
-/** 로그인한 회원이 보는 화면의 머리글 */
+/** 로그인한 회원이 보는 화면의 머리글. 스크롤해도 위에 붙어 있다 */
 export function TopBar({ current }: { current: string }) {
   return (
     <header className={styles.bar}>
       <div className={styles.brand}>
         <BrandLogo iconSize={32} />
-        <span className={styles.tagline}>MOCK INTERVIEW ROOM</span>
       </div>
       <nav className={styles.nav} aria-label="주 메뉴">
         {MENU.map(({ href, label }) => (

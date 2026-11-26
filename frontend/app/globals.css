@@ -31,8 +31,6 @@
   --color-pending-surface: #fcf9f5;
   --color-pending-badge: #f4eadd;
   --color-track: #e5e6ea;
-  --color-veil: rgb(255 255 255 / 72%);
-  --color-veil-end: rgb(255 255 255 / 0%);
 
   /* 어두운 면. 다크모드가 아니라 라이트 화면 안의 어두운 부분이다 */
   --color-dark-bg: #121316;
