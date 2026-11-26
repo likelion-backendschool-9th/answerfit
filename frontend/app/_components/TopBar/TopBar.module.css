@@ -13,9 +13,9 @@
   background: var(--color-surface);
 }
 
-/* 헤더에서는 로고 글자를 한 단계 작게 쓴다(BrandLogo가 읽는 변수) */
+/* 헤더에서는 워드마크를 한 단계 작게 쓴다(Wordmark가 읽는 변수) */
 .brand {
-  --brand-size: var(--text-xl);
+  --wordmark-height: 1.125rem;
   display: flex;
   align-items: center;
 }
