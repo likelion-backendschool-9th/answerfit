@@ -10,12 +10,16 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.likelion.answerfit.auth.jwt.JwtConfig;
+import com.likelion.answerfit.global.config.SecurityConfig;
 import com.likelion.answerfit.user.service.NicknameAvailabilityService;
 
 @WebMvcTest(NicknameAvailabilityController.class)
+@Import({SecurityConfig.class, JwtConfig.class})
 class NicknameAvailabilityControllerTest {
     private static final String PATH = "/api/v1/auth/nickname-available";
 

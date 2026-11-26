@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -24,10 +26,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ApiResponse<Void>> handleCustomException(CustomException exception, HttpServletRequest request) {
-        return failResponse(exception.getErrorCode(), request.getRequestURI());
+        ErrorCode errorCode = exception.getErrorCode();
+        ErrorResponse errorResponse = new ErrorResponse(request.getRequestURI(), errorCode, exception.getMessage(), null);
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(ApiResponse.fail(errorResponse));
     }
 
-    // Spring Security가 들어오면 AccessDeniedException·AuthenticationException은 따로 받아야 한다. 여기로 오면 500이 된다.
+    // 컨트롤러 안에서 난 Security 예외는 아래 Exception 처리에 잡혀 500이 되지 않게 따로 받는다.
+    // 필터에서 난 401·403은 SecurityConfig가 같은 형식으로 응답한다.
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(AuthenticationException exception, HttpServletRequest request) {
+        return failResponse(ErrorCode.UNAUTHORIZED, request.getRequestURI());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(AccessDeniedException exception, HttpServletRequest request) {
+        return failResponse(ErrorCode.FORBIDDEN, request.getRequestURI());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGlobalException(Exception exception, HttpServletRequest request) {
         log.error("처리하지 못한 예외: {} {}", request.getMethod(), request.getRequestURI(), exception);

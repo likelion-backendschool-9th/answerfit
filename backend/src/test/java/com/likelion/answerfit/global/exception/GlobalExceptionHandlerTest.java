@@ -58,6 +58,21 @@ class GlobalExceptionHandlerTest {
         @PostMapping("/valid")
         void valid(@Valid @RequestBody NameRequest request) {
         }
+
+        @GetMapping("/denied")
+        void denied() {
+            throw new org.springframework.security.access.AccessDeniedException("denied");
+        }
+
+        @GetMapping("/unauthenticated")
+        void unauthenticated() {
+            throw new org.springframework.security.authentication.InsufficientAuthenticationException("no token");
+        }
+
+        @GetMapping("/suspended")
+        void suspended() {
+            throw new CustomException(ErrorCode.SUSPENDED, "이용이 정지된 계정이에요. 사유: 반복 등록");
+        }
     }
 
     private final MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new TestController())
@@ -119,6 +134,22 @@ class GlobalExceptionHandlerTest {
     @Test
     void ResponseStatusException은_INVALID_INPUT으로_응답한다() throws Exception {
         expectError(get("/conflict"), ErrorCode.INVALID_INPUT);
+    }
+
+    @Test
+    void 컨트롤러_안의_권한_거부는_500이_아니라_FORBIDDEN() throws Exception {
+        expectError(get("/denied"), ErrorCode.FORBIDDEN);
+    }
+
+    @Test
+    void 컨트롤러_안의_인증_실패는_500이_아니라_UNAUTHORIZED() throws Exception {
+        expectError(get("/unauthenticated"), ErrorCode.UNAUTHORIZED);
+    }
+
+    @Test
+    void CustomException에_넣은_문장이_detail로_나간다() throws Exception {
+        expectError(get("/suspended"), ErrorCode.SUSPENDED)
+                .andExpect(jsonPath("$.error.detail").value("이용이 정지된 계정이에요. 사유: 반복 등록"));
     }
 
     @Test

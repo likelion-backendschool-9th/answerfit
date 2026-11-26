@@ -30,8 +30,9 @@ const PROVIDERS = [
   { id: "kakao", label: "카카오로 계속하기", icon: KakaoIcon },
 ];
 
-export function SocialButtons({ next }: { next: string }) {
-  const [state, action, pending] = useActionState(socialLoginAction, {});
+/** notice: 카카오 로그인이 실패해 돌아왔을 때의 안내 */
+export function SocialButtons({ next, notice }: { next: string; notice?: string }) {
+  const [state, action, pending] = useActionState(socialLoginAction, { error: notice });
   return (
     <form action={action} className={styles.list}>
       <input type="hidden" name="next" value={next} />

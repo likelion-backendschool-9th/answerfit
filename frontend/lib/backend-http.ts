@@ -1,4 +1,5 @@
 import "server-only";
+import { readApiResponse } from "./api-response";
 
 /** 개발 모드에서 아직 없는 API를 불렀다. 목업으로 대신하지 않는다. digest는 오류 화면이 종류를 구분하는 데 쓴다 */
 export class ApiNotConnectedError extends Error {
@@ -23,7 +24,7 @@ export class ApiError extends Error {
 
 type Options = { method?: string; body?: object | FormData; token?: string };
 
-/** 성공 응답은 호출자가 읽고, 공통 오류 응답과 기존 오류 형식은 여기서 처리한다. */
+/** 백엔드 호출. 성공하면 ApiResponse의 data를 돌려준다(docs/api-response.md) */
 export async function callBackend<T>(path: string, { method = "GET", body, token }: Options = {}): Promise<T> {
   const base = process.env.BACKEND_URL;
   if (!base) throw new ApiNotConnectedError(path);
@@ -40,12 +41,8 @@ export async function callBackend<T>(path: string, { method = "GET", body, token
     throw new ApiNotConnectedError(path);
   }
 
-  const data = await response.json().catch(() => null);
-  if (response.ok) return data as T;
-  if (data?.success === false && typeof data.error?.errorCode === "string") {
-    throw new ApiError(response.status, data.error.errorCode, data.error.detail ?? "요청을 처리하지 못했어요.");
-  }
-  // 오류 코드 없는 Spring 기본 응답은 아직 없는 API로 본다.
-  if ([404, 405, 501].includes(response.status) && !data?.code) throw new ApiNotConnectedError(path);
-  throw new ApiError(response.status, data?.code, data?.message ?? "요청을 처리하지 못했어요.");
+  const result = readApiResponse<T>(response.status, await response.json().catch(() => null));
+  if (result.ok) return result.data;
+  if (result.notConnected) throw new ApiNotConnectedError(path);
+  throw new ApiError(response.status, result.code, result.message);
 }
