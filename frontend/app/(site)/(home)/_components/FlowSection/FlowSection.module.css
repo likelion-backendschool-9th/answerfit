@@ -1,5 +1,5 @@
 .section {
-  padding: var(--space-flow) var(--space-5) var(--space-section);
+  padding: var(--space-fit) var(--space-5);
   background: var(--color-surface-subtle);
 }
 
@@ -31,7 +31,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-10) var(--space-6);
-  margin-top: var(--space-16);
+  margin-top: var(--space-fit-lg);
 }
 
 .step {
@@ -55,9 +55,9 @@
 
 .card {
   display: grid;
-  min-height: 15rem;
-  margin-top: var(--space-5);
-  padding: var(--space-6) var(--space-7);
+  min-height: min(15rem, 22dvh);
+  margin-top: var(--space-fit-md);
+  padding: var(--space-fit-md) var(--space-7);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
@@ -72,14 +72,14 @@
 }
 
 .stepTitle {
-  margin-top: var(--space-5);
+  margin-top: var(--space-fit-md);
 }
 
 .description {
-  margin-top: var(--space-5);
+  margin-top: var(--space-fit-md);
   color: var(--color-text-muted);
-  font-size: var(--text-lg);
-  line-height: var(--leading-lg);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
 }
 
 /* 준비 */
@@ -215,11 +215,11 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-6);
-  margin-top: var(--space-16);
+  margin-top: var(--space-fit-lg);
 }
 
 .mode {
-  padding: var(--space-9) var(--space-10) var(--space-10);
+  padding: var(--space-fit-lg) var(--space-10);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-panel);
   background: var(--color-surface);
@@ -242,16 +242,16 @@
 }
 
 .modeTitle {
-  margin-top: var(--space-5);
+  margin-top: var(--space-fit-md);
 }
 
 .points {
   display: flex;
   flex-direction: column;
   gap: var(--space-2h);
-  margin-top: var(--space-5);
-  font-size: var(--text-lg);
-  line-height: var(--leading-lg);
+  margin-top: var(--space-fit-md);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
 }
 
 .points li {
