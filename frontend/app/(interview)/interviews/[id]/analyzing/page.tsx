@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
+import { Main } from "@/app/_components/Main/Main";
 import { TopBar } from "@/app/_components/TopBar/TopBar";
 import { PATHS } from "@/app/_lib/paths";
 import { getProgress, getResult } from "@/features/interview/api";
@@ -11,14 +12,15 @@ export const metadata: Metadata = { title: "면접 결과 정리" };
 
 type Props = { params: Promise<{ id: string }> };
 
+/** 푸터가 없는 화면이라 본문을 직접 그린다 */
 export default function AnalyzingPage({ params }: Props) {
   return (
-    <>
+    <Main>
       <TopBar current={PATHS.newInterview} />
       <Suspense>
         <Analyzing params={params} />
       </Suspense>
-    </>
+    </Main>
   );
 }
 

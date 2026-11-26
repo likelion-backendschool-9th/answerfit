@@ -7,11 +7,7 @@
   color: var(--color-text);
 }
 
-.header {
-  color: var(--color-text);
-}
-
-/* 헤더 아래 남은 높이를 채우고 내용을 세로 가운데에 둔다 */
+/* 남은 높이를 채우고 내용을 세로 가운데에 둔다 */
 .inner {
   display: grid;
   flex: 1;

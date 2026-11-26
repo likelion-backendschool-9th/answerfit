@@ -31,8 +31,6 @@
   --color-pending-surface: #fcf9f5;
   --color-pending-badge: #f4eadd;
   --color-track: #e5e6ea;
-  --color-veil: rgb(255 255 255 / 72%);
-  --color-veil-end: rgb(255 255 255 / 0%);
 
   /* 어두운 면. 다크모드가 아니라 라이트 화면 안의 어두운 부분이다 */
   --color-dark-bg: #121316;
@@ -215,10 +213,12 @@ h1:focus {
  * 구역 단위 스크롤. data-snap-sections가 있는 화면(홈)에서만, 모바일보다 넓을 때만 켠다.
  * 구역마다 한 화면 높이를 차지하고 내용은 가운데에 둔다. 푸터도 맞춤 지점이라 맨 아래까지 내려갈 수 있다.
  * 모바일에서는 스냅과 화면 높이 고정을 모두 풀어 자유롭게 스크롤한다.
+ * 위에 붙는 헤더(TopBar, 3rem)에 가리지 않게 스냅 위치와 구역 높이에서 헤더 높이를 뺀다.
  */
 @media (min-width: 40rem) {
   html:has([data-snap-sections]) {
     scroll-snap-type: y mandatory;
+    scroll-padding-top: 3rem;
   }
 
   [data-snap-sections] > section {
@@ -230,7 +230,7 @@ h1:focus {
 
   /* 마지막 구역(마무리)은 한 화면을 채우지 않고 원래 크기를 쓴다 */
   [data-snap-sections] > section:not(:last-child) {
-    min-height: 100dvh;
+    min-height: calc(100dvh - 3rem);
   }
 
   html:has([data-snap-sections]) footer {

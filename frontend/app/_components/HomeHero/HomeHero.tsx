@@ -3,7 +3,6 @@ import { PATHS } from "@/app/_lib/paths";
 import { ButtonLink } from "@/components/ui/Button/Button";
 import { Icon } from "@/components/ui/Icon/Icon";
 import { cn } from "@/lib/cn";
-import { SiteHeader } from "../SiteHeader/SiteHeader";
 import styles from "./HomeHero.module.css";
 
 const FEATURES = [
@@ -14,13 +13,10 @@ const FEATURES = [
 
 const TAGS = ["#트러블슈팅", "#협업", "#성능 개선"];
 
-/** 홈 첫 화면. 로그인 화면의 배경으로도 쓴다 */
-export function HomeHero({ backdrop = false }: { backdrop?: boolean }) {
+/** 홈 첫 화면. 로그인 화면의 배경으로도 쓴다. 헤더(TopBar)는 스크롤을 따라오도록 이 영역 밖, 페이지 맨 위에 둔다 */
+export function HomeHero() {
   return (
     <section className={styles.hero} aria-labelledby="hero-title">
-      <div className={styles.header}>
-        <SiteHeader backdrop={backdrop} />
-      </div>
       <div className={styles.inner}>
         <div className={styles.copy}>
           <p className={styles.badge}>
