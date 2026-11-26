@@ -1,6 +1,6 @@
 # 문제은행 변경 액션 연결
 
-[문제은행 청사진](../../backend/question/README.md)의 QB-11이다. [조회 연결](archive.md)의 인증·응답 변환을 재사용하며 화면 URL과 기존 디자인을 유지한다. 실제 계정의 브라우저 흐름과 관리자·AI 전체 연계는 QB-12에서 확인한다.
+[문제은행 청사진](../../backend/question/README.md)의 QB-11이다. [조회 연결](archive.md)의 인증·응답 변환을 재사용하며 화면 URL과 기존 디자인을 유지한다. 실제 HTTP 회귀·목업 브라우저 검증 결과와 실제 계정·관리자·AI의 남은 연계는 [QB-12 통합 회귀 검증](../../backend/question/integration-regression.md)에 기록한다.
 
 ## 입력과 저장
 

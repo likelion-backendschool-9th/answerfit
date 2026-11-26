@@ -2,7 +2,7 @@
 
 WBS 3의 `problem-bank-101`부터 `problem-bank-109`까지 9개 API를 구현해 기존 질문 아카이브 화면에 연결한다. 기존 질문 엔티티를 재사용하고, 검색·페이지 조회·소유권·상태 전이·좋아요·신고 규칙을 백엔드에서 보장한다.
 
-이 문서는 문제은행의 구현 계획이다. 확정 계약은 [공통 계약](contracts.md), [카테고리 조회](categories.md), [질문 목록](list.md), [질문 상세](detail.md), [사용자 등록](create.md), [수정·재제출](update.md), [본인 질문 삭제](delete.md), [좋아요 등록·취소](likes.md), [질문 신고](reports.md)에 기록한다. 프론트의 [조회 연결](../../frontend/question/archive.md)과 [변경 액션 연결](../../frontend/question/actions.md)은 화면 문서에서 다룬다.
+이 문서는 문제은행의 구현 계획이다. 확정 계약은 [공통 계약](contracts.md), [카테고리 조회](categories.md), [질문 목록](list.md), [질문 상세](detail.md), [사용자 등록](create.md), [수정·재제출](update.md), [본인 질문 삭제](delete.md), [좋아요 등록·취소](likes.md), [질문 신고](reports.md)에 기록한다. 프론트의 [조회 연결](../../frontend/question/archive.md)과 [변경 액션 연결](../../frontend/question/actions.md)은 화면 문서에서 다루며, 연결 검증의 범위와 남은 조건은 [통합 회귀 검증](integration-regression.md)에 기록한다.
 
 ## 1. 요구사항과 범위
 
@@ -30,11 +30,11 @@ WBS 3의 `problem-bank-101`부터 `problem-bank-109`까지 9개 API를 구현해
 
 ## 2. 현재 기반과 연결 차이
 
-기존 엔티티와 QB-01~QB-10, 통합한 인증 브랜치 기준이다.
+기존 엔티티와 QB-01~QB-11, 통합한 인증 브랜치 기준이다.
 
 | 영역 | 확인한 기반 | 필요한 작업 |
 | --- | --- | --- |
-| 백엔드 | Java 21, Spring Boot 4.2.0, JPA·Validation·WebMVC, H2, 질문 요청 DTO·입력 검증 | 질문 목록·상세·변경의 Repository·Service·Controller와 응답 DTO |
+| 백엔드 | Java 21, Spring Boot 4.2.0, JPA·Validation·WebMVC, H2, 질문 Repository·Service·Controller와 DTO | 운영 DB/migration 연계 |
 | 질문 데이터 | `Question`, `Category`, `QuestionKeyword`, `QuestionLike`, `QuestionReport`, `QuestionModeration` | 기존 모델 활용, 필요한 불변식·경합 처리 보강 |
 | 공통 기반 | 문제은행 오류 응답, JWT 검증 후 DB 회원 기반 principal, 공개·소유권 정책 | 실제 카카오 설정·계정 확인, 운영 DB/migration 연계 |
 | 카테고리 | 조회·공개 건수·초기 분류와 프론트 분류 ID 연결 | 운영 seed/migration 정책 연계 |
@@ -45,8 +45,8 @@ WBS 3의 `problem-bank-101`부터 `problem-bank-109`까지 9개 API를 구현해
 | 본인 질문 삭제 | DELETE 연결, 기록 보존, 성공 후 관련 화면 갱신과 이동 | 관리자 쓰기의 동일 잠금 규칙 연계 |
 | 좋아요 등록·취소 | POST/DELETE 연결, 서버 최종 집계와 개인 선택 상태 반영 | 관리자 쓰기의 동일 잠금 규칙 연계 |
 | 질문 신고 | 5유형 코드 변환과 상세 검증, 업무 오류 안내·신고 상태 갱신 | 관리자 신고 처리·공통 잠금 및 운영 DB 연계 |
-| 프론트 통신 | Next 서버가 Bearer 토큰을 붙여 `BACKEND_URL` 호출 | WBS 경로·메서드·DTO에 맞춘 adapter 연결 |
-| 프론트 목록/상세 | 서버 페이지 응답과 전용 상세 조회 사용, 개인 전체 배열 소비자 분리 | 개인 API와 변경 액션 연결(QB-11), 전체 흐름 검증(QB-12) |
+| 프론트 통신 | Next 서버가 Bearer 토큰을 붙여 WBS 경로·메서드·DTO로 `BACKEND_URL` 호출 | 실제 계정 브라우저 전체 흐름 검증(QB-12) |
+| 프론트 목록/상세 | 서버 페이지 응답과 전용 상세 조회 사용, 변경 액션 연결, 개인 전체 배열 소비자 분리 | 개인 API 연결, 관리자·AI 전체 흐름 검증(QB-12) |
 
 주요 근거: [빌드 설정](../../../backend/build.gradle), [질문 엔티티](../../../backend/src/main/java/com/likelion/answerfit/question/entity/Question.java), [현재 프론트 호출](../../../frontend/features/question/api.ts), [화면 자료형](../../../frontend/features/question/types.ts), [목록 데이터 조립](../../../frontend/app/(site)/archive/page.tsx), [상세 데이터 조립](../../../frontend/app/(site)/archive/[id]/page.tsx).
 
@@ -224,11 +224,11 @@ stateDiagram-v2
 
 ### 전체 배열을 공유하는 화면의 회귀 방지
 
-현재 `getQuestions()`는 아카이브뿐 아니라 `/my/questions`, `/my/likes`, `/my` 대시보드도 사용한다. 이 함수를 공개 질문 첫 페이지로 단순 교체하면 본인 미승인 질문·좋아요 목록·건수가 누락된다.
+기존 `getQuestions()`의 소비자를 아카이브 조회와 `/my/questions`, `/my/likes`, `/my` 대시보드의 개인 조회로 분리했다. 공개 질문 첫 페이지로 개인 전체 데이터를 대체하면 본인 미승인 질문·좋아요 목록·건수가 누락되므로 각 전용 계약을 유지한다.
 
 - `my-114`는 내 질문과 상태별 건수의 전용 계약을 사용한다. 문제은행 상세·수정·삭제는 이번 계약을 재사용한다.
 - `my-106`·`my-105`는 좋아요 목록과 전체 건수를 제공한다. 공개 목록 첫 페이지를 세어 대체하지 않는다.
-- 회원 담당이 이 API들을 연결하기 전까지 해당 화면 전체의 백엔드 연결 완료로 보고하지 않는다. 기존 호출자를 명시적으로 분리한 뒤 질문 데이터 접근을 바꾼다.
+- 회원 담당이 이 API들을 연결하기 전까지 해당 화면 전체의 백엔드 연결 완료로 보고하지 않는다. 분리한 개인 조회의 미연결 오류를 공개 목록이나 빈 배열로 감추지 않는다.
 
 유사 질문은 별도 생성 API를 추가하지 않고 기존 질문 검색을 재사용한다. QB-11은 입력의 조사·일반 문구를 정리해 가장 긴 핵심어를 최대 100 code point로 추출하고 최신순 후보 한 페이지 20개를 조회한다. 그 후보에서 전체 입력 최대 200 code point의 기존 조각 유사도를 비교한다. 전체 아카이브를 반복 다운로드하지 않으며 검색 후보 밖의 유사 질문까지 보장하지 않는다. 상세 기준은 [변경 액션 연결](../../frontend/question/actions.md)을 따른다.
 
@@ -334,19 +334,21 @@ git switch -c feature/question-bank-backend-01-contracts feature/question-bank-b
 
   조회 adapter·화면·목업 호환과 인증 통합 범위: [프론트 아카이브](../../frontend/question/archive.md). email-signup 인증 브랜치와 현재 DB 기반 principal을 연결하고 검증한 결과를 부모 브랜치에 반영했다. 실제 카카오 계정과 운영 설정의 브라우저 검증은 QB-12에 남긴다.
 
-- [ ] **QB-11 등록·수정·삭제·좋아요·신고 프론트 연결** — `feature/question-bank-backend-11-connect-actions`
+- [x] **QB-11 등록·수정·삭제·좋아요·신고 프론트 연결** — `feature/question-bank-backend-11-connect-actions`
 
   선행: QB-05~QB-10. 기존 폼과 서버 액션을 실제 변경 API에 연결한다. 생성 ID를 상세 링크/이동으로 전달하고 카테고리 ID·신고 유형을 변환한다. 합의한 검색어 추출·후보 기준으로 기존 검색 API를 유사 질문 안내에 재사용한다.
 
   완료 기준: 각 동작의 성공 결과·업무 오류·재조회가 화면에 반영된다. 반려 재제출, 100자 검색어 제한, 중복 요청과 권한 거절도 확인한다. 관련 시나리오: S4·S5·S7·S8·S9·S11·S12.
 
-  입력·분류·신고 유형 변환, 성공 후 이동·갱신과 후보 검색 기준: [프론트 변경 액션](../../frontend/question/actions.md). 체크박스는 작업 결과를 부모 브랜치에 반영한 뒤 완료 처리한다.
+  입력·분류·신고 유형 변환, 성공 후 이동·갱신과 후보 검색 기준: [프론트 변경 액션](../../frontend/question/actions.md). 구현과 테스트를 마치고 부모 브랜치에 반영했다.
 
 - [ ] **QB-12 전체 흐름과 연계 회귀 검증** — `feature/question-bank-backend-12-integration-regression`
 
   선행: QB-10·QB-11, 인증/회원 API와 관리자·AI 연계 준비. 실제 인증을 사용한 개발 모드에서 S1~S12를 확인하고 발견한 연결 오류를 수정한다. 내 질문·좋아요·대시보드는 각 담당 API와 연결해 전체 데이터 누락을 확인한다.
 
   완료 기준: 로그인 → 목록/상세 → 좋아요 → 등록/본인 상세 → 수정/재제출/삭제 → 신고가 동작하고 관리자 승인·답안 생성 상태가 반영된다. 자동 검사와 직접 확인 결과를 남긴다. 외부 연계가 준비되지 않은 부분은 완료로 체크하지 않으며, 해당 API 구현은 기존 담당 범위를 유지한다.
+
+  [통합 회귀 검증](integration-regression.md): 실제 HTTP·JWT·JPA와 프론트 조회/액션을 연결한 8개 시나리오와 목업 브라우저 검증을 추가했다. 실제 카카오 계정·관리자·AI·개인 API 연계는 남아 있어 전체 완료 체크는 보류한다.
 
 ### 구현 시 공통 확인 사항
 
