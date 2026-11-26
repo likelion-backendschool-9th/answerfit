@@ -14,10 +14,12 @@
   background: var(--color-overlay);
 }
 
+/* isolation: 배경 안의 헤더(sticky, z-index)가 어두운 막 위로 올라오지 않게 배경끼리만 쌓는다 */
 .backdrop {
   position: absolute;
   inset: 0;
   overflow: hidden;
+  isolation: isolate;
 }
 
 .modal {

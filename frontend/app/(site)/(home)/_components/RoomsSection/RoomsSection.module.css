@@ -1,0 +1,110 @@
+.section {
+  padding: var(--space-fit) var(--space-5);
+  background: var(--color-surface);
+}
+
+.inner {
+  width: min(100%, 100rem);
+  margin: 0 auto;
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.facts,
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.pill {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+}
+
+.rooms {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin-top: var(--space-fit-lg);
+}
+
+.room {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-fit-lg) var(--space-6);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface-subtle);
+}
+
+.number {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+}
+
+.art {
+  margin-top: var(--space-fit-md);
+  color: var(--color-text);
+}
+
+.title {
+  margin-top: var(--space-fit-md);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  line-height: var(--leading-xl);
+}
+
+.description {
+  margin-top: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+}
+
+.tags {
+  margin-top: var(--space-fit-md);
+}
+
+/* 카드 높이가 달라도 입장 링크는 맨 아래에 맞춘다 */
+.enter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: auto;
+  padding-top: var(--space-fit-lg);
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.enter:hover {
+  color: var(--color-accent-hover);
+}
+
+@media (max-width: 80rem) {
+  .rooms {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 40rem) {
+  .section {
+    padding: var(--space-section-sm) var(--space-5);
+  }
+
+  .rooms {
+    grid-template-columns: 1fr;
+  }
+}
