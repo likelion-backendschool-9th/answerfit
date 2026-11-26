@@ -70,6 +70,13 @@ class AuthApiTest {
     }
 
     @Test
+    void 깨진_JSON은_INVALID_REQUEST() throws Exception {
+        mvc.perform(post("/api/auth/social/kakao").contentType(MediaType.APPLICATION_JSON).content("{bad"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
+    }
+
+    @Test
     void 토큰이_없거나_틀리면_내_정보는_401() throws Exception {
         mvc.perform(get("/api/members/me"))
                 .andExpect(status().isUnauthorized())

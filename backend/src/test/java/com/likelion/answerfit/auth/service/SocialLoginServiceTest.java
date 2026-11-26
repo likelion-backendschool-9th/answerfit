@@ -14,6 +14,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.support.TransactionOperations;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.likelion.answerfit.auth.jwt.TokenService;
@@ -34,7 +36,8 @@ class SocialLoginServiceTest {
     private final UserSocialAccountRepository socialAccountRepository = mock(UserSocialAccountRepository.class);
     private final TokenService tokenService = mock(TokenService.class);
     private final SocialLoginService service =
-            new SocialLoginService(kakaoClient, userRepository, socialAccountRepository, tokenService, () -> 4821);
+            new SocialLoginService(kakaoClient, userRepository, socialAccountRepository, tokenService,
+                    TransactionOperations.withoutTransaction(), () -> 4821);
 
     @BeforeEach
     void setUp() {
@@ -145,6 +148,31 @@ class SocialLoginServiceTest {
         ArgumentCaptor<User> users = ArgumentCaptor.forClass(User.class);
         verify(userRepository, org.mockito.Mockito.times(5)).save(users.capture());
         assertThat(users.getAllValues()).extracting(User::getNickname).containsOnly("회원4821");
+    }
+
+    @Test
+    void 동시_가입으로_유일_조건에_걸리면_한_번_다시_해서_먼저_만든_회원으로_로그인한다() {
+        User created = User.createSocial("jiwoo@kakao.com", "지우");
+        kakaoReturns(new KakaoUser("777", "jiwoo@kakao.com", true, "지우"));
+        when(socialAccountRepository.findByProviderAndProviderUserId(SocialProvider.KAKAO, "777"))
+                .thenReturn(Optional.empty())
+                .thenReturn(Optional.of(linked(created, 1L)));
+        when(socialAccountRepository.save(any())).thenThrow(new DataIntegrityViolationException("uk_user_social_accounts_provider_user"));
+        when(userRepository.findActiveById(1L)).thenReturn(Optional.of(created));
+
+        assertThat(login()).isEqualTo("token");
+
+        verify(kakaoClient, org.mockito.Mockito.times(1)).fetchUser(anyString(), anyString());
+        verify(tokenService).issue(created);
+    }
+
+    @Test
+    void 다시_해도_유일_조건에_걸리면_예외를_그대로_던진다() {
+        kakaoReturns(new KakaoUser("777", "jiwoo@kakao.com", true, "지우"));
+        when(socialAccountRepository.save(any())).thenThrow(new DataIntegrityViolationException("uk"));
+
+        assertThatThrownBy(this::login).isInstanceOf(DataIntegrityViolationException.class);
+        verify(socialAccountRepository, org.mockito.Mockito.times(2)).save(any());
     }
 
     @Test

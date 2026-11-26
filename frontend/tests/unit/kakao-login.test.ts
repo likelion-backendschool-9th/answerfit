@@ -74,6 +74,7 @@ describe("로그인 화면 안내", () => {
   it("아는 코드만 문장으로 바꾼다", () => {
     expect(socialLoginMessage("EMAIL_ALREADY_REGISTERED")).toBe("이메일로 가입한 계정이에요. 이메일로 로그인해 주세요.");
     expect(socialLoginMessage("CANCELLED")).toBe("카카오 로그인을 취소했어요.");
+    expect(socialLoginMessage("KAKAO_UNAVAILABLE")).toBe("카카오 서버와 연결하지 못했어요. 잠시 뒤 다시 시도해 주세요.");
     expect(socialLoginMessage("toString")).toBeUndefined();
     expect(socialLoginMessage("<script>")).toBeUndefined();
     expect(socialLoginMessage(["SUSPENDED"])).toBeUndefined();
