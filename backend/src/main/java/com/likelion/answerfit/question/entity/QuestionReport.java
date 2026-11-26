@@ -48,7 +48,8 @@ public class QuestionReport {
     @Column(name = "reason_type", nullable = false, length = 30)
     private ReportReasonType reasonType;
 
-    @Column(name = "reason", length = 500)
+    // 300 code point는 H2에서 최대 600 UTF-16 코드 단위가 될 수 있다.
+    @Column(name = "reason", length = 600)
     private String reason;
 
     @Enumerated(EnumType.STRING)
