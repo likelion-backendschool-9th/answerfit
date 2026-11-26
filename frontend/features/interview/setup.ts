@@ -5,6 +5,9 @@ export const MODE_LABEL: Record<InterviewMode, string> = { practice: "연습 모
 export const TYPE_LABEL: Record<InterviewType, string> = { experience: "경험 면접", cs: "CS 면접", personality: "인성 · 컬쳐핏 면접", pt: "PT 면접" };
 export const KEEP_DAYS = 30;
 
+/** 자소서·직무기술서로 질문을 만드는 유형 */
+export const needsDocuments = (type: InterviewType) => type === "experience" || type === "personality";
+
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
 /** 2026-12-10 → 2026년 12월 10일 (목) */
@@ -29,7 +32,7 @@ export function setupError(setup: InterviewSetup, groups: DocumentGroup[], today
     if (!isDate(setup.deleteAfter)) return "영상 보관 날짜가 올바르지 않아요.";
     if (setup.deleteAfter < today) return "영상 보관 날짜는 오늘부터 고를 수 있어요.";
   }
-  if (setup.type !== "experience") return undefined;
+  if (!needsDocuments(setup.type)) return undefined;
   const group = groups.find(({ id }) => id === setup.groupId);
   if (!group) return "서류 그룹을 골라 주세요.";
   if (group.error) return "스캔에 실패한 서류 그룹은 쓸 수 없어요.";

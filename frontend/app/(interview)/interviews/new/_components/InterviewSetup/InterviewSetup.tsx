@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button/Button";
 import { StepBar } from "@/components/ui/StepBar/StepBar";
 import { startInterviewAction } from "@/features/interview/actions";
-import { setupError } from "@/features/interview/setup";
+import { needsDocuments, setupError } from "@/features/interview/setup";
 import type { DocumentGroup, InterviewSetup as Setup } from "@/features/interview/types";
 import { CheckStep } from "../CheckStep/CheckStep";
 import { InfoStep } from "../InfoStep/InfoStep";
@@ -28,8 +28,8 @@ export function InterviewSetup({ initial, groups, gazeReady, today }: Props) {
     window.scrollTo(0, 0);
   }, [step]);
 
-  // 서류는 경험 면접에서만 쓴다. 영상 보관 기간은 모든 유형에 쓴다
-  const effective: Setup = setup.type === "experience" ? setup : { ...setup, groupId: null };
+  // 서류는 경험·인성 면접에서만 쓴다. 영상 보관 기간은 모든 유형에 쓴다
+  const effective: Setup = needsDocuments(setup.type) ? setup : { ...setup, groupId: null };
 
   function goNext() {
     const problem = setupError(effective, groups, today);

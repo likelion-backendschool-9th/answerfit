@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChoiceCard } from "@/components/ui/ChoiceCard/ChoiceCard";
 import { Icon } from "@/components/ui/Icon/Icon";
+import { TYPE_LABEL } from "@/features/interview/setup";
 import type { DocumentGroup, InterviewSetup } from "@/features/interview/types";
 import { Section } from "../Section/Section";
 import styles from "./DocumentSection.module.css";
@@ -14,7 +15,7 @@ export function DocumentSection({ setup, groups, onChange }: Props) {
   return (
     <div className={styles.panel}>
       <p className={styles.reason}>
-        <Icon name="file" size={20} /> 경험 면접을 골라서 아래 서류 정보가 필요해요.
+        <Icon name="file" size={20} /> {TYPE_LABEL[setup.type]}을 골라서 아래 서류 정보가 필요해요.
       </p>
       <Section
         title="서류 그룹"

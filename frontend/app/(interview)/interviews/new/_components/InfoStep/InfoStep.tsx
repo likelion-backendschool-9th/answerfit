@@ -2,7 +2,7 @@
 
 import { ChoiceCard } from "@/components/ui/ChoiceCard/ChoiceCard";
 import type { IconName } from "@/components/ui/Icon/Icon";
-import { COUNTS, TYPE_LABEL } from "@/features/interview/setup";
+import { COUNTS, needsDocuments, TYPE_LABEL } from "@/features/interview/setup";
 import type { DocumentGroup, InterviewSetup, InterviewType } from "@/features/interview/types";
 import { DocumentSection } from "../DocumentSection/DocumentSection";
 import { KeepDateField } from "../KeepDateField/KeepDateField";
@@ -48,7 +48,7 @@ export function InfoStep({ setup, groups, today, onChange }: Props) {
       <Section title="영상 보관 기간" description="이날이 지나면 녹화 영상이 삭제돼요. 실제 면접 기간으로 선택하세요.">
         <KeepDateField value={setup.deleteAfter} today={today} onChange={(deleteAfter) => set({ deleteAfter })} />
       </Section>
-      {setup.type === "experience" && <DocumentSection setup={setup} groups={groups} onChange={set} />}
+      {needsDocuments(setup.type) && <DocumentSection setup={setup} groups={groups} onChange={set} />}
     </>
   );
 }
