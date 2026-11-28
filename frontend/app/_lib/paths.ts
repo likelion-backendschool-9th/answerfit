@@ -9,6 +9,8 @@ export const PATHS = {
   guide: "/guide",
   archive: "/archive",
   experiences: "/experiences",
+  /** "new"는 모바일에서 새 경험을 적는 화면이다 */
+  experience: (id: string) => `/experiences/${encodeURIComponent(id)}`,
   question: questionHref,
   my: "/my",
   myInterviews: "/my/interviews",

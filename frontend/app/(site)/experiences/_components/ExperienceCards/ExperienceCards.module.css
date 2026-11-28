@@ -1,0 +1,70 @@
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-sm);
+}
+
+a.card:hover {
+  background: var(--color-surface-subtle);
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.title {
+  font-size: var(--text-md);
+  font-weight: 700;
+  line-height: var(--leading-md);
+}
+
+.head > :last-child {
+  flex: none;
+}
+
+.sub {
+  color: var(--color-text-muted);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.result {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  white-space: pre-line;
+}
+
+.bone {
+  display: block;
+  width: 60%;
+  height: var(--space-3);
+  border-radius: var(--radius-xs);
+  background: var(--color-track);
+}
+
+.bone + .bone {
+  width: 40%;
+}

@@ -10,7 +10,7 @@ import styles from "./TopBar.module.css";
 const MENU = [
   { href: PATHS.newInterview, label: "모의면접" },
   { href: PATHS.archive, label: "질문 아카이브" },
-  { href: PATHS.experiences, label: "이력 관리" },
+  { href: PATHS.experiences, label: "경험 정리" },
 ];
 
 /** 모든 화면의 머리글. 스크롤해도 위에 붙어 있다. 오른쪽은 로그인 여부에 따라 바뀐다 */

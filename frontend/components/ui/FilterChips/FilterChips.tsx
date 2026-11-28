@@ -1,17 +1,30 @@
 import Link from "next/link";
 import styles from "./FilterChips.module.css";
 
-type Chip = { label: string; count: number; href: string; current: boolean };
+/** href가 있으면 주소가 바뀌고, onSelect가 있으면 화면 안에서 고른다 */
+type Chip = { label: string; count?: number; current: boolean } & ({ href: string } | { onSelect: () => void });
 
-/** 고르면 주소가 바뀌는 조건 */
 export function FilterChips({ label, chips }: { label: string; chips: Chip[] }) {
+  const links = chips.every((chip) => "href" in chip);
+  const Wrap = links ? "nav" : "div";
   return (
-    <nav className={styles.chips} aria-label={label}>
-      {chips.map(({ label: name, count, href, current }) => (
-        <Link key={name} href={href} scroll={false} className={styles.chip} aria-current={current ? "page" : undefined}>
-          {name} <span className={styles.count}>{count}</span>
-        </Link>
-      ))}
-    </nav>
+    <Wrap className={styles.chips} aria-label={label} role={links ? undefined : "group"}>
+      {chips.map((chip) => {
+        const body = (
+          <>
+            {chip.label} {chip.count !== undefined && <span className={styles.count}>{chip.count}</span>}
+          </>
+        );
+        return "href" in chip ? (
+          <Link key={chip.label} href={chip.href} scroll={false} className={styles.chip} aria-current={chip.current ? "page" : undefined}>
+            {body}
+          </Link>
+        ) : (
+          <button key={chip.label} type="button" className={styles.chip} aria-pressed={chip.current} onClick={chip.onSelect}>
+            {body}
+          </button>
+        );
+      })}
+    </Wrap>
   );
 }

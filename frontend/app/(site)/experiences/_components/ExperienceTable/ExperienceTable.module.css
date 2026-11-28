@@ -1,0 +1,429 @@
+/* 머리글이 붙어 있도록 표 상자가 세로로도 스크롤한다 */
+.scroll {
+  max-height: calc(100dvh - 10rem);
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.table {
+  width: 100%;
+  min-width: 100rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: var(--leading-sm);
+  text-align: left;
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: var(--space-3) var(--space-3) var(--space-2h);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-subtle);
+  color: var(--color-text-muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.table td {
+  position: relative;
+  padding: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  vertical-align: top;
+}
+
+.table tbody tr:hover td {
+  background: var(--color-surface-subtle);
+}
+
+/* 번호와 제목은 가로로 스크롤해도 왼쪽에 남는다 */
+.table .number {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  width: 3.5rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  text-align: center;
+}
+
+.table td.number {
+  padding: var(--space-3) 0;
+}
+
+.table .sticky {
+  position: sticky;
+  left: 3.5rem;
+  z-index: 1;
+  border-right: 1px solid var(--color-border);
+}
+
+.table th.number,
+.table th.sticky {
+  z-index: 6;
+}
+
+.title {
+  width: 16rem;
+}
+
+.type {
+  width: 8rem;
+}
+
+.period {
+  width: 13.5rem;
+}
+
+.organization {
+  width: 10rem;
+}
+
+.role {
+  width: 9rem;
+}
+
+.tags {
+  width: 15rem;
+}
+
+.result {
+  width: 20rem;
+}
+
+.actions {
+  width: 5rem;
+  white-space: nowrap;
+}
+
+.table td.actions {
+  padding: var(--space-1) var(--space-2);
+  text-align: right;
+}
+
+.required {
+  margin-left: var(--space-px-2);
+  color: var(--color-danger);
+}
+
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* 셀 상태: 기본 · 호버 · 선택됨 · 편집 중 · 오류 */
+.cell {
+  cursor: default;
+}
+
+.cell:hover {
+  z-index: 3;
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+.cell:focus {
+  outline: none;
+}
+
+.active,
+.cell:focus-visible {
+  z-index: 3;
+  box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+
+.table .editing {
+  z-index: 3;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+}
+
+.error:not(.editing) {
+  box-shadow: inset 0 0 0 2px var(--color-danger);
+}
+
+.inner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-height: 2.875rem;
+  padding: var(--space-3);
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table[data-height="all"] .text {
+  white-space: normal;
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+/* 성과는 행 높이 설정을 따른다 */
+.clamp {
+  display: -webkit-box;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  white-space: pre-line;
+}
+
+.table[data-height="two"] .clamp {
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.table[data-height="all"] .clamp {
+  display: block;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--space-1);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.tagList > * {
+  flex: none;
+}
+
+.more {
+  align-self: center;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  outline: none;
+}
+
+.saving,
+.saved {
+  display: inline-flex;
+  flex: none;
+  margin-left: auto;
+  padding-top: var(--space-px-3);
+}
+
+.saving {
+  color: var(--color-text-muted);
+}
+
+.saving svg {
+  animation: var(--animate-spin);
+}
+
+.saved {
+  color: var(--color-success);
+  animation: fade var(--duration-slow) ease 0.9s forwards;
+}
+
+@keyframes fade {
+  to {
+    opacity: 0;
+  }
+}
+
+/* 오류와 상태 점의 안내. 마우스를 올리거나 포커스하면 보인다 */
+.tip {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  z-index: 4;
+  display: none;
+  width: max-content;
+  max-width: 16rem;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  text-align: left;
+  white-space: normal;
+}
+
+.cell:hover > .tip,
+.cell:focus > .tip,
+.dot:hover > .tip,
+.dot:focus > .tip {
+  display: block;
+}
+
+.dot {
+  position: absolute;
+  top: 50%;
+  left: var(--space-2);
+  width: var(--space-2);
+  height: var(--space-2);
+  margin-top: calc(var(--space-1) * -1);
+  border-radius: var(--radius-full);
+  background: var(--color-warning);
+}
+
+.dot:focus-visible {
+  outline-offset: 1px;
+}
+
+.icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-muted);
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+.icon:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.add {
+  position: sticky;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.add:hover {
+  color: var(--color-accent);
+}
+
+.table tfoot td {
+  border-bottom: 0;
+}
+
+.bone {
+  display: block;
+  height: var(--space-3);
+  margin: var(--space-4) var(--space-3);
+  border-radius: var(--radius-xs);
+  background: var(--color-track);
+}
+
+.table .empty {
+  padding: var(--space-16) var(--space-5);
+  text-align: center;
+}
+
+/* 팝오버 안 */
+.menu {
+  display: flex;
+  flex-direction: column;
+  min-width: 10rem;
+  margin: calc(var(--space-2) * -1);
+}
+
+.menu button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2h) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu button:hover,
+.menu button:focus-visible {
+  background: var(--color-surface-subtle);
+}
+
+.menu button[aria-pressed="true"] {
+  color: var(--color-accent);
+}
+
+.menu .danger {
+  justify-content: flex-start;
+  color: var(--color-danger);
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 26rem;
+  max-width: 100%;
+}
+
+.editorFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.apply {
+  width: auto;
+  min-height: 2.5rem;
+  margin-left: auto;
+  padding: 0 var(--space-5);
+}
+
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.textarea {
+  width: 100%;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-subtle);
+  line-height: var(--leading-sm);
+  resize: vertical;
+}
+
+.textarea:focus {
+  border-color: var(--color-accent);
+  background: var(--color-surface);
+  outline: none;
+}

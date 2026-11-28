@@ -1,0 +1,11 @@
+.content {
+  width: min(100%, 77.5rem);
+  margin: 0 auto;
+  padding: var(--space-14) var(--space-5) var(--space-section-sm);
+}
+
+@media (max-width: 40rem) {
+  .content {
+    padding-top: var(--space-8);
+  }
+}

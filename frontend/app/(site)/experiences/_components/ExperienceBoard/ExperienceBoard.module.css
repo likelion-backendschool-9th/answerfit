@@ -1,0 +1,207 @@
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  line-height: var(--leading-2xl);
+  letter-spacing: -0.02em;
+}
+
+.description {
+  margin-top: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+}
+
+.buttons,
+.dialogButtons {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.dialogButtons {
+  justify-content: flex-end;
+  margin-top: var(--space-6);
+}
+
+.button {
+  width: auto;
+  min-height: 3rem;
+  padding: 0 var(--space-5);
+  gap: var(--space-2);
+}
+
+/* 보기 탭. 질문 아카이브의 종류 탭과 같은 모양을 작은 글자로 쓴다 */
+.tabs {
+  display: flex;
+  gap: var(--space-6);
+  margin-top: var(--space-8);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tab {
+  margin-bottom: -1px;
+  padding: var(--space-2) 0 var(--space-3);
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: var(--color-text-muted);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  line-height: var(--leading-lg);
+  cursor: pointer;
+}
+
+.tab[aria-selected="true"] {
+  border-color: var(--color-primary);
+  color: var(--color-text);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+  margin-top: var(--space-5);
+}
+
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.search {
+  width: 15rem;
+}
+
+/* 행 높이. 관리자 화면의 이어 붙은 조건과 같은 모양이다 */
+.segments {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.segmentsLabel {
+  padding: 0 var(--space-3);
+  color: var(--color-text-muted);
+}
+
+.segment {
+  min-height: 2.5rem;
+  padding: 0 var(--space-3h);
+  border: 0;
+  border-left: 1px solid var(--color-border);
+  background: var(--color-surface);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.segment[aria-checked="true"] {
+  background: var(--color-chip);
+  color: var(--color-accent);
+}
+
+.segment:focus-visible {
+  outline-offset: -2px;
+}
+
+.view {
+  margin-top: var(--space-5);
+}
+
+.hint {
+  margin-top: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-text-muted);
+}
+
+.box {
+  padding: var(--space-12) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.error {
+  margin-top: var(--space-4);
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+}
+
+/* 모바일은 표 대신 카드 목록 */
+.desktop,
+.segments {
+  display: none;
+}
+
+@media (min-width: 40rem) {
+  .desktop {
+    display: block;
+  }
+
+  .segments {
+    display: flex;
+  }
+
+  .mobile {
+    display: none;
+  }
+}
+
+@media (max-width: 40rem) {
+  .title {
+    font-size: var(--text-xl);
+    line-height: var(--leading-xl);
+  }
+
+  .description {
+    font-size: var(--text-md);
+    line-height: var(--leading-md);
+  }
+
+  .search {
+    width: 100%;
+  }
+
+  .tools {
+    width: 100%;
+  }
+}

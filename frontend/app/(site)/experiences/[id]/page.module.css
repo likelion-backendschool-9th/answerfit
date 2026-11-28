@@ -1,0 +1,26 @@
+.content {
+  width: min(100%, 40rem);
+  margin: 0 auto;
+  padding: var(--space-8) 0 var(--space-section-sm);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: var(--space-5);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.title {
+  margin: var(--space-4) var(--space-5) 0;
+  font-size: var(--text-xl);
+  font-weight: 700;
+  line-height: var(--leading-xl);
+}
+
+.form {
+  margin-top: var(--space-2);
+}
