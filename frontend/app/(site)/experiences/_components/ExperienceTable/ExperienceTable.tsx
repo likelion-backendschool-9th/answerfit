@@ -7,6 +7,7 @@ import { Icon } from "@/components/ui/Icon/Icon";
 import { ACTIVITY_LABEL, formatPeriod, LONG_MAX, periodError, SHORT_MAX, TITLE_MAX, titleError } from "@/features/experience/rules";
 import { ACTIVITY_TYPES, type Column, type Experience, type Patch, type Story } from "@/features/experience/types";
 import { cn } from "@/lib/cn";
+import { resizeByKey, startResize } from "../../_lib/drag";
 import { PeriodPicker } from "../PeriodPicker/PeriodPicker";
 import { Popover, type CloseReason } from "../Popover/Popover";
 import { TagPicker } from "../TagPicker/TagPicker";
@@ -19,17 +20,27 @@ export const cellKey = (expId: string, storyId: string | null, column: Column) =
 /** 이 셀을 고른다(edit이면 바로 편집한다). key가 바뀔 때마다 한 번 따른다 */
 export type FocusRequest = { key: string; expId: string; storyId: string; column: Column; edit: boolean };
 
-/** story가 true인 열은 역량 행마다 다르고, 아니면 경험 하나에 한 칸으로 병합한다 */
-const COLUMNS: { key: Column; label: string; story: boolean }[] = [
-  { key: "title", label: "제목", story: false },
-  { key: "type", label: "구분", story: false },
-  { key: "period", label: "기간", story: false },
-  { key: "organization", label: "소속", story: false },
-  { key: "role", label: "역할", story: false },
-  { key: "tags", label: "역량 태그", story: true },
-  { key: "content", label: "활동 내용", story: true },
-  { key: "result", label: "성과", story: true },
+/**
+ * story가 true인 열은 역량 행마다 다르고, 아니면 경험 하나에 한 칸으로 병합한다.
+ * width는 처음 폭(px)이고 머리글 오른쪽 끝을 끌어 바꾼다. 활동 내용은 폭을 정하지 않아 남는 폭을 모두 쓴다.
+ */
+const COLUMNS: { key: Column; label: string; story: boolean; width: number | null }[] = [
+  { key: "title", label: "제목", story: false, width: 208 },
+  { key: "type", label: "구분", story: false, width: 104 },
+  { key: "period", label: "기간", story: false, width: 184 },
+  { key: "organization", label: "소속", story: false, width: 128 },
+  { key: "role", label: "역할", story: false, width: 120 },
+  { key: "tags", label: "역량 태그", story: true, width: 176 },
+  { key: "content", label: "활동 내용", story: true, width: null },
+  { key: "result", label: "성과", story: true, width: 240 },
 ];
+const DEFAULT_WIDTHS = Object.fromEntries(COLUMNS.flatMap(({ key, width }) => (width ? [[key, width]] : []))) as Partial<Record<Column, number>>;
+const COLUMN_MIN = 64;
+const COLUMN_MAX = 720;
+/** 행 번호 열과 행 메뉴 열의 폭. 활동 내용 열은 이보다 좁아지지 않는다 */
+const NUMBER_WIDTH = 48;
+const ACTIONS_WIDTH = 40;
+const CONTENT_MIN = 320;
 /** 표 안에서 바로 적는 칸과 그 글자 수. 나머지 칸은 누르면 팝오버가 열린다 */
 const TEXT_MAX: Partial<Record<Column, number>> = { title: TITLE_MAX, organization: SHORT_MAX, role: SHORT_MAX };
 /** 여러 줄로 적는 칸 */
@@ -40,8 +51,8 @@ const SKELETON_ROWS = 6;
 const LETTERS = "ABCDEFGH";
 const colOf = (column: Column) => COLUMNS.findIndex(({ key }) => key === column);
 
-/** 시트의 한 줄은 역량 행 하나다. 경험 열은 경험의 첫 줄에만 있다 */
-type SheetRow = { exp: Experience; story: Story; first: boolean; last: boolean };
+/** 시트의 한 줄은 역량 행 하나다. 경험 열은 경험의 첫 줄에만 있다. band는 경험을 한 개씩 걸러 바탕을 까는 줄무늬다 */
+type SheetRow = { exp: Experience; story: Story; first: boolean; band: boolean };
 
 /** 수식 입력줄에 보이는 셀 내용 */
 function cellText({ exp, story }: SheetRow, column: Column) {
@@ -89,8 +100,11 @@ export function ExperienceTable({ items, rowHeight, status, custom, focus, empty
   const [menu, setMenu] = useState<Menu | null>(null);
   const refocus = useRef(false);
   const [seenFocus, setSeenFocus] = useState<string | null>(null);
+  const [widths, setWidths] = useState(DEFAULT_WIDTHS);
   const rows = items ?? [];
-  const sheet: SheetRow[] = rows.flatMap((exp) => exp.stories.map((story, i) => ({ exp, story, first: i === 0, last: i === exp.stories.length - 1 })));
+  const sheet: SheetRow[] = rows.flatMap((exp, index) => exp.stories.map((story, i) => ({ exp, story, first: i === 0, band: index % 2 === 1 })));
+  const tableWidth = NUMBER_WIDTH + ACTIONS_WIDTH + CONTENT_MIN + Object.values(widths).reduce((sum, width) => sum + width, 0);
+  const resize = (column: Column) => (width: number) => setWidths((current) => ({ ...current, [column]: width }));
 
   /** 경험 열이면 그 경험의 첫 줄로 맞춘다(병합한 셀은 첫 줄에만 있다) */
   function normalize(row: number, col: number) {
@@ -231,19 +245,42 @@ export function ExperienceTable({ items, rowHeight, status, custom, focus, empty
         )}
       </div>
       <div className={styles.scroll}>
-        <table ref={table} className={styles.table} role="grid" aria-label="경험 목록" aria-busy={items === null} data-height={rowHeight}>
+        <table ref={table} className={styles.table} style={{ minWidth: tableWidth }} role="grid" aria-label="경험 목록" aria-busy={items === null} data-height={rowHeight}>
+          <colgroup>
+            <col style={{ width: NUMBER_WIDTH }} />
+            {COLUMNS.map(({ key }) => (
+              <col key={key} style={{ width: widths[key] }} />
+            ))}
+            <col style={{ width: ACTIONS_WIDTH }} />
+          </colgroup>
           <thead>
             <tr>
               <th scope="col" className={styles.number}>
                 <span className={styles.hidden}>번호</span>
               </th>
               {COLUMNS.map(({ key, label, story }, col) => (
-                <th key={key} scope="col" className={cn(styles[key], key === "title" && styles.sticky, story && styles.storyHead, active?.col === col && activeColumn && styles.current)}>
+                <th key={key} scope="col" className={cn(key === "title" && styles.sticky, story && styles.storyHead, active?.col === col && activeColumn && styles.current)}>
                   <span className={styles.letter} aria-hidden="true">
                     {LETTERS[col]}
                   </span>
                   {label}
                   {key === "title" && <span className={styles.required}>*</span>}
+                  {widths[key] !== undefined && (
+                    <span
+                      role="separator"
+                      aria-orientation="vertical"
+                      aria-label={`${label} 열 폭`}
+                      aria-valuenow={widths[key]}
+                      aria-valuemin={COLUMN_MIN}
+                      aria-valuemax={COLUMN_MAX}
+                      tabIndex={0}
+                      title="끌어서 폭 조절 · 두 번 누르면 처음 폭"
+                      className={styles.resizer}
+                      onPointerDown={(event) => startResize(event, widths[key]!, "right", COLUMN_MIN, COLUMN_MAX, resize(key))}
+                      onKeyDown={(event) => resizeByKey(event, widths[key]!, "right", COLUMN_MIN, COLUMN_MAX, resize(key))}
+                      onDoubleClick={() => resize(key)(DEFAULT_WIDTHS[key]!)}
+                    />
+                  )}
                 </th>
               ))}
               <th scope="col" className={styles.actions}>
@@ -270,11 +307,11 @@ export function ExperienceTable({ items, rowHeight, status, custom, focus, empty
               </tr>
             )}
             {sheet.map((line, row) => {
-              const { exp, story, first, last } = line;
+              const { exp, story, band } = line;
               const name = exp.title || "새 경험";
               return (
-                <tr key={story.id}>
-                  <td className={cn(styles.number, row === activeRow && styles.current, last && styles.edge)}>
+                <tr key={story.id} className={cn(band && styles.band)}>
+                  <td className={cn(styles.number, row === activeRow && styles.current)}>
                     {!story.content.trim() && (
                       <span className={styles.dot} tabIndex={0}>
                         <span className={styles.tip}>활동 내용을 아직 안 적었어요</span>
@@ -297,7 +334,7 @@ export function ExperienceTable({ items, rowHeight, status, custom, focus, empty
                         tabIndex={isActive && !inline ? 0 : -1}
                         aria-selected={isActive}
                         aria-invalid={error ? true : undefined}
-                        className={cn(styles.cell, styles[key], key === "title" && styles.sticky, (!perStory || last) && styles.edge, isActive && styles.active, isEditing && styles.editing, error && styles.error)}
+                        className={cn(styles.cell, key === "title" && styles.sticky, isActive && styles.active, isEditing && styles.editing, error && styles.error)}
                         onClick={(event) => {
                           if (isEditing) return;
                           if (!TEXT_MAX[key] || isActive) edit(row, col, event.currentTarget);
@@ -328,18 +365,17 @@ export function ExperienceTable({ items, rowHeight, status, custom, focus, empty
                       </td>
                     );
                   })}
-                  <td className={cn(styles.actions, last && styles.edge)}>
-                    {first && (
-                      <button type="button" className={styles.icon} aria-label={`${name} 상세 열기`} title="상세 열기" onClick={() => onOpen(exp.id)}>
-                        <Icon name="chevron" size={16} />
-                      </button>
-                    )}
-                    {last && (
-                      <button type="button" className={styles.icon} aria-label={`${name}에 역량 추가`} title="이 경험에 역량 추가" onClick={() => onAddStory(exp.id)}>
-                        <Icon name="plus" size={16} />
-                      </button>
-                    )}
-                    <button type="button" className={styles.icon} aria-label={`${name} ${row + 1}행 메뉴`} title="메뉴" aria-haspopup="dialog" onClick={(event) => setMenu({ expId: exp.id, storyId: story.id, anchor: event.currentTarget })}>
+                  {/* 행 메뉴 하나만 둔다. 줄에 마우스를 올리거나 포커스가 있을 때만 보인다 */}
+                  <td className={styles.actions}>
+                    <button
+                      type="button"
+                      className={styles.more}
+                      aria-label={`${name} ${row + 1}행 메뉴`}
+                      title="상세 열기 · 역량 추가 · 복제 · 삭제"
+                      aria-haspopup="dialog"
+                      aria-expanded={menu?.storyId === story.id}
+                      onClick={(event) => setMenu({ expId: exp.id, storyId: story.id, anchor: event.currentTarget })}
+                    >
                       ⋯
                     </button>
                   </td>
@@ -380,7 +416,9 @@ export function ExperienceTable({ items, rowHeight, status, custom, focus, empty
           <div className={styles.menu}>
             {(
               [
+                ["상세 열기", () => onOpen(menu.expId)],
                 ["이 경험에 역량 추가", () => onAddStory(menu.expId)],
+                null,
                 ["이 역량 행 복제", () => onDuplicateStory(menu.expId, menu.storyId)],
                 ["이 역량 행 삭제", () => onRemoveStory(menu.expId, menu.storyId), true],
                 null,

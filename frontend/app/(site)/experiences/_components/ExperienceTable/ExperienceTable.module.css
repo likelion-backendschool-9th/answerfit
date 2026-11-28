@@ -72,9 +72,9 @@
   background: var(--color-surface-subtle);
 }
 
+/* 최소 폭은 열 폭 합으로 화면이 정한다 */
 .table {
   width: 100%;
-  min-width: 100rem;
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
@@ -159,47 +159,68 @@
   box-shadow: inset -2px 0 0 var(--color-accent);
 }
 
-.title {
-  width: 13rem;
-}
-
-.type {
-  width: 6.5rem;
-}
-
-.period {
-  width: 11.5rem;
-}
-
-.organization {
-  width: 8rem;
-}
-
-.role {
-  width: 7.5rem;
-}
-
-.tags {
-  width: 11rem;
-}
-
-/* 활동 내용은 남는 폭을 모두 쓴다 */
-.result {
-  width: 15rem;
-}
-
-.actions {
-  width: 6.5rem;
-}
-
 /* 역량 행마다 다른 열. 머리글 위에 선을 그어 경험 열과 나눈다 */
 .table .storyHead:not(.current) {
   box-shadow: inset 0 2px 0 var(--color-accent-soft);
 }
 
-/* 경험 하나가 끝나는 줄. 병합한 경험을 눈으로 묶는다 */
-.table .edge {
-  border-bottom-color: var(--color-text-muted);
+/* 경험을 한 개씩 걸러 아주 연한 바탕을 깐다. 병합한 경험 정보와 역량 행을 한 덩어리로 보이게 한다 */
+.table .band td:not(.number) {
+  background: var(--color-surface-subtle);
+}
+
+.table .band .cell:hover {
+  background: var(--color-accent-surface);
+}
+
+.table .band td.editing {
+  background: var(--color-surface);
+}
+
+/* 열 폭 손잡이: 머리글 오른쪽 끝 */
+.resizer {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  bottom: 0;
+  z-index: 1;
+  width: 6px;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.resizer:hover,
+.resizer:focus-visible {
+  background: var(--color-accent);
+  outline: none;
+}
+
+/* 행 메뉴 버튼. 줄에 마우스를 올리거나 포커스가 있거나 메뉴가 열렸을 때만 보인다 */
+.more {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: none;
+  color: var(--color-text-muted);
+  font-size: var(--text-md);
+  opacity: 0;
+  cursor: pointer;
+}
+
+.table tr:hover .more,
+.table tr:focus-within .more,
+.more[aria-expanded="true"] {
+  opacity: 1;
+}
+
+.more:hover,
+.more[aria-expanded="true"] {
+  background: var(--color-chip);
+  color: var(--color-accent);
 }
 
 .table td.actions {
@@ -400,25 +421,6 @@
 
 .dot:focus-visible {
   outline-offset: 1px;
-}
-
-.icon {
-  display: inline-grid;
-  place-items: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  padding: 0;
-  border: 0;
-  border-radius: var(--radius-xs);
-  background: none;
-  color: var(--color-text-muted);
-  font-size: var(--text-md);
-  cursor: pointer;
-}
-
-.icon:hover {
-  background: var(--color-surface-subtle);
-  color: var(--color-text);
 }
 
 .add {

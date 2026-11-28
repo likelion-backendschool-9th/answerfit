@@ -252,7 +252,7 @@ export function ExperienceBoard({ items: loaded }: { items: Experience[] | null 
           <p className={styles.status} aria-live="polite">
             {loading ? "불러오는 중…" : statusText}
           </p>
-          {view === "table" && <p className={styles.hint}>방향키 이동 · Enter 편집 · Tab 다음 칸 · Esc 취소</p>}
+          {view === "table" && <p className={styles.hint}>방향키 이동 · Enter 편집 · Tab 다음 칸 · Esc 취소 · 행 끝 ⋯에서 상세 열기·역량 추가</p>}
         </div>
       </div>
 
