@@ -9,7 +9,7 @@ import styles from "./TagPicker.module.css";
 export function TagPicker({ value, custom, onChange }: { value: string[]; custom: string[]; onChange: (tags: string[]) => void }) {
   const [draft, setDraft] = useState("");
   const full = value.length >= TAGS_MAX;
-  const groups: [string, readonly string[]][] = [...Object.entries(TAG_GROUPS), ["내 태그", myTags([{ tags: custom }, { tags: value }])]];
+  const groups: [string, readonly string[]][] = [...Object.entries(TAG_GROUPS), ["내 태그", myTags([...custom, ...value])]];
 
   function toggle(tag: string) {
     if (value.includes(tag)) onChange(value.filter((item) => item !== tag));

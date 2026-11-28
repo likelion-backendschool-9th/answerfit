@@ -12,7 +12,7 @@ type Props = { open: boolean; onClose: () => void; onImported: (items: Experienc
 
 export function PasteImport({ open, onClose, onImported }: Props) {
   return (
-    <Modal open={open} title="붙여넣기로 가져오기" description="엑셀이나 구글 시트에서 행을 복사해 붙여 넣으세요. 열 순서는 표와 같아요: 제목, 구분, 기간, 소속, 역할, 태그(쉼표로 나눔), 성과." onClose={onClose}>
+    <Modal open={open} title="붙여넣기로 가져오기" description="엑셀이나 구글 시트에서 행을 복사해 붙여 넣으세요. 열 순서는 표와 같아요: 제목, 구분, 기간, 소속, 역할, 역량 태그(쉼표로 나눔), 활동 내용, 성과. 제목 칸이 빈 줄(병합한 셀)은 바로 위 경험의 역량 행으로 들어가요." onClose={onClose}>
       <Form onClose={onClose} onImported={onImported} />
     </Modal>
   );
@@ -27,10 +27,10 @@ function Form({ onClose, onImported }: Omit<Props, "open">) {
 
   return (
     <div className={styles.form}>
-      <textarea className={styles.textarea} aria-label="붙여 넣을 표" rows={10} placeholder={"제목\t구분\t기간\t소속\t역할\t태그\t성과"} value={text} autoFocus onChange={(event) => setText(event.target.value)} />
+      <textarea className={styles.textarea} aria-label="붙여 넣을 표" rows={10} placeholder={"제목\t구분\t기간\t소속\t역할\t역량 태그\t활동 내용\t성과"} value={text} autoFocus onChange={(event) => setText(event.target.value)} />
       <p className={styles.summary} role="status">
-        {text.trim() && `${preview.items.length}개를 가져와요.`}
-        {preview.skipped > 0 && ` 제목이 없는 ${preview.skipped}줄은 건너뛰어요.`}
+        {text.trim() && `경험 ${preview.items.length}개(역량 행 ${preview.items.reduce((sum, item) => sum + item.stories.length, 0)}개)를 가져와요.`}
+        {preview.skipped > 0 && ` 붙일 경험이 없는 ${preview.skipped}줄은 건너뛰어요.`}
       </p>
       {error && (
         <p className={styles.error} role="alert">

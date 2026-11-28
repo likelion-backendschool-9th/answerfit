@@ -6,7 +6,7 @@ import { TopBar } from "@/app/_components/TopBar/TopBar";
 import { PATHS } from "@/app/_lib/paths";
 import { Icon } from "@/components/ui/Icon/Icon";
 import { getExperiences } from "@/features/experience/api";
-import { myTags } from "@/features/experience/rules";
+import { customTags } from "@/features/experience/rules";
 import { requireMember } from "@/features/session/guard";
 import { ExperienceForm } from "../_components/ExperienceForm/ExperienceForm";
 import styles from "./page.module.css";
@@ -45,7 +45,7 @@ async function Detail({ params }: Props) {
     <>
       <h1 className={styles.title}>{experience?.title || "새 경험"}</h1>
       <div className={styles.form}>
-        <ExperienceForm experience={experience} custom={myTags(items)} backHref={PATHS.experiences} />
+        <ExperienceForm experience={experience} custom={customTags(items)} backHref={PATHS.experiences} />
       </div>
     </>
   );

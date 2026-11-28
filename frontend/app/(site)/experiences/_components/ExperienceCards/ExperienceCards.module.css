@@ -42,6 +42,22 @@ a.card:hover {
   color: var(--color-text-muted);
 }
 
+.stories {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+/* 역량 행 하나. 상세 화면의 역량 칸처럼 왼쪽에 선을 둔다 */
+.story {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--color-accent);
+}
+
 .tags {
   display: flex;
   flex-wrap: wrap;
