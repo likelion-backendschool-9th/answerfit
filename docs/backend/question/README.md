@@ -4,9 +4,11 @@ WBS 3의 `problem-bank-101`부터 `problem-bank-109`까지 9개 API를 구현해
 
 이 문서는 문제은행의 구현 계획이다. 확정 계약은 [공통 계약](contracts.md), [카테고리 조회](categories.md), [질문 목록](list.md), [질문 상세](detail.md), [사용자 등록](create.md), [수정·재제출](update.md), [본인 질문 삭제](delete.md), [좋아요 등록·취소](likes.md), [질문 신고](reports.md)에 기록한다. 프론트의 [조회 연결](../../frontend/question/archive.md)과 [변경 액션 연결](../../frontend/question/actions.md)은 화면 문서에서 다루며, 연결 검증의 범위와 남은 조건은 [통합 회귀 검증](integration-regression.md)에 기록한다.
 
+관리자용 질문 CRUD·승인/반려·신고 처리의 요구사항과 AQB-01~AQB-12 작업 순서는 [관리자 문제은행 청사진](admin.md)에 둔다. 화면 연결은 [관리자 문제은행 화면](../../frontend/question/admin.md)을 따른다. 사용자 문제은행과 기존 모델·카테고리·공개 조건·행 잠금을 공유한다.
+
 ## 1. 요구사항과 범위
 
-원본은 [최종프로젝트 4팀 WBS의 WBS 3](https://docs.google.com/spreadsheets/d/1ZcudXgHfxo-pvC2YsAEQAIcAnhHKStIwND0lUe540Ig/edit?gid=204813250#gid=204813250)이다. 문제은행은 `A14:N23`, 인증은 `auth-103`, 연계 작업은 `my-105`·`my-106`·`my-114`와 `admin-101`~`admin-109`를 참고한다.
+원본은 [최종프로젝트 4팀 WBS의 WBS 3](https://docs.google.com/spreadsheets/d/1ZcudXgHfxo-pvC2YsAEQAIcAnhHKStIwND0lUe540Ig/edit?gid=204813250#gid=204813250)이다. 문제은행은 `A14:N23`, 인증은 `auth-103`, 연계 작업은 `my-105`·`my-106`·`my-114`와 `admin-101`~`admin-104`·`admin-107`~`admin-109`를 참고한다. `admin-105/106`은 회원 관리 범위다.
 
 | WBS | 메서드·경로 | 보장할 동작 |
 | --- | --- | --- |
@@ -22,7 +24,7 @@ WBS 3의 `problem-bank-101`부터 `problem-bank-109`까지 9개 API를 구현해
 
 ### 다른 작업과의 연결
 
-- 관리자 등록·수정·승인·반려·숨김·신고 처리는 관리자 WBS의 별도 작업이다. 이번 9개 API가 해당 엔드포인트를 대신 구현하지 않는다.
+- 관리자 등록·수정·승인·반려·숨김·신고 처리는 [관리자 청사진](admin.md)의 별도 작업이다. 이번 사용자용 9개 API가 관리자용 7개 API를 대신 구현하지 않는다.
 - 승인 후 AI 답안 생성은 관리자·AI 담당 작업이다. 질문 ID, 답안 상태, 답안 본문과 키워드를 같은 질문에 기록하는 계약을 공유한다.
 - 내가 올린 질문 목록은 `my-114`, 좋아요한 질문 목록과 대시보드 집계는 `my-106`·`my-105`와 연결한다. 문제은행의 공개 목록에 본인 미승인 질문을 섞지 않는다.
 - 면접에서 생성된 질문의 개인 좋아요는 별도 관계다. 문제은행의 `question_likes`와 합치지 않는다.
