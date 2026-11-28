@@ -1,6 +1,6 @@
 # 문제은행 질문 신고
 
-WBS `problem-bank-109`, [청사진의 QB-09](README.md#7-브랜치별-todo와-구현-순서)에 해당한다. 기존 `QuestionReport`와 회원별 신고 유일 제약을 사용한다.
+WBS `problem-bank-109`, [청사진의 QB-09](README.md#7-기능별-구현-순서)에 해당한다. 기존 `QuestionReport`와 회원별 신고 유일 제약을 사용한다.
 
 ## 요청과 응답
 

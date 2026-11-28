@@ -28,11 +28,11 @@ WBS 3의 `problem-bank-101`부터 `problem-bank-109`까지 9개 API를 구현해
 - 면접에서 생성된 질문의 개인 좋아요는 별도 관계다. 문제은행의 `question_likes`와 합치지 않는다.
 - 프론트 URL은 현재 `/archive`와 `/archive/{id}`를 유지한다. WBS에 적힌 `/study/questions`로 화면 URL을 옮기는 작업은 이번 연결에 포함하지 않는다.
 
-## 2. 현재 기반과 연결 차이
+## 2. 기반과 연계 조건
 
-기존 엔티티와 QB-01~QB-11, 통합한 인증 브랜치 기준이다.
+기존 질문 엔티티와 인증 구현을 재사용한다. 문제은행 API와 프론트의 책임, 담당 간 연계 조건은 다음과 같다.
 
-| 영역 | 확인한 기반 | 필요한 작업 |
+| 영역 | 기반과 책임 | 연계 조건 |
 | --- | --- | --- |
 | 백엔드 | Java 21, Spring Boot 4.2.0, JPA·Validation·WebMVC, H2, 질문 Repository·Service·Controller와 DTO | 운영 DB/migration 연계 |
 | 질문 데이터 | `Question`, `Category`, `QuestionKeyword`, `QuestionLike`, `QuestionReport`, `QuestionModeration` | 기존 모델 활용, 필요한 불변식·경합 처리 보강 |
@@ -48,9 +48,9 @@ WBS 3의 `problem-bank-101`부터 `problem-bank-109`까지 9개 API를 구현해
 | 프론트 통신 | Next 서버가 Bearer 토큰을 붙여 WBS 경로·메서드·DTO로 `BACKEND_URL` 호출 | 실제 계정 브라우저 전체 흐름 검증(QB-12) |
 | 프론트 목록/상세 | 서버 페이지 응답과 전용 상세 조회 사용, 변경 액션 연결, 개인 전체 배열 소비자 분리 | 개인 API 연결, 관리자·AI 전체 흐름 검증(QB-12) |
 
-주요 근거: [빌드 설정](../../../backend/build.gradle), [질문 엔티티](../../../backend/src/main/java/com/likelion/answerfit/question/entity/Question.java), [현재 프론트 호출](../../../frontend/features/question/api.ts), [화면 자료형](../../../frontend/features/question/types.ts), [목록 데이터 조립](../../../frontend/app/(site)/archive/page.tsx), [상세 데이터 조립](../../../frontend/app/(site)/archive/[id]/page.tsx).
+주요 근거: [빌드 설정](../../../backend/build.gradle), [질문 엔티티](../../../backend/src/main/java/com/likelion/answerfit/question/entity/Question.java), [프론트 호출](../../../frontend/features/question/api.ts), [화면 자료형](../../../frontend/features/question/types.ts), [목록 데이터 조립](../../../frontend/app/(site)/archive/page.tsx), [상세 데이터 조립](../../../frontend/app/(site)/archive/[id]/page.tsx).
 
-개인 전체 목록과 면접 결과 질문 좋아요의 `/api/v1/questions` 계약은 아직 담당 API와 연결해야 한다. 아카이브 조회는 QB-10에서 서버 페이지와 반려 상태를 연결했고, 문제은행 변경 액션은 QB-11에서 `/api/v1/learning/questions`, `PATCH /{id}`, `POST/DELETE /{id}/likes`로 연결했다.
+개인 전체 목록과 면접 결과 질문 좋아요의 `/api/v1/questions` 계약은 각 담당 API와 연결한다. 아카이브 조회는 QB-10의 서버 페이지와 반려 상태 계약을, 문제은행 변경 액션은 QB-11의 `/api/v1/learning/questions`, `PATCH /{id}`, `POST/DELETE /{id}/likes` 계약을 따른다.
 
 ## 3. 모듈과 책임
 
@@ -234,121 +234,109 @@ stateDiagram-v2
 
 통신 경로는 브라우저 → Next 서버 액션/조회 → 백엔드다. 기존 `BACKEND_URL`과 Bearer 전달을 사용하고, 현재 경로만을 위해 브라우저 직접 호출용 CORS 구성을 추가하지 않는다.
 
-## 7. 브랜치별 TODO와 구현 순서
+## 7. 기능별 구현 순서
 
-체크박스 하나를 작업 브랜치 하나로 진행한다. 각 항목은 구현, 관련 테스트, 필요한 문서 수정을 함께 포함한다. 아래 번호는 작업 순서와 의존성을 식별하는 용도다.
-
-### 브랜치 운영
-
-- 부모·통합 브랜치: `feature/question-bank-backend`.
-- 작업 브랜치: `feature/question-bank-backend-01-contracts`처럼 부모 이름에 작업 번호와 기능을 붙인다. 기존 부모 브랜치와 Git 참조 경로가 충돌하므로 `feature/question-bank-backend/01-contracts` 형식은 사용할 수 없다.
-- 첫 작업은 현재 부모에서 분기한다. 이후 작업의 시작점은 이전 작업 결과가 반영된 최신 부모 브랜치다. 번호 순서대로 진행하되 외부 연계가 필요한 항목은 선행 조건을 확인한다.
-- 해당 항목의 완료 기준과 [테스트 규칙](../../testing.md)을 충족하고 부모 브랜치에 결과를 반영한 뒤 `[x]`로 바꾼다. 이슈가 생기면 항목에 이슈 링크를 덧붙인다.
-- 작업 브랜치를 실제로 만들 때 첫 항목은 다음 명령을 사용한다. 부모 브랜치의 최종 `develop` 통합과 push·PR은 저장소 협업 규칙을 따른다.
-
-```bash
-git switch -c feature/question-bank-backend-01-contracts feature/question-bank-backend
-```
+각 항목은 구현, 관련 테스트, 필요한 문서 수정을 함께 포함한다. 아래 번호는 작업 순서와 의존성을 식별하는 용도이며, 외부 연계가 필요한 항목은 선행 조건을 확인한다.
 
 ### 기반과 백엔드 API
 
-- [x] **QB-01 공통 계약과 처리 기반** — `feature/question-bank-backend-01-contracts`
+- **QB-01 공통 계약과 처리 기반**
 
   선행: 없음. 인증 principal·계정 상태·세션 API, DB/migration·카테고리 seed 담당, 공개 조건·입력 길이·페이지·중복 신고 정책을 확정한다. 문제은행에서 사용할 요청/응답·업무 오류·입력 검증과 인증 연계 방식을 마련한다. 인증 서버·회원 API·운영 DB 구축은 각 담당과 연결한다.
 
   완료 기준: 이 문서의 제안 중 구현에 필요한 항목이 확정되고, 문제은행의 공통 오류 응답과 길이·분류·페이지 검증 테스트가 통과한다. 실제 인증이 아직 연결되지 않았다면 해당 연계 조건을 기록한다. 관련 시나리오: S3·S4·S9·S11.
 
-  구현 계약과 남은 연계 조건: [공통 계약](contracts.md). 구현과 테스트를 마치고 부모 브랜치에 반영했다.
+  구현 계약과 연계 조건: [공통 계약](contracts.md).
 
-- [x] **QB-02 카테고리 조회** — `feature/question-bank-backend-02-categories`
+- **QB-02 카테고리 조회**
 
   선행: QB-01. `problem-bank-105`의 `GET /api/v1/categories`와 분류별 공개 질문 집계를 구현한다. 합의한 seed를 적용하고 관리자·면접에서 같은 ID와 표시 순서를 재사용할 수 있게 한다.
 
   완료 기준: CS/인성 분류·정렬·0건 카테고리가 반환되고, 숨김·삭제·미승인 질문이 집계에서 제외된다. Repository·HTTP 검증 포함. 관련 시나리오: S1·S10.
 
-  구현 계약과 초기화 정책: [카테고리 조회](categories.md). 구현과 테스트를 마치고 부모 브랜치에 반영했다.
+  구현 계약과 초기화 정책: [카테고리 조회](categories.md).
 
-- [x] **QB-03 질문 목록·검색·필터·페이지 조회** — `feature/question-bank-backend-03-list`
+- **QB-03 질문 목록·검색·필터·페이지 조회**
 
   선행: QB-01·QB-02. `problem-bank-101`의 목록 API를 구현한다. 대분류·카테고리·검색어·좋아요 필터, 최신/좋아요 정렬, 서버 페이지 조회와 전체·대분류 건수를 제공한다.
 
   완료 기준: 개인별 좋아요·본인·신고 여부와 집계가 일치하고, 페이지 크기·빈 결과·범위 초과·동점 정렬을 검증한다. 페이지별 묶음 조회로 불필요한 반복 쿼리를 방지한다. 관련 시나리오: S1·S2.
 
-  구현 계약과 조회 정책: [질문 목록 조회](list.md). 구현과 테스트를 마치고 부모 브랜치에 반영했다.
+  구현 계약과 조회 정책: [질문 목록 조회](list.md).
 
-- [x] **QB-04 공개 질문·본인 미승인 질문 상세** — `feature/question-bank-backend-04-detail`
+- **QB-04 공개 질문·본인 미승인 질문 상세**
 
   선행: QB-01·QB-02·QB-03. `problem-bank-102`의 상세 API를 구현한다. 공개 질문과 본인 USER 대기/반려 질문을 직접 조회하고, 답안·키워드·생성 상태·반려 사유·수정/삭제 권한·앞뒤 질문을 반환한다.
 
   완료 기준: 본인 미승인 질문은 목록에 없어도 조회되고 타인은 404를 받는다. 숨김·삭제 질문, 중분류 없는 인성 질문, 답안 없음/생성 중/실패, 키워드 순서와 앞뒤 이동을 검증한다. 관련 시나리오: S1·S3·S10.
 
-  구현 계약과 접근 정책: [질문 상세 조회](detail.md). 구현과 테스트를 마치고 부모 브랜치에 반영했다.
+  구현 계약과 접근 정책: [질문 상세 조회](detail.md).
 
-- [x] **QB-05 사용자 CS 질문 등록** — `feature/question-bank-backend-05-create`
+- **QB-05 사용자 CS 질문 등록**
 
   선행: QB-01·QB-02·QB-04. `problem-bank-106`의 등록 API를 구현한다. 카테고리와 질문을 검증하고 인증 회원 소유의 `USER/PENDING` 질문을 생성한다.
 
   완료 기준: 생성 ID·상태와 Location을 반환하고, 길이·공백·CS 분류·작성자/출처/상태 위조를 검증한다. 공개 목록에는 바로 포함되지 않고 생성 ID로 본인 상세를 열 수 있다. 관련 시나리오: S3·S4.
 
-  구현 계약과 초기 상태: [사용자 질문 등록](create.md). 구현과 테스트를 마치고 부모 브랜치에 반영했다.
+  구현 계약과 초기 상태: [사용자 질문 등록](create.md).
 
-- [x] **QB-06 본인 질문 수정·반려 재제출** — `feature/question-bank-backend-06-update`
+- **QB-06 본인 질문 수정·반려 재제출**
 
   선행: QB-04·QB-05. `problem-bank-107`의 PATCH를 구현한다. 본인 USER 대기/반려 질문의 분류·내용을 수정하고 반려 질문을 같은 ID로 재제출한다.
 
   완료 기준: 재제출 시 현재 검토 정보가 초기화되고 과거 반려 이력은 남는다. 타인·승인 질문 변경과 관리자 승인 경합을 검증한다. 관련 시나리오: S5·S6.
 
-  구현 계약과 잠금 규칙: [수정·재제출](update.md). 구현과 테스트를 마치고 부모 브랜치에 반영했다.
+  구현 계약과 잠금 규칙: [수정·재제출](update.md).
 
-- [x] **QB-07 본인 미승인 질문 삭제** — `feature/question-bank-backend-07-delete`
+- **QB-07 본인 미승인 질문 삭제**
 
   선행: QB-04·QB-05. `problem-bank-108`의 DELETE를 구현한다. 본인 USER 대기/반려 질문만 엔티티의 삭제 메서드로 soft delete한다.
 
   완료 기준: 삭제 후 상세·목록에서 제외되고, 타인/승인 질문 삭제와 승인 경합이 차단된다. 물리 삭제 없이 과거 면접 스냅샷·신고·검토 이력을 보존한다. 관련 시나리오: S6·S7.
 
-  구현 계약과 기록 보존·잠금 규칙: [본인 질문 삭제](delete.md). 구현과 테스트를 마치고 부모 브랜치에 반영했다.
+  구현 계약과 기록 보존·잠금 규칙: [본인 질문 삭제](delete.md).
 
-- [x] **QB-08 좋아요 등록·취소** — `feature/question-bank-backend-08-likes`
+- **QB-08 좋아요 등록·취소**
 
   선행: QB-04. `problem-bank-103`·`problem-bank-104`의 POST/DELETE를 함께 구현한다. 공개 질문에 대한 인증 회원의 좋아요를 등록/취소하고 최종 건수·선택 상태를 반환한다.
 
   완료 기준: 반복·동시 요청에도 회원별 한 행을 유지한다. 다른 회원의 상태, 미승인/숨김/삭제 질문 거절과 관리자 숨김/삭제 경합을 검증한다. 관련 시나리오: S8.
 
-  구현 계약과 반복 요청·잠금 규칙: [좋아요 등록·취소](likes.md). 구현과 테스트를 마치고 부모 브랜치에 반영했다.
+  구현 계약과 반복 요청·잠금 규칙: [좋아요 등록·취소](likes.md).
 
-- [x] **QB-09 질문 신고와 5유형 검증** — `feature/question-bank-backend-09-reports`
+- **QB-09 질문 신고와 5유형 검증**
 
   선행: QB-04. `problem-bank-109`의 신고 API를 구현한다. 질문 내용 오류용 enum을 추가해 5유형을 구분하고 상세 사유를 검증해 PENDING 신고를 저장한다.
 
   완료 기준: 빈 상세·300/301자·잘못된 사유·본인/중복 신고·비공개 질문을 검증한다. 유일 제약과 공개 상태 경합 오류를 합의한 업무 오류로 반환한다. 관련 시나리오: S9.
 
-  구현 계약과 중복·잠금 규칙: [질문 신고](reports.md). 구현과 테스트를 마치고 부모 브랜치에 반영했다.
+  구현 계약과 중복·잠금 규칙: [질문 신고](reports.md).
 
 ### 프론트 연결과 전체 검증
 
-- [x] **QB-10 카테고리·목록·상세 프론트 연결** — `feature/question-bank-backend-10-connect-reads`
+- **QB-10 카테고리·목록·상세 프론트 연결**
 
   선행: QB-02·QB-03·QB-04, 실제 인증·세션 조회 연계. API adapter·자료형·페이지 데이터 조회부를 WBS 계약에 맞춘다. 서버 페이지/집계, 전용 상세, 반려 사유·답안 상태·앞뒤 질문과 중분류 없는 인성 질문 표시를 연결한다.
 
   완료 기준: 실제 API 응답으로 목록/상세가 표시되고 중복 검색·페이지 나누기가 없다. 기존 `getQuestions()` 소비자를 분리해 내 질문·좋아요·대시보드가 첫 페이지 데이터로 대체되지 않게 한다. 관련 시나리오: S2·S3·S10·S12.
 
-  조회 adapter·화면·목업 호환과 인증 통합 범위: [프론트 아카이브](../../frontend/question/archive.md). email-signup 인증 브랜치와 현재 DB 기반 principal을 연결하고 검증한 결과를 부모 브랜치에 반영했다. 실제 카카오 계정과 운영 설정의 브라우저 검증은 QB-12에 남긴다.
+  조회 adapter·화면·목업 호환과 인증 통합 범위: [프론트 아카이브](../../frontend/question/archive.md). 인증 구현과 현재 DB 기반 principal을 사용하며, 실제 카카오 계정과 운영 설정의 브라우저 검증은 QB-12에서 수행한다.
 
-- [x] **QB-11 등록·수정·삭제·좋아요·신고 프론트 연결** — `feature/question-bank-backend-11-connect-actions`
+- **QB-11 등록·수정·삭제·좋아요·신고 프론트 연결**
 
   선행: QB-05~QB-10. 기존 폼과 서버 액션을 실제 변경 API에 연결한다. 생성 ID를 상세 링크/이동으로 전달하고 카테고리 ID·신고 유형을 변환한다. 합의한 검색어 추출·후보 기준으로 기존 검색 API를 유사 질문 안내에 재사용한다.
 
   완료 기준: 각 동작의 성공 결과·업무 오류·재조회가 화면에 반영된다. 반려 재제출, 100자 검색어 제한, 중복 요청과 권한 거절도 확인한다. 관련 시나리오: S4·S5·S7·S8·S9·S11·S12.
 
-  입력·분류·신고 유형 변환, 성공 후 이동·갱신과 후보 검색 기준: [프론트 변경 액션](../../frontend/question/actions.md). 구현과 테스트를 마치고 부모 브랜치에 반영했다.
+  입력·분류·신고 유형 변환, 성공 후 이동·갱신과 후보 검색 기준: [프론트 변경 액션](../../frontend/question/actions.md).
 
-- [ ] **QB-12 전체 흐름과 연계 회귀 검증** — `feature/question-bank-backend-12-integration-regression`
+- **QB-12 전체 흐름과 연계 회귀 검증**
 
-  선행: QB-10·QB-11, 인증/회원 API와 관리자·AI 연계 준비. 실제 인증을 사용한 개발 모드에서 S1~S12를 확인하고 발견한 연결 오류를 수정한다. 내 질문·좋아요·대시보드는 각 담당 API와 연결해 전체 데이터 누락을 확인한다.
+  선행: QB-10·QB-11. 팀원이 인증/회원·관리자·AI·개인 API 개발을 완료하면 해당 결과를 통합하고 실제 전체 흐름 검증을 재개한다. 실제 인증을 사용한 개발 모드에서 S1~S12를 확인하고 발견한 연결 오류를 수정한다. 내 질문·좋아요·대시보드는 각 담당 API와 연결해 전체 데이터 누락을 확인한다.
 
-  완료 기준: 로그인 → 목록/상세 → 좋아요 → 등록/본인 상세 → 수정/재제출/삭제 → 신고가 동작하고 관리자 승인·답안 생성 상태가 반영된다. 자동 검사와 직접 확인 결과를 남긴다. 외부 연계가 준비되지 않은 부분은 완료로 체크하지 않으며, 해당 API 구현은 기존 담당 범위를 유지한다.
+  완료 기준: 로그인 → 목록/상세 → 좋아요 → 등록/본인 상세 → 수정/재제출/삭제 → 신고가 동작하고 관리자 승인·답안 생성 상태가 반영된다. 자동 검사와 실제 계정·담당 API를 사용한 직접 확인 결과를 남긴다. 해당 API 구현은 기존 담당 범위를 유지한다.
 
-  [통합 회귀 검증](integration-regression.md): 실제 HTTP·JWT·JPA와 프론트 조회/액션을 연결한 8개 시나리오와 목업 브라우저 검증을 추가했다. 실제 카카오 계정·관리자·AI·개인 API 연계는 남아 있어 전체 완료 체크는 보류한다.
+  검증 범위와 연계 조건: [통합 회귀 검증](integration-regression.md). 실제 HTTP·JWT·JPA와 프론트 조회/액션의 회귀 검사, 목업 브라우저 관찰, 실제 카카오 계정·관리자·AI·개인 API 통합 이후 검증을 구분한다.
 
 ### 구현 시 공통 확인 사항
 
@@ -388,9 +376,9 @@ QB-06의 사용자 수정과 QB-07의 삭제는 쓰기 트랜잭션에서 질문
 
 문서 변경은 `git diff --check`, 백엔드 코드 변경은 `./gradlew test`, 빌드/의존성 변경은 `./gradlew build`, 프론트 연결 변경은 규칙에 명시된 타입·lint·구조·단위 검사를 실행한다. 실제 인증·관리자·AI 연결을 거치지 않은 상태에서 전체 기능 연결 완료로 보고하지 않는다.
 
-## 9. 헥사고날 아키텍처 전환 TODO
+## 9. 헥사고날 아키텍처 전환 계획
 
-QB-01~QB-11에서 구현하고 QB-12에서 회귀 검증한 문제은행을 `question` 하위에서 점진적으로 전환한다. 3절은 기존 구조이며, 아래 구조가 전환 목표다. 이번에는 계획만 작성한다. 구현과 새 브랜치 생성은 각 항목을 시작할 때 진행한다.
+QB-01~QB-11의 문제은행을 `question` 하위에서 점진적으로 전환하며, QB-12의 실행 가능한 HTTP 회귀를 검증 기준으로 사용한다. 3절은 기존 구조이며, 아래 구조가 전환 목표다.
 
 목표는 업무 규칙과 유스케이스가 웹·Spring Security·JPA의 구현을 몰라도 실행되고 테스트될 수 있게 하는 것이다. 포트의 interface는 필요한 업무 동작과 오류·트랜잭션 조건을 표현하고, adapter는 HTTP·DB·회원 조회 기술을 연결한다. 기본 관점은 [Cockburn의 Ports & Adapters 원문](https://alistair.cockburn.us/hexagonal-architecture)을 따른다.
 
@@ -400,8 +388,8 @@ QB-01~QB-11에서 구현하고 QB-12에서 회귀 검증한 문제은행을 `que
 - 테이블·컬럼·FK·인덱스·유일 제약명과 enum 저장 값을 유지한다. 패키지 이동을 DB 스키마 개편과 함께 진행하지 않는다.
 - 공개 조건·소유권·반려 재제출·soft delete·기록 보존·회원 상태 판정·잠금 순서를 유지한다. 면접의 은행 질문 ID와 출제 당시 본문·힌트 스냅샷 계약도 유지한다.
 - 분류·검색·페이지·집계·상세의 조회 모델은 변경용 도메인 모델과 분리한다. 목록을 만들려고 모든 질문·키워드를 도메인 객체로 복원하거나 메모리에서 페이지를 나누지 않는다.
-- 범위는 현재 문제은행과 필요한 연결부다. 인증·회원·면접 전체를 재설계하거나 미구현 관리자·AI·개인 목록 API를 새로 구현하지 않는다. 공통 Security 설정은 adapter의 연결 변경에 필요한 범위만 수정한다.
-- QB-12의 실제 카카오·관리자·AI·개인 API 미연계 항목은 [기존 기록](integration-regression.md)에 남긴다. 이미 실행 가능한 HTTP 회귀를 기준으로 구조 전환을 시작할 수 있으며, 전환 완료를 해당 외부 연계의 완료로 보고하지 않는다.
+- 범위는 현재 문제은행과 필요한 연결부다. 인증·회원·면접 전체를 재설계하거나 다른 담당의 관리자·AI·개인 목록 API를 새로 구현하지 않는다. 공통 Security 설정은 adapter의 연결 변경에 필요한 범위만 수정한다.
+- 실제 카카오·관리자·AI·개인 API의 연계 검증은 [QB-12의 조건](integration-regression.md)을 따른다. 실행 가능한 HTTP 회귀를 기준으로 구조 전환을 시작할 수 있으며, 구조 전환과 외부 연계의 검증 범위를 구분한다.
 
 ### 목표 패키지와 의존 방향
 
@@ -431,86 +419,83 @@ question/
 
 운영용 JPA adapter와 유스케이스 테스트용 메모리 adapter로 교체 가능성을 확인한다. 메모리 adapter는 DB 잠금·제약 검증을 대신하지 않으며, 해당 검증은 실제 JPA 통합 테스트에 둔다. 초기화를 위한 빈 포트나 기능마다 의미 없는 전달 interface를 미리 만들지 않는다.
 
-### 브랜치 운영과 단계별 검증
+### 단계별 검증
 
-- 전환 부모·통합 브랜치 제안: `feature/question-bank-hexagonal`.
-- 시작점에는 QB-12의 현재 HTTP 회귀 테스트와 이 계획까지 반영한다. 이후 각 항목은 이전 결과가 반영된 최신 전환 부모에서 분기한다.
-- 체크박스 하나를 작업 브랜치 하나로 진행한다. 아래 브랜치명은 계획이며 아직 생성하지 않는다. 부모와 Git 참조 경로가 충돌하는 `feature/question-bank-hexagonal/01-...` 형식은 사용하지 않는다.
 - 각 단계에서 실제 호출 경로를 새 구현으로 연결하고 기존 기능을 실행할 수 있는 상태로 마친다. 임시 호환 adapter가 필요하면 `adapter` 안에 두고, 사용 구간과 제거 항목(HX-11)을 기록한다. core가 기존 Service나 Repository를 직접 호출하는 임시 의존은 만들지 않는다.
 - `config`의 트랜잭션 decorator가 입력 포트의 유스케이스 전체를 감싼다. 조회는 read-only, 변경은 한 쓰기 트랜잭션으로 묶고 core에 Spring 트랜잭션 타입을 노출하지 않는다. adapter 호출마다 새 트랜잭션을 시작하거나 내부 호출로 프록시를 우회하지 않는다.
 - 백엔드 코드 변경은 `./gradlew test`, 빌드 설정·의존성 변경은 `./gradlew build`를 실행한다. 실제 호출 경로를 바꾼 단계는 `./gradlew fullStackTest`도 실행한다. 프론트 파일이 바뀌면 [테스트 규칙](../../testing.md)의 프론트 검사도 적용한다.
-- 테스트의 패키지·fixture는 새 구조에 맞추되 기존 권한·개인정보·입력·경합·기록 보존 시나리오를 유지한다. 각 항목의 완료 기준과 검사를 충족하고 전환 부모에 반영한 뒤 `[x]`로 바꾼다.
+- 테스트의 패키지·fixture는 새 구조에 맞추되 기존 권한·개인정보·입력·경합·기록 보존 시나리오와 각 항목의 완료 기준을 유지한다.
 
-### 체크리스트
+### 전환 순서
 
-- [ ] **HX-01 전환 기준과 의존성 목록 고정** — `feature/question-bank-hexagonal-01-baseline`
+- **HX-01 전환 기준과 의존성 목록 고정**
 
   선행: QB-11 결과와 QB-12의 실행 가능한 회귀 테스트 반영. Controller·5개 Service·Repository·인증·오류·seed·테스트의 현재 의존성과 목표 위치를 정리한다. 입력 포트별 command/query/result, 출력 포트별 데이터와 실패 조건을 정하고 기존 S1~S12와 대응시킨다.
 
   완료 기준: 유지할 HTTP·DB 계약, 단계별 전환 대상과 임시 호환 adapter 제거 위치가 정해진다. 기존 백엔드 614개·프론트 343개·실제 HTTP 8개라는 기준 시점과 실제 실행 결과를 구분해 기록한다. 기존 미연계 항목을 전환으로 해결된 것으로 표시하지 않는다.
 
-- [ ] **HX-02 입력 포트와 웹 계약 분리** — `feature/question-bank-hexagonal-02-usecase-contracts`
+- **HX-02 입력 포트와 웹 계약 분리**
 
   선행: HX-01. application 소유 입력 포트와 command/query/result, 검증된 actor를 도입한다. Controller는 웹 DTO를 command/query로 변환하고 포트 결과를 기존 응답 DTO로 변환한다. 순수 enum·입력 정규화·오류 코드와 웹의 Bean Validation·HTTP 상태 매핑을 분리한다. 필요한 과도기 구현은 외부 호환 adapter로 연결한다.
 
   완료 기준: 입력 포트에 HTTP DTO·Principal·Jwt·회원 엔티티·Spring Data 타입이 없다. 기존 JSON·상태·오류 형식과 200자/300자 Unicode 기준, PATCH의 생략·null 처리, 조회 기본값을 유지한다. 업무 오류가 HttpStatus를 보유하지 않고 웹 mapper가 기존 상태를 결정한다.
 
-- [ ] **HX-03 카테고리 조회와 초기화 전환** — `feature/question-bank-hexagonal-03-categories`
+- **HX-03 카테고리 조회와 초기화 전환**
 
   선행: HX-02. `CategoryService`의 조회를 입력 포트 → application 구현 → 카테고리 조회 출력 포트 → JPA adapter로 연결한다. 순수 분류 모델과 조회 결과를 사용한다. 기본 분류 초기화는 조회 유스케이스에서 분리해 bootstrap 진입점과 초기화 포트로 옮기고 최초 Bean·트랜잭션 조립을 검증한다.
 
   완료 기준: CS/인성 표시 순서·0건 분류·중분류 없는 인성 질문 집계가 같다. 기존 seed 활성화 설정과 누락분만 추가하는 정책, 기존 ID·이름·순서를 유지한다. core가 Spring/JPA 없이 실행되고 JPA adapter로 같은 결과를 반환한다.
 
-- [ ] **HX-04 목록·검색·필터·페이지 조회 전환** — `feature/question-bank-hexagonal-04-list`
+- **HX-04 목록·검색·필터·페이지 조회 전환**
 
   선행: HX-03. `QuestionQueryService`의 목록 조회를 질문 조회 포트로 연결한다. 검색 조건·정렬·페이지 결과는 application 타입으로 정의하고 Criteria·projection·페이지 offset 처리는 영속성 adapter에 둔다. 분류 검증·공개 정책과 결과 조립의 소유 위치를 분명히 한다.
 
   완료 기준: 검색 특수문자 escape, 필터 조합·좋아요 정렬·동점 순서·페이지 보정과 전체/대분류 집계가 같다. nullable 분류 LEFT JOIN, count와 페이지 projection, 개인별 좋아요·신고 묶음 처리를 유지한다. 건수·페이지 오류와 N+1 회귀가 없고 기존 프론트 요청을 그대로 처리한다.
 
-- [ ] **HX-05 상세·반려 사유·답안 상태 조회 전환** — `feature/question-bank-hexagonal-05-detail`
+- **HX-05 상세·반려 사유·답안 상태 조회 전환**
 
   선행: HX-04. 상세 조회의 순수 모델과 공개/소유권 정책을 분리한다. 질문 기본 상태 조회 → 접근 권한 확인 → 허용된 상호작용·키워드·반려 사유·앞뒤 질문 조회 순서를 포트 계약에 반영한다. JPA 지연 로딩과 projection은 영속성 adapter 안에서 끝낸다.
 
   완료 기준: 본인 대기/반려만 비공개 상세를 열고 타인은 404를 받는다. 반려 사유는 본인 REJECTED에만 조회하며 최신 순서를 유지한다. 생성 중/실패/완료·nullable 답안/분류·키워드 순서·수정/삭제/신고 권한이 같고 앞뒤 질문은 DB에서 1건만 조회한다.
 
-- [ ] **HX-06 순수 질문 모델·영속성 매핑과 등록 전환** — `feature/question-bank-hexagonal-06-domain-create`
+- **HX-06 순수 질문 모델·영속성 매핑과 등록 전환**
 
   선행: HX-05. `Question`의 상태 전이·분류 불변식과 필요한 좋아요·신고 규칙의 순수 domain 모델 및 JPA 매핑을 도입하고, CS 등록부터 명시적 저장 출력 포트로 연결한다. 생성과 DB 복원 경로를 구분하며, 기존 관리자·답안 상태 메서드와 fixture가 표현하던 규칙도 보존한다. 아직 전환하지 않은 쓰기의 기존 JPA 상태 메서드·정책과 외부 호환 adapter는 HX-07~HX-09에서 각 경로를 교체할 때까지 유지하고 HX-11에서 최종 정리한다.
 
   완료 기준: domain 모델·정책에 JPA/Hibernate/Spring Assert가 없다. DB 복원은 신규 생성·검토·삭제 시각을 다시 만들지 않는다. 등록은 기존 category/작성자/USER/PENDING과 생성 ID를 유지하고, mapper가 검토 정보·답안·키워드·삭제 상태를 누락하거나 임의 초기화하지 않는다. 순수 모델에 의한 변경은 JPA 변경 감지로 자동 저장되지 않는다는 조건을 저장 계약에 명시한다.
 
-- [ ] **HX-07 수정·반려 재제출·삭제와 트랜잭션 전환** — `feature/question-bank-hexagonal-07-update-delete`
+- **HX-07 수정·반려 재제출·삭제와 트랜잭션 전환**
 
   선행: HX-06. 변경 유스케이스에서 첫 질문 조회에 쓰기 행 잠금을 획득하고 같은 트랜잭션 안에서 권한·현재 상태 확인 → domain 변경 → 명시적 저장을 수행한다. adapter는 잠근 managed JPA 엔티티에 허용된 변경만 적용한다. 과거 검토·면접·신고 기록을 변경 대상으로 삼지 않는다.
 
   완료 기준: 반려 재제출의 같은 ID·PENDING·현재 검토 정보 초기화, 대기/반려 soft delete와 404가 같다. 불완전한 복사본의 merge로 답안·관계 데이터를 덮어쓰지 않는다. 관리자 상태 변경과의 기존 경합 테스트가 통과하고 잠금은 최종 커밋/롤백까지 유지된다. 이미 읽은 엔티티가 잠금 조회만으로 자동 refresh된다고 가정하지 않는다.
 
-- [ ] **HX-08 좋아요 등록·취소 전환** — `feature/question-bank-hexagonal-08-likes`
+- **HX-08 좋아요 등록·취소 전환**
 
   선행: HX-07. `QuestionLikeService`를 좋아요 입력 포트와 저장·집계 출력 포트로 전환한다. 복합 PK와 JPA 관계·flush 처리는 영속성 adapter에 둔다. 질문 공개 상태 확인과 변경은 같은 질문 행 잠금·트랜잭션을 공유한다.
 
   완료 기준: 반복·동시 요청에도 회원별 한 행과 멱등 결과를 유지한다. flush 뒤의 최종 likeCount/isLiked, 다른 회원의 선택 상태, 미승인/숨김/삭제 거절과 관리자 상태 변경 경합이 같다. 프론트의 낙관적 표시 이후 서버 결과·재조회도 기존 HTTP 회귀로 확인한다.
 
-- [ ] **HX-09 신고와 저장 오류 변환 전환** — `feature/question-bank-hexagonal-09-reports`
+- **HX-09 신고와 저장 오류 변환 전환**
 
   선행: HX-08. `QuestionReportService`를 신고 유스케이스와 출력 포트로 전환한다. 5유형·본인/중복/공개 상태 규칙은 core에, 저장·flush·제약명 판독은 영속성 adapter에 둔다. 저장 실패와 트랜잭션 완료 시 발생하는 DB 오류를 외부 트랜잭션 decorator/오류 mapper에서 순수 업무 오류로 변환하는 책임도 정한다.
 
   완료 기준: 빈 상세·300/301자·잘못된 유형과 본인/비공개/전체 처리 상태의 중복 신고 정책이 같다. 정확한 신고 유일 제약만 ALREADY_REPORTED로 변환하고 다른 무결성 오류를 오분류하지 않는다. 잠금 실패·롤백과 기존 400/403/404/409/500 오류 계약을 유지한다.
 
-- [ ] **HX-10 인증·회원 접근 adapter 전환** — `feature/question-bank-hexagonal-10-auth`
+- **HX-10 인증·회원 접근 adapter 전환**
 
   선행: HX-09. `QuestionAuthentication`·JWT converter/token의 기술 의존을 security adapter에 모으고 검증된 회원 정보를 application actor로 변환한다. 현재 DB 회원 정보 조회는 회원 접근 출력 포트와 기존 UserRepository를 연결하는 adapter로 분리한다. 공통 SecurityConfig는 새 adapter를 주입하도록 연결한다.
 
   완료 기준: core가 User·Role·UserStatus 엔티티 패키지나 Spring Security를 참조하지 않는다. JWT 서명·issuer·만료·subject 검증, 현재 DB 역할·정지/탈퇴/없는 회원 판정과 401/403이 유지된다. 오래된 role 클레임을 신뢰하지 않고 기존 Jwt principal 및 `/members/me`·카카오 로그인 소비 계약을 보존한다. 요청 본문이나 임의 헤더로 actor를 만들지 않는다.
 
-- [ ] **HX-11 기존 계층 정리와 의존 규칙 자동 검증** — `feature/question-bank-hexagonal-11-cleanup`
+- **HX-11 기존 계층 정리와 의존 규칙 자동 검증**
 
   선행: HX-10. 남은 Controller·DTO·예외·검증·JPA 엔티티·Repository·projection·seed를 목표 위치로 정리한다. 기존 Service와 임시 호환 adapter·중복 정책을 제거하고 모든 호출이 새 입력 포트를 사용하게 한다. ArchUnit 등 의존 규칙 테스트로 core의 역참조와 금지된 기술 import를 차단한다.
 
   완료 기준: 옛 패키지로 우회하는 production 호출·중복 Bean·사용하지 않는 포트가 없다. JPQL의 projection/enum 전체 경로, 엔티티 이름·Criteria 속성·Spring Data fragment 검색 이름과 예외 처리 적용 범위를 모두 갱신한다. 자동 규칙이 domain/application의 JPA·Spring·웹·회원 구현 의존을 검출하며 실제 Bean 조립·트랜잭션·쿼리가 실행된다.
 
-- [ ] **HX-12 전환 후 회귀 검증과 문서 갱신** — `feature/question-bank-hexagonal-12-regression`
+- **HX-12 전환 후 회귀 검증과 문서 갱신**
 
   선행: HX-11. 순수 domain/유스케이스 테스트, JPA 조회·매핑·제약·경합 테스트, HTTP·JWT와 프론트 연결 테스트를 실행한다. Spring 없이 유스케이스를 호출하는 테스트와 실제 JPA adapter를 통한 HTTP 회귀가 같은 업무 계약을 만족하는지 확인하고 3절의 기존 구조 설명과 관련 기능 문서를 최종 구조로 갱신한다.
 
-  완료 기준: `./gradlew build`와 `./gradlew fullStackTest`가 통과하고 기존 프론트 계약이 유지된다. 프론트 변경이 있으면 해당 검사도 통과한다. 테스트 수 자체를 고정하지 않고 기존 권한·경계값·동시성·기록 보존 시나리오가 유지되는지 확인한다. 실행 가능한 브라우저 흐름의 확인 범위와 QB-12의 외부 연계 잔여 항목을 구분해 기록하며, 전환 부모에 결과를 반영한다.
+  완료 기준: `./gradlew build`와 `./gradlew fullStackTest`가 통과하고 기존 프론트 계약이 유지된다. 프론트 변경이 있으면 해당 검사도 통과한다. 테스트 수 자체를 고정하지 않고 기존 권한·경계값·동시성·기록 보존 시나리오가 유지되는지 확인한다. 실행 가능한 브라우저 흐름의 확인 범위와 QB-12의 외부 연계 검증 조건을 구분해 기록한다.

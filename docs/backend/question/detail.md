@@ -1,6 +1,6 @@
 # 질문 상세 조회
 
-WBS `problem-bank-102`, [청사진의 QB-04](README.md#7-브랜치별-todo와-구현-순서)에 해당한다. `GET /api/v1/learning/questions/{questionId}`로 공개 질문 또는 본인의 미승인 USER 질문을 직접 조회한다. 공개 목록에 들어 있지 않은 본인의 대기·반려 질문도 ID로 열 수 있다.
+WBS `problem-bank-102`, [청사진의 QB-04](README.md#7-기능별-구현-순서)에 해당한다. `GET /api/v1/learning/questions/{questionId}`로 공개 질문 또는 본인의 미승인 USER 질문을 직접 조회한다. 공개 목록에 들어 있지 않은 본인의 대기·반려 질문도 ID로 열 수 있다.
 
 ## 접근 권한
 

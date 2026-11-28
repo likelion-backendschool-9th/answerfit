@@ -1,6 +1,6 @@
 # 문제은행 공통 계약
 
-[청사진의 QB-01](README.md#7-브랜치별-todo와-구현-순서)에서 적용하는 입력·오류·회원 식별·접근 정책이다. 기존 ERD 기반 `question/entity`와 `user/entity`를 사용하며, 후속 API는 이 계약을 소비한다. 조회·저장 엔드포인트와 실제 토큰 검증은 각 담당 작업에서 연결한다.
+[청사진의 QB-01](README.md#7-기능별-구현-순서)에서 적용하는 입력·오류·회원 식별·접근 정책이다. 기존 ERD 기반 `question/entity`와 `user/entity`를 사용하며, 후속 API는 이 계약을 소비한다. 조회·저장 엔드포인트와 실제 토큰 검증은 각 담당 작업에서 연결한다.
 
 ## 입력 기준
 
@@ -67,7 +67,7 @@ principal 없음·계약에 맞지 않는 principal·유효하지 않은 ID/권�
 
 ## 후속 연계 조건
 
-- **인증/회원**: QB-10에서 email-signup 인증 브랜치의 JWT·카카오 로그인·`/api/v1/members/me`와 현재 DB 기반 principal adapter를 연결했다. 세션 역할은 해당 API가 member/admin으로 반환한다. 실제 카카오 설정과 계정 동의 확인은 [조회 연결](../../frontend/question/archive.md)을 따른다.
+- **인증/회원**: QB-10은 JWT·카카오 로그인·`/api/v1/members/me`와 현재 DB 기반 principal adapter를 사용한다. 세션 역할은 해당 API가 member/admin으로 반환한다. 실제 카카오 설정과 계정 동의 확인은 [조회 연결](../../frontend/question/archive.md)을 따른다.
 - **DB**: 현재 프로젝트의 H2 구성을 유지한다. 운영 DB·migration 방식과 담당은 별도 합의가 필요하며, 운영 테이블 생성이나 DDL 변경을 이번 작업에서 가정하지 않는다.
 - **카테고리**: QB-02에서 기존 프론트의 분류를 기준으로 초기 데이터와 표시 순서를 적용했다. ID는 조회 응답으로 공유한다. [카테고리 조회](categories.md)의 초기화 정책을 따르며, 운영 migration의 복합 FK 적용은 DB 담당과 확인한다.
 - **변경 API 계약**: [좋아요](likes.md)는 반복 가능한 상태 설정, [신고](reports.md)는 5유형과 회원별 한 번의 등록으로 처리한다. 관리자 쓰기도 각 문서의 공통 잠금 규칙을 적용해야 한다.

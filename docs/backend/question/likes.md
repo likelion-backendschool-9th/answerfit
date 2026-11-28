@@ -1,6 +1,6 @@
 # 문제은행 좋아요 등록과 취소
 
-WBS `problem-bank-103`·`problem-bank-104`, [청사진의 QB-08](README.md#7-브랜치별-todo와-구현-순서)에 해당한다. 기존 [공통 인증 계약](contracts.md)과 `QuestionLike`·`QuestionLikeId`를 재사용한다. 면접 회차의 질문 좋아요는 별도 기능이다.
+WBS `problem-bank-103`·`problem-bank-104`, [청사진의 QB-08](README.md#7-기능별-구현-순서)에 해당한다. 기존 [공통 인증 계약](contracts.md)과 `QuestionLike`·`QuestionLikeId`를 재사용한다. 면접 회차의 질문 좋아요는 별도 기능이다.
 
 ## 요청과 응답
 

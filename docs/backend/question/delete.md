@@ -1,6 +1,6 @@
 # 본인 미승인 질문 삭제
 
-WBS `problem-bank-108`, [청사진의 QB-07](README.md#7-브랜치별-todo와-구현-순서)에 해당한다. 기존 [공통 인증 계약](contracts.md)과 질문 엔티티를 사용한다.
+WBS `problem-bank-108`, [청사진의 QB-07](README.md#7-기능별-구현-순서)에 해당한다. 기존 [공통 인증 계약](contracts.md)과 질문 엔티티를 사용한다.
 
 ## 요청과 응답
 

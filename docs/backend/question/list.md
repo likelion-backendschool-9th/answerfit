@@ -1,6 +1,6 @@
 # 질문 목록 조회
 
-WBS `problem-bank-101`, [청사진의 QB-03](README.md#7-브랜치별-todo와-구현-순서)에 해당한다. 공개된 질문을 서버에서 검색·정렬·페이지 조회하고, 인증 회원의 좋아요·소유권·신고 여부를 함께 반환한다. 기존 `question/entity`를 재사용하며 Controller → Service → Repository 구조를 따른다.
+WBS `problem-bank-101`, [청사진의 QB-03](README.md#7-기능별-구현-순서)에 해당한다. 공개된 질문을 서버에서 검색·정렬·페이지 조회하고, 인증 회원의 좋아요·소유권·신고 여부를 함께 반환한다. 기존 `question/entity`를 재사용하며 Controller → Service → Repository 구조를 따른다.
 
 ## 요청
 

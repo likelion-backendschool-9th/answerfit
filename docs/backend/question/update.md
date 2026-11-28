@@ -1,6 +1,6 @@
 # 본인 질문 수정과 반려 재제출
 
-WBS `problem-bank-107`, [청사진의 QB-06](README.md#7-브랜치별-todo와-구현-순서)에 해당한다. 본인의 미삭제 USER 질문 중 PENDING/REJECTED만 수정한다. 기존 [공통 인증·입력 계약](contracts.md)과 ERD 기반 엔티티를 사용한다.
+WBS `problem-bank-107`, [청사진의 QB-06](README.md#7-기능별-구현-순서)에 해당한다. 본인의 미삭제 USER 질문 중 PENDING/REJECTED만 수정한다. 기존 [공통 인증·입력 계약](contracts.md)과 ERD 기반 엔티티를 사용한다.
 
 ## 요청과 응답
 
