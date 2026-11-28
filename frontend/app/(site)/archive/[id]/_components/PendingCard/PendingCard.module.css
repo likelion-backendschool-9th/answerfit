@@ -25,6 +25,12 @@
   line-height: var(--leading-sm);
 }
 
+.reason {
+  margin-top: var(--space-4);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .steps {
   display: flex;
   align-items: center;

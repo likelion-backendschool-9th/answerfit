@@ -2,7 +2,7 @@ import "server-only";
 import { todayInSeoul } from "@/features/interview/setup";
 import type { AnswerState, BankQuestion, PendingQuestion, QuestionDraft, ReportEntry, ReportStatus, ReportedQuestion } from "@/features/admin/types";
 import { findSimilar } from "@/features/question/rules";
-import type { ArchiveQuestion, ModelAnswer, QuestionInput, ReportInput } from "@/features/question/types";
+import type { ArchiveQuestion, ModelAnswer, ReportInput } from "@/features/question/types";
 import { demoDate, demoTime } from "./clock";
 import { readStore, writeStore } from "./store";
 
@@ -111,7 +111,8 @@ function seedBank(): Item[] {
   });
 }
 
-type Submission = QuestionInput & { id: string; code: string; nickname: string; email: string; mine: boolean; createdAt: string; approvedAt: number | null };
+type DemoQuestionInput = { category: string; text: string };
+type Submission = DemoQuestionInput & { id: string; code: string; nickname: string; email: string; mine: boolean; createdAt: string; approvedAt: number | null };
 
 const defaultSubmissions = (): Submission[] => [
   { id: "mine-l4l7", code: "U-0087", category: "네트워크", text: "로드밸런서의 L4와 L7 방식은 어떻게 다른가요?", nickname: "지우", email: "jiwoo@answerfit.kr", mine: true, createdAt: demoTime("2026-11-24", "23:52"), approvedAt: null },
@@ -188,7 +189,7 @@ export async function likeDemoQuestion(id: string, liked: boolean) {
 }
 
 /** 더 등록할 수 없으면 null */
-export async function addDemoQuestion({ category, text }: QuestionInput, who: { nickname: string; email: string }): Promise<string | null> {
+export async function addDemoQuestion({ category, text }: DemoQuestionInput, who: { nickname: string; email: string }): Promise<string | null> {
   const submissions = await readSubmissions();
   if (submissions.filter(({ mine, approvedAt }) => mine && approvedAt === null).length >= MAX_MINE) return null;
   const id = `mine-${Date.now().toString(36)}`;
@@ -198,7 +199,7 @@ export async function addDemoQuestion({ category, text }: QuestionInput, who: { 
   return id;
 }
 
-export async function updateDemoQuestion(id: string, { category, text }: QuestionInput) {
+export async function updateDemoQuestion(id: string, { category, text }: DemoQuestionInput) {
   await writeStore(
     SUBMISSIONS,
     (await readSubmissions()).map((one) => (one.id === id ? { ...one, category, text } : one)),

@@ -1,5 +1,5 @@
 import "server-only";
-import { readApiResponse } from "./api-response";
+import { readApiResponse, type ApiResponseFormat } from "./api-response";
 
 /** 개발 모드에서 아직 없는 API를 불렀다. 목업으로 대신하지 않는다. digest는 오류 화면이 종류를 구분하는 데 쓴다 */
 export class ApiNotConnectedError extends Error {
@@ -22,10 +22,10 @@ export class ApiError extends Error {
   }
 }
 
-type Options = { method?: string; body?: object | FormData; token?: string };
+type Options = { method?: string; body?: object | FormData; token?: string; responseFormat?: ApiResponseFormat };
 
 /** 백엔드 호출. 성공하면 ApiResponse의 data를 돌려준다(docs/api-response.md) */
-export async function callBackend<T>(path: string, { method = "GET", body, token }: Options = {}): Promise<T> {
+export async function callBackend<T>(path: string, { method = "GET", body, token, responseFormat = "envelope" }: Options = {}): Promise<T> {
   const base = process.env.BACKEND_URL;
   if (!base) throw new ApiNotConnectedError(path);
 
@@ -41,7 +41,7 @@ export async function callBackend<T>(path: string, { method = "GET", body, token
     throw new ApiNotConnectedError(path);
   }
 
-  const result = readApiResponse<T>(response.status, await response.json().catch(() => null));
+  const result = readApiResponse<T>(response.status, await response.json().catch(() => null), responseFormat);
   if (result.ok) return result.data;
   if (result.notConnected) throw new ApiNotConnectedError(path);
   throw new ApiError(response.status, result.code, result.message);

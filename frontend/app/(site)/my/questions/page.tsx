@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PATHS } from "@/app/_lib/paths";
-import { getQuestions } from "@/features/question/api";
+import { getMyQuestions } from "@/features/question/api";
 import { RegisterButton } from "@/features/question/components/RegisterButton/RegisterButton";
 import type { ArchiveQuestion } from "@/features/question/types";
 import { requireMember } from "@/features/session/guard";
@@ -15,14 +15,15 @@ type Props = { searchParams: Promise<{ status?: string | string[] }> };
 const TABS: { status: ArchiveQuestion["status"] | null; label: string }[] = [
   { status: null, label: "전체" },
   { status: "pending", label: "승인 대기" },
+  { status: "rejected", label: "반려" },
   { status: "approved", label: "승인됨" },
 ];
 
 export default async function MyQuestionsPage({ searchParams }: Props) {
   const { status: raw } = await searchParams;
-  const status = raw === "pending" || raw === "approved" ? raw : null;
+  const status = raw === "pending" || raw === "approved" || raw === "rejected" ? raw : null;
   await requireMember(PATHS.myQuestions);
-  const mine = (await getQuestions()).filter((question) => question.mine).sort((a, b) => (b.createdOn ?? "").localeCompare(a.createdOn ?? ""));
+  const mine = (await getMyQuestions()).sort((a, b) => (b.createdOn ?? "").localeCompare(a.createdOn ?? ""));
   const of = (one: ArchiveQuestion["status"] | null) => (one ? mine.filter((question) => question.status === one) : mine);
   const items = of(status);
   return (
