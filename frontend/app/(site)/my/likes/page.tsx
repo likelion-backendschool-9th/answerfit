@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { PATHS } from "@/app/_lib/paths";
 import { FilterChips } from "@/components/ui/FilterChips/FilterChips";
-import { getLikedAnswers, getQuestions } from "@/features/question/api";
+import { getLikedAnswers, getMyLikedQuestions } from "@/features/question/api";
 import { requireMember } from "@/features/session/guard";
 import { PageHeading } from "../_components/PageHeading/PageHeading";
 import { LikedList, type LikedItem } from "./_components/LikedList/LikedList";
@@ -17,7 +17,7 @@ export default async function LikesPage({ searchParams }: Props) {
   const { category: raw } = await searchParams;
   const selected = typeof raw === "string" ? raw : null;
   await requireMember(PATHS.myLikes);
-  const [questions, answers] = await Promise.all([getQuestions(), getLikedAnswers()]);
+  const [questions, answers] = await Promise.all([getMyLikedQuestions(), getLikedAnswers()]);
   const items: LikedItem[] = [
     ...answers.map(({ id, interviewId, text, date, typeLabel, score }) => ({ id, source: "interview" as const, category: FROM_INTERVIEW, text, meta: `${date} ${typeLabel} · 내 점수 ${score}`, href: PATHS.interviewResult(interviewId) })),
     ...questions.filter(({ liked }) => liked).map(({ id, kind, category, text, likes }) => ({ id, source: "archive" as const, category: kind === "personality" ? PERSONALITY : category, text, meta: `좋아요 ${likes}`, href: PATHS.question(id) })),

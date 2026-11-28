@@ -49,5 +49,11 @@
 - Security: 컨트롤러 안에서 난 `AuthenticationException`은 `UNAUTHORIZED`, `AccessDeniedException`은 `FORBIDDEN`으로 응답한다. 필터에서 막힌 401·403은 `SecurityConfig`가 같은 `ApiResponse`로 응답한다. (#12, 2026-11-26)
 - DTO 검증 애너테이션에는 `message`를 한글로 적는다(예: `@NotBlank(message = "이메일을 입력해 주세요.")`). 적지 않으면 Hibernate Validator 기본 메시지(`must not be blank` 등)가 그대로 화면에 보일 수 있다.
 
+## 문제은행의 기존 계약과 호환
+
+QB-10에서 인증 브랜치를 통합하면서 기존 문제은행의 flat 성공 응답과 `{code,message}` 업무 오류를 유지한다. 해당 Controller의 오류 처리는 질문 범위에 한정해 전역 처리보다 먼저 적용한다. Security 필터와 그 밖의 API는 이 문서의 envelope를 따른다.
+
+프론트의 문제은행 호출만 `responseFormat: "plain"`을 명시하며, 같은 요청에 envelope 오류가 오면 공통 parser로 읽는다. 다른 호출의 성공 형식 검사는 완화하지 않는다. 문제은행을 공통 envelope로 전환하려면 별도의 계약 변경으로 다룬다.
+
 ## 아직 정하지 않은 것
 - `ErrorCode`의 약관 동의 코드(`REQUIRED_CONSENT_MISSING`, `DUPLICATE_CONSENT_TYPE`)에 맞는 약관 테이블이 ERD에 없다.

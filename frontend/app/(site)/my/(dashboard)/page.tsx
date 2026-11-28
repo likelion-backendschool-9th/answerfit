@@ -4,7 +4,7 @@ import { ButtonLink } from "@/components/ui/Button/Button";
 import { getRecords } from "@/features/interview/api";
 import { averageScore, PREVIOUS_LABEL, PERIODS, readPeriod, splitByPeriod, typeStats, type RecordQuery } from "@/features/interview/records";
 import { getLearning } from "@/features/member/api";
-import { getLikedAnswers, getQuestions } from "@/features/question/api";
+import { getLikedAnswers, getMyLikedQuestions } from "@/features/question/api";
 import { requireMember } from "@/features/session/guard";
 import { PageHeading } from "../_components/PageHeading/PageHeading";
 import { CategoryBars } from "./_components/CategoryBars/CategoryBars";
@@ -24,10 +24,9 @@ const SHOWN_TYPES = ["experience", "cs", "personality"] as const satisfies reado
 export default async function DashboardPage({ searchParams }: Props) {
   const period = readPeriod((await searchParams).period);
   const { nickname } = await requireMember(PATHS.my);
-  const [records, learning, questions, answers] = await Promise.all([getRecords(), getLearning(), getQuestions(), getLikedAnswers()]);
+  const [records, learning, liked, answers] = await Promise.all([getRecords(), getLearning(), getMyLikedQuestions(), getLikedAnswers()]);
   const now = new Date();
   const month = splitByPeriod(records, "month", now).current;
-  const liked = questions.filter((question) => question.liked);
   const previous = PREVIOUS_LABEL[period];
   return (
     <>

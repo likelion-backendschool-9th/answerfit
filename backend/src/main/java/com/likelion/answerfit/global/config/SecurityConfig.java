@@ -3,10 +3,10 @@ package com.likelion.answerfit.global.config;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -17,6 +17,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import com.likelion.answerfit.global.common.ApiResponse;
 import com.likelion.answerfit.global.exception.ErrorCode;
 import com.likelion.answerfit.global.exception.ErrorResponse;
+import com.likelion.answerfit.question.auth.QuestionJwtAuthenticationConverter;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,10 +26,12 @@ import tools.jackson.databind.json.JsonMapper;
 
 /** 서버 세션 없이 Bearer JWT로만 회원을 확인한다. 로그인 API만 토큰 없이 부를 수 있다. */
 @Configuration
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JsonMapper jsonMapper;
+    private final QuestionJwtAuthenticationConverter questionJwtAuthenticationConverter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -44,7 +47,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/**", "/error").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(server -> server
-                        .jwt(Customizer.withDefaults())
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(questionJwtAuthenticationConverter))
                         .authenticationEntryPoint(unauthorized)
                         .accessDeniedHandler(forbidden))
                 .exceptionHandling(handling -> handling

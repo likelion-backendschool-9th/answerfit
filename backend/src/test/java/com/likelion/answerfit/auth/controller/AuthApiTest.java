@@ -20,6 +20,7 @@ import com.likelion.answerfit.auth.service.SocialLoginService;
 import com.likelion.answerfit.global.config.SecurityConfig;
 import com.likelion.answerfit.global.exception.CustomException;
 import com.likelion.answerfit.global.exception.ErrorCode;
+import com.likelion.answerfit.question.auth.QuestionJwtAuthenticationConverter;
 import com.likelion.answerfit.user.controller.MemberController;
 import com.likelion.answerfit.user.dto.MemberResponse;
 import com.likelion.answerfit.user.service.MemberService;
@@ -39,6 +40,9 @@ class AuthApiTest {
 
     @MockitoBean
     private MemberService memberService;
+
+    @MockitoBean
+    private QuestionJwtAuthenticationConverter questionJwtAuthenticationConverter;
 
     @Test
     void 카카오_로그인은_토큰_없이_부를_수_있다() throws Exception {

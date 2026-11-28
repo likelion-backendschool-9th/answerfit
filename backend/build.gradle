@@ -36,5 +36,19 @@ dependencies {
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+	useJUnitPlatform {
+		excludeTags 'full-stack'
+	}
+}
+
+tasks.register('fullStackTest', Test) {
+	group = 'verification'
+	description = 'Runs the frontend adapters against an isolated HTTP backend. Requires frontend npm dependencies.'
+	doNotTrackState('Exercises backend and frontend over live HTTP; every explicit invocation must run.')
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+	useJUnitPlatform {
+		includeTags 'full-stack'
+	}
+	shouldRunAfter tasks.named('test')
 }

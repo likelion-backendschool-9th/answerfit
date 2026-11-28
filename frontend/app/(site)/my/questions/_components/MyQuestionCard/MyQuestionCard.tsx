@@ -8,14 +8,14 @@ import styles from "./MyQuestionCard.module.css";
 
 const dots = (date: string) => date.replaceAll("-", ".");
 
-export function MyQuestionCard({ question: { id, category, text, status, likes, createdOn, approvedOn } }: { question: ArchiveQuestion }) {
-  const pending = status === "pending";
+export function MyQuestionCard({ question: { id, category, categoryId, text, status, likes, createdOn, approvedOn } }: { question: ArchiveQuestion }) {
+  const pending = status === "pending" || status === "rejected";
   return (
     <article className={cn(styles.card, pending && styles.pending)}>
       <div className={styles.text}>
         <p className={styles.top}>
           <span className={styles.category}>{category}</span>
-          <span className={cn(styles.badge, pending ? styles.waiting : styles.approved)}>{pending ? "승인 대기" : "승인됨"}</span>
+          <span className={cn(styles.badge, pending ? styles.waiting : styles.approved)}>{status === "rejected" ? "반려" : pending ? "승인 대기" : "승인됨"}</span>
         </p>
         <Link href={PATHS.question(id)} className={styles.question}>
           {text}
@@ -27,7 +27,7 @@ export function MyQuestionCard({ question: { id, category, text, status, likes, 
       </div>
       {pending ? (
         <div className={styles.actions}>
-          <PendingActions id={id} category={category} text={text} next={PATHS.myQuestions} />
+          <PendingActions id={id} category={category} categoryId={categoryId} text={text} next={PATHS.myQuestions} />
         </div>
       ) : (
         <div className={styles.state}>

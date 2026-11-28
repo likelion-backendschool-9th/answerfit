@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.likelion.answerfit.auth.jwt.JwtConfig;
 import com.likelion.answerfit.global.config.SecurityConfig;
+import com.likelion.answerfit.question.auth.QuestionJwtAuthenticationConverter;
 import com.likelion.answerfit.user.service.NicknameAvailabilityService;
 
 @WebMvcTest(NicknameAvailabilityController.class)
@@ -28,6 +29,9 @@ class NicknameAvailabilityControllerTest {
 
     @MockitoBean
     private NicknameAvailabilityService nicknames;
+
+    @MockitoBean
+    private QuestionJwtAuthenticationConverter questionJwtAuthenticationConverter;
 
     @ParameterizedTest
     @ValueSource(strings = {"지우", "abc123abc123"})
