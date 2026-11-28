@@ -8,12 +8,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.likelion.answerfit.question.exception.QuestionPlainApi;
 import com.likelion.answerfit.question.auth.QuestionAuthentication;
 import com.likelion.answerfit.question.dto.response.QuestionLikeResponse;
 import com.likelion.answerfit.question.service.QuestionLikeService;
 
 import jakarta.validation.constraints.Positive;
 
+@QuestionPlainApi
 @RestController
 @RequestMapping("/api/v1/learning/questions")
 public class QuestionLikeController {

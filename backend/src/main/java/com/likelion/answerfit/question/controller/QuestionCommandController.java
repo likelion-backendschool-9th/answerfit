@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.likelion.answerfit.question.exception.QuestionPlainApi;
 import com.likelion.answerfit.question.auth.QuestionAuthentication;
 import com.likelion.answerfit.question.dto.request.CreateQuestionRequest;
 import com.likelion.answerfit.question.dto.request.UpdateQuestionRequest;
@@ -22,6 +23,7 @@ import com.likelion.answerfit.question.service.QuestionCommandService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 
+@QuestionPlainApi
 @RestController
 @RequestMapping("/api/v1/learning/questions")
 public class QuestionCommandController {

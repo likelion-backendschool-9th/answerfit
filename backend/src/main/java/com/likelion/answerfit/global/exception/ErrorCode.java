@@ -35,11 +35,25 @@ public enum ErrorCode {
     SUSPENDED(ErrorDomain.BUSINESS, "110", HttpStatus.FORBIDDEN, "이용이 정지된 계정이에요."),
     WITHDRAWN(ErrorDomain.BUSINESS, "111", HttpStatus.FORBIDDEN, "탈퇴한 계정이에요."),
 
+    // 2xx: 관리자 문제은행
+    ADMIN_QUESTION_NOT_FOUND(ErrorDomain.BUSINESS, "201", HttpStatus.NOT_FOUND, "질문을 찾을 수 없습니다."),
+    ADMIN_REPORT_NOT_FOUND(ErrorDomain.BUSINESS, "202", HttpStatus.NOT_FOUND, "신고를 찾을 수 없습니다."),
+    ADMIN_QUESTION_STATE_CHANGED(ErrorDomain.BUSINESS, "203", HttpStatus.CONFLICT, "질문의 상태가 변경되었습니다. 다시 확인해 주세요."),
+    ADMIN_REPORT_ALREADY_HANDLED(ErrorDomain.BUSINESS, "204", HttpStatus.CONFLICT, "이미 처리된 신고가 있습니다. 다시 확인해 주세요."),
+    ADMIN_REVISION_CONFLICT(ErrorDomain.BUSINESS, "205", HttpStatus.CONFLICT, "질문 내용이 변경되었습니다. 최신 내용을 확인해 주세요."),
+    ADMIN_INVALID_CATEGORY(ErrorDomain.BUSINESS, "206", HttpStatus.BAD_REQUEST, "올바른 카테고리를 선택해 주세요."),
+    ADMIN_INVALID_REPORT_SELECTION(ErrorDomain.BUSINESS, "207", HttpStatus.BAD_REQUEST, "같은 질문의 처리할 신고를 선택해 주세요."),
+    ADMIN_INVALID_ACTION(ErrorDomain.BUSINESS, "208", HttpStatus.BAD_REQUEST, "올바른 작업을 선택해 주세요."),
+
     // ===== INFRA: 외부 연동 =====
     // 1xx: 카카오
     KAKAO_AUTH_FAILED(ErrorDomain.INFRA, "101", HttpStatus.BAD_REQUEST, "카카오 인증에 실패했어요. 다시 시도해 주세요."),
     KAKAO_UNAVAILABLE(ErrorDomain.INFRA, "102", HttpStatus.BAD_GATEWAY, "카카오 서버와 연결하지 못했어요. 잠시 뒤 다시 시도해 주세요."),
-    KAKAO_NOT_CONFIGURED(ErrorDomain.INFRA, "103", HttpStatus.SERVICE_UNAVAILABLE, "카카오 로그인이 아직 설정되지 않았어요.");
+    KAKAO_NOT_CONFIGURED(ErrorDomain.INFRA, "103", HttpStatus.SERVICE_UNAVAILABLE, "카카오 로그인이 아직 설정되지 않았어요."),
+
+    // 2xx: 문제은행 답안 생성 연동
+    QUESTION_AI_NOT_CONFIGURED(ErrorDomain.INFRA, "201", HttpStatus.SERVICE_UNAVAILABLE, "문제은행 답안 생성이 아직 설정되지 않았어요."),
+    QUESTION_AI_UNAVAILABLE(ErrorDomain.INFRA, "202", HttpStatus.BAD_GATEWAY, "답안 생성 서버와 연결하지 못했어요. 잠시 뒤 다시 시도해 주세요.");
 
 
     private final static String SERVICE_DOMAIN = "BACKEND";

@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -17,6 +18,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import com.likelion.answerfit.global.common.ApiResponse;
 import com.likelion.answerfit.global.exception.ErrorCode;
 import com.likelion.answerfit.global.exception.ErrorResponse;
+import com.likelion.answerfit.question.admin.auth.AdminQuestionAuthentication;
 import com.likelion.answerfit.question.auth.QuestionJwtAuthenticationConverter;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,6 +47,12 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**", "/error").permitAll()
+                        .requestMatchers("/api/v1/admin", "/api/v1/admin/**")
+                        .access((authentication, context) -> {
+                            var principal = authentication.get();
+                            return new AuthorizationDecision(principal != null && principal.isAuthenticated()
+                                    && AdminQuestionAuthentication.canAccess(principal));
+                        })
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(server -> server
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(questionJwtAuthenticationConverter))

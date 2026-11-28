@@ -25,7 +25,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-@RestControllerAdvice(basePackages = "com.likelion.answerfit.question")
+@RestControllerAdvice(annotations = QuestionPlainApi.class)
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class QuestionExceptionHandler extends ResponseEntityExceptionHandler {
 
