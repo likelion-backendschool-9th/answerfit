@@ -220,6 +220,7 @@ class QuestionExceptionHandlerTest {
             implements QuestionPrincipal {
     }
 
+    @QuestionPlainApi
     @RestController
     @RequestMapping("/test/question-errors")
     public static class TestController {
