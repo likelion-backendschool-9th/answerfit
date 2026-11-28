@@ -29,6 +29,22 @@ const COLUMNS: { key: Column; label: string }[] = [
 const TEXT_MAX: Partial<Record<Column, number>> = { title: TITLE_MAX, organization: SHORT_MAX, role: SHORT_MAX };
 const LAST = COLUMNS.length - 1;
 const SKELETON_ROWS = 6;
+/** 엑셀처럼 열에 붙이는 글자. 수식 입력줄의 셀 주소(B3)에 쓴다 */
+const LETTERS = "ABCDEFG";
+
+/** 수식 입력줄에 보이는 셀 내용 */
+function cellText(item: Experience, column: Column) {
+  switch (column) {
+    case "type":
+      return item.type ? ACTIVITY_LABEL[item.type] : "";
+    case "period":
+      return formatPeriod(item) ?? "";
+    case "tags":
+      return item.tags.join(", ");
+    default:
+      return item[column];
+  }
+}
 
 type Editing = { id: string; column: Column; draft: string; anchor: HTMLElement | null };
 
@@ -88,9 +104,13 @@ export function ExperienceTable({ items, rowHeight, status, custom, newRowId, em
   }
 
   /** 바뀐 값만 저장한다 */
+  function apply(id: string, column: Column, patch: Partial<Experience>) {
+    const item = rows.find((row) => row.id === id);
+    if (item && Object.entries(patch).some(([key, value]) => JSON.stringify(item[key as keyof Experience]) !== JSON.stringify(value))) onChange(id, column, patch);
+  }
+
   function commit(patch: Partial<Experience>) {
-    const item = rows.find(({ id }) => id === editing?.id);
-    if (editing && item && Object.entries(patch).some(([key, value]) => JSON.stringify(item[key as keyof Experience]) !== JSON.stringify(value))) onChange(editing.id, editing.column, patch);
+    if (editing) apply(editing.id, editing.column, patch);
     finish();
   }
 
@@ -137,8 +157,33 @@ export function ExperienceTable({ items, rowHeight, status, custom, newRowId, em
 
   const editingItem = editing && rows.find(({ id }) => id === editing.id);
   const firstCell = rows[0] && `${rows[0].id}:0`;
+  const activeRow = active ? rows.findIndex(({ id }) => id === active.id) : -1;
+  const activeItem = rows[activeRow];
+  const activeColumn = active && activeItem ? COLUMNS[active.col].key : null;
 
   return (
+    <div className={styles.sheet}>
+      <div className={styles.formula}>
+        <span className={styles.address} aria-label="선택한 셀">
+          {activeColumn && `${LETTERS[active!.col]}${activeRow + 1}`}
+        </span>
+        <span className={styles.fx} aria-hidden="true">
+          fx
+        </span>
+        {activeItem && activeColumn ? (
+          <FormulaInput
+            key={`${activeItem.id}:${activeColumn}:${cellText(activeItem, activeColumn)}`}
+            label={COLUMNS[active!.col].label}
+            value={cellText(activeItem, activeColumn)}
+            max={activeColumn === "result" ? LONG_MAX : TEXT_MAX[activeColumn]}
+            multiline={activeColumn === "result"}
+            onCommit={(value) => apply(activeItem.id, activeColumn, { [activeColumn]: value.trim() })}
+            onDone={() => select(activeItem.id, active!.col)}
+          />
+        ) : (
+          <input className={styles.formulaInput} aria-label="셀 내용" placeholder="셀을 고르면 내용이 여기에 보여요" disabled />
+        )}
+      </div>
     <div className={styles.scroll}>
       <table ref={table} className={styles.table} role="grid" aria-label="경험 목록" aria-busy={items === null} data-height={rowHeight}>
         <thead>
@@ -146,8 +191,11 @@ export function ExperienceTable({ items, rowHeight, status, custom, newRowId, em
             <th scope="col" className={styles.number}>
               <span className={styles.hidden}>번호</span>
             </th>
-            {COLUMNS.map(({ key, label }) => (
-              <th key={key} scope="col" className={cn(styles[key], key === "title" && styles.sticky)}>
+            {COLUMNS.map(({ key, label }, col) => (
+              <th key={key} scope="col" className={cn(styles[key], key === "title" && styles.sticky, active?.col === col && activeColumn && styles.current)}>
+                <span className={styles.letter} aria-hidden="true">
+                  {LETTERS[col]}
+                </span>
                 {label}
                 {key === "title" && <span className={styles.required}>*</span>}
               </th>
@@ -177,7 +225,7 @@ export function ExperienceTable({ items, rowHeight, status, custom, newRowId, em
           )}
           {rows.map((item, row) => (
             <tr key={item.id}>
-              <td className={styles.number}>
+              <td className={cn(styles.number, row === activeRow && styles.current)}>
                 {!item.content.trim() && (
                   <span className={styles.dot} tabIndex={0}>
                     <span className={styles.tip}>활동 내용을 아직 안 적었어요</span>
@@ -244,15 +292,19 @@ export function ExperienceTable({ items, rowHeight, status, custom, newRowId, em
         {rows.length > 0 && (
           <tfoot>
             <tr>
-              <td colSpan={COLUMNS.length + 2}>
+              <td className={styles.number} aria-hidden="true">
+                <Icon name="plus" size={14} />
+              </td>
+              <td colSpan={COLUMNS.length + 1}>
                 <button type="button" className={styles.add} onClick={onAdd}>
-                  <Icon name="plus" size={16} /> 새 행 추가
+                  새 행 추가
                 </button>
               </td>
             </tr>
           </tfoot>
         )}
       </table>
+    </div>
       {editing?.anchor && editingItem && !TEXT_MAX[editing.column] && <CellEditor key={editing.id + editing.column} item={editingItem} column={editing.column} anchor={editing.anchor} custom={custom} onChange={(patch) => onChange(editingItem.id, editing.column, patch)} onCommit={commit} onCancel={finish} />}
       {menu && (
         <Popover anchor={menu.anchor} label="행 메뉴" onClose={() => setMenu(null)}>
@@ -286,7 +338,7 @@ export function ExperienceTable({ items, rowHeight, status, custom, newRowId, em
 function Value({ item, column }: { item: Experience; column: Column }) {
   switch (column) {
     case "type":
-      return item.type && <Chip>{ACTIVITY_LABEL[item.type]}</Chip>;
+      return item.type && <Chip size="sm">{ACTIVITY_LABEL[item.type]}</Chip>;
     case "period":
       return <span className={cn(styles.text, !item.startedOn && styles.muted)}>{formatPeriod(item) ?? "기간 선택"}</span>;
     case "tags":
@@ -294,7 +346,9 @@ function Value({ item, column }: { item: Experience; column: Column }) {
       return (
         <span className={styles.tagList}>
           {item.tags.slice(0, 3).map((tag) => (
-            <Chip key={tag}>{tag}</Chip>
+            <Chip key={tag} size="sm">
+              {tag}
+            </Chip>
           ))}
           {item.tags.length > 3 && <span className={styles.more}>+{item.tags.length - 3}</span>}
         </span>
@@ -320,6 +374,53 @@ function Status({ value }: { value: CellStatus | undefined }) {
       </span>
     );
   return null;
+}
+
+type FormulaProps = { label: string; value: string; max?: number; multiline: boolean; onCommit: (value: string) => void; onDone: () => void };
+
+/**
+ * 수식 입력줄. 셀보다 넓어서 긴 글을 고치기 편하다. 글로 적는 칸(제목·소속·역할·성과)만 고칠 수 있고, 나머지는 셀을 눌러 고른다.
+ * Enter는 저장, Esc는 되돌린다. 성과는 Shift+Enter로 줄을 바꾼다.
+ */
+function FormulaInput({ label, value, max, multiline, onCommit, onDone }: FormulaProps) {
+  const [draft, setDraft] = useState(value);
+  // Enter·Esc로 셀에 포커스를 돌려줄 때 생기는 blur는 저장하지 않는다
+  const skipBlur = useRef(false);
+  const editable = max !== undefined;
+  const save = () => {
+    if (skipBlur.current) {
+      skipBlur.current = false;
+      return;
+    }
+    if (draft !== value) onCommit(draft);
+  };
+  return (
+    <textarea
+      className={styles.formulaInput}
+      aria-label={`${label} 내용`}
+      rows={1}
+      value={editable ? draft : value}
+      maxLength={max}
+      readOnly={!editable}
+      title={editable ? undefined : "셀을 눌러 고르세요"}
+      onChange={(event) => setDraft(multiline ? event.target.value : event.target.value.replace(/\n/g, ""))}
+      onBlur={save}
+      onKeyDown={(event) => {
+        if (!editable || event.nativeEvent.isComposing) return;
+        if (event.key === "Enter" && !(multiline && event.shiftKey)) {
+          event.preventDefault();
+          save();
+          skipBlur.current = true;
+          onDone();
+        } else if (event.key === "Escape") {
+          event.preventDefault();
+          setDraft(value);
+          skipBlur.current = true;
+          onDone();
+        }
+      }}
+    />
+  );
 }
 
 /** move는 Tab(1)·Shift+Tab(-1)으로 끝내 옆 칸으로 갈 때다 */

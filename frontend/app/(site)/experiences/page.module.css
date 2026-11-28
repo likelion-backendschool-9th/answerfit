@@ -1,11 +1,5 @@
+/* 경험을 정리하는 작업 화면이라 양쪽 여백 없이 화면 폭을 다 쓴다 */
 .content {
-  width: min(100%, 77.5rem);
-  margin: 0 auto;
-  padding: var(--space-14) var(--space-5) var(--space-section-sm);
-}
-
-@media (max-width: 40rem) {
-  .content {
-    padding-top: var(--space-8);
-  }
+  width: 100%;
+  padding-top: var(--space-6);
 }

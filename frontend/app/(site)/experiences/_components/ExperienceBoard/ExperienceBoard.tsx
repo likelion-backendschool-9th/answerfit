@@ -101,6 +101,9 @@ export function ExperienceBoard({ items: loaded }: { items: Experience[] | null 
   }
 
   const opened = items.find((item) => item.id === openId) ?? null;
+  const blank = items.filter((item) => !item.content.trim()).length;
+  const saving = Object.values(status).includes("saving");
+  const statusText = [filtered ? `${shown.length}개 표시 / 전체 ${items.length}개` : `경험 ${items.length}개`, blank > 0 && `활동 내용 빈 행 ${blank}개`, saving && "저장 중…"].filter(Boolean).join(" · ");
   const pasteLink = (
     <button type="button" className={styles.link} onClick={() => setPasting(true)}>
       엑셀에서 붙여넣기
@@ -124,94 +127,102 @@ export function ExperienceBoard({ items: loaded }: { items: Experience[] | null 
         </div>
       </div>
 
-      <div className={styles.tabs} role="tablist" aria-label="보기">
-        {(
-          [
-            ["table", "표"],
-            ["matrix", "역량 매트릭스"],
-          ] as const
-        ).map(([value, label]) => (
-          <button key={value} type="button" role="tab" id={`tab-${value}`} aria-selected={view === value} aria-controls="experience-view" className={styles.tab} onClick={() => setView(value)}>
-            {label}
-          </button>
-        ))}
-      </div>
-
-      <div className={styles.toolbar}>
-        <FilterChips
-          label="활동 구분"
-          chips={[
-            { label: "전체", count: items.length, current: filter.type === null, onSelect: () => setFilter({ ...filter, type: null }) },
-            ...ACTIVITY_TYPES.map((type) => ({ label: ACTIVITY_LABEL[type], count: items.filter((item) => item.type === type).length, current: filter.type === type, onSelect: () => setFilter({ ...filter, type }) })),
-          ]}
-        />
-        <div className={styles.tools}>
-          <SelectField label="태그" value={filter.tag} options={{ "": "모든 태그" }} groups={{ ...TAG_GROUPS, ...(custom.length > 0 && { "내 태그": custom }) }} onChange={(event) => setFilter({ ...filter, tag: event.target.value })} />
-          <SearchField label="제목·내용 검색" size="sm" className={styles.search} value={filter.keyword} onChange={(event) => setFilter({ ...filter, keyword: event.target.value })} />
-          {view === "table" && (
-            <div className={styles.segments} role="radiogroup" aria-label="행 높이">
-              <span className={styles.segmentsLabel} aria-hidden="true">
-                행 높이
-              </span>
-              {ROW_HEIGHTS.map(([value, label]) => (
-                <button key={value} type="button" role="radio" aria-checked={rowHeight === value} className={styles.segment} onClick={() => setRowHeight(value)}>
-                  {label}
-                </button>
-              ))}
-            </div>
-          )}
+      <div className={styles.sheet}>
+        <div className={styles.ribbon}>
+          <FilterChips
+            label="활동 구분"
+            chips={[
+              { label: "전체", count: items.length, current: filter.type === null, onSelect: () => setFilter({ ...filter, type: null }) },
+              ...ACTIVITY_TYPES.map((type) => ({ label: ACTIVITY_LABEL[type], count: items.filter((item) => item.type === type).length, current: filter.type === type, onSelect: () => setFilter({ ...filter, type }) })),
+            ]}
+          />
+          <div className={styles.tools}>
+            <SelectField label="태그" value={filter.tag} options={{ "": "모든 태그" }} groups={{ ...TAG_GROUPS, ...(custom.length > 0 && { "내 태그": custom }) }} onChange={(event) => setFilter({ ...filter, tag: event.target.value })} />
+            <SearchField label="제목·내용 검색" size="sm" className={styles.search} value={filter.keyword} onChange={(event) => setFilter({ ...filter, keyword: event.target.value })} />
+            {view === "table" && (
+              <div className={styles.segments} role="radiogroup" aria-label="행 높이">
+                <span className={styles.segmentsLabel} aria-hidden="true">
+                  행 높이
+                </span>
+                {ROW_HEIGHTS.map(([value, label]) => (
+                  <button key={value} type="button" role="radio" aria-checked={rowHeight === value} className={styles.segment} onClick={() => setRowHeight(value)}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
 
-      <div id="experience-view" role="tabpanel" aria-labelledby={`tab-${view}`} className={styles.view}>
-        {view === "matrix" ? (
-          <CompetencyMatrix items={shown} />
-        ) : (
-          <>
-            <div className={styles.desktop}>
-              <ExperienceTable
-                items={loading ? null : shown}
-                rowHeight={rowHeight}
-                status={status}
-                custom={custom}
-                newRowId={newRowId}
-                empty={
-                  filtered ? (
-                    <p className={styles.muted}>조건에 맞는 경험이 없어요.</p>
-                  ) : (
-                    <div className={styles.empty}>
-                      <p>아직 정리한 경험이 없어요. 첫 행을 추가해 보세요.</p>
+        <div id="experience-view" role="tabpanel" aria-labelledby={`tab-${view}`} className={styles.view}>
+          {view === "matrix" ? (
+            <CompetencyMatrix items={shown} />
+          ) : (
+            <>
+              <div className={styles.desktop}>
+                <ExperienceTable
+                  items={loading ? null : shown}
+                  rowHeight={rowHeight}
+                  status={status}
+                  custom={custom}
+                  newRowId={newRowId}
+                  empty={
+                    filtered ? (
+                      <p className={styles.muted}>조건에 맞는 경험이 없어요.</p>
+                    ) : (
+                      <div className={styles.empty}>
+                        <p>아직 정리한 경험이 없어요. 첫 행을 추가해 보세요.</p>
+                        <Button className={styles.button} onClick={add}>
+                          경험 추가
+                        </Button>
+                        {pasteLink}
+                      </div>
+                    )
+                  }
+                  onChange={change}
+                  onOpen={setOpenId}
+                  onDuplicate={duplicate}
+                  onRemove={setRemoveId}
+                  onAdd={add}
+                />
+              </div>
+              <div className={styles.mobile}>
+                {!loading && shown.length === 0 ? (
+                  <div className={cn(styles.empty, styles.box)}>
+                    <p>{filtered ? "조건에 맞는 경험이 없어요." : "아직 정리한 경험이 없어요."}</p>
+                    {!filtered && (
                       <Button className={styles.button} onClick={add}>
                         경험 추가
                       </Button>
-                      {pasteLink}
-                    </div>
-                  )
-                }
-                onChange={change}
-                onOpen={setOpenId}
-                onDuplicate={duplicate}
-                onRemove={setRemoveId}
-                onAdd={add}
-              />
-              <p className={styles.hint}>방향키 이동 · Enter 편집 · Tab 다음 칸 · Esc 취소</p>
-            </div>
-            <div className={styles.mobile}>
-              {!loading && shown.length === 0 ? (
-                <div className={cn(styles.empty, styles.box)}>
-                  <p>{filtered ? "조건에 맞는 경험이 없어요." : "아직 정리한 경험이 없어요."}</p>
-                  {!filtered && (
-                    <Button className={styles.button} onClick={add}>
-                      경험 추가
-                    </Button>
-                  )}
-                </div>
-              ) : (
-                <ExperienceCards items={loading ? null : shown} />
-              )}
-            </div>
-          </>
-        )}
+                    )}
+                  </div>
+                ) : (
+                  <ExperienceCards items={loading ? null : shown} />
+                )}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* 엑셀의 시트 탭과 상태 표시줄 */}
+        <div className={styles.sheetBar}>
+          <div className={styles.tabs} role="tablist" aria-label="보기">
+            {(
+              [
+                ["table", "표"],
+                ["matrix", "역량 매트릭스"],
+              ] as const
+            ).map(([value, label]) => (
+              <button key={value} type="button" role="tab" id={`tab-${value}`} aria-selected={view === value} aria-controls="experience-view" className={styles.tab} onClick={() => setView(value)}>
+                {label}
+              </button>
+            ))}
+          </div>
+          <p className={styles.status} aria-live="polite">
+            {loading ? "불러오는 중…" : statusText}
+          </p>
+          {view === "table" && <p className={styles.hint}>방향키 이동 · Enter 편집 · Tab 다음 칸 · Esc 취소</p>}
+        </div>
       </div>
 
       <DetailPanel

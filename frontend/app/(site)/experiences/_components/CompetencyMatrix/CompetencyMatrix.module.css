@@ -1,8 +1,10 @@
+/* 표 시트와 같은 높이·격자 */
 .scroll {
-  max-height: calc(100dvh - 10rem);
+  height: calc(100dvh - 3rem - 6.25rem);
+  min-height: 22rem;
   overflow: auto;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface-subtle);
 }
 
 .table {
@@ -15,7 +17,8 @@
 
 .table th,
 .table td {
-  padding: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-right: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
   background: var(--color-surface);
   white-space: nowrap;
@@ -56,8 +59,7 @@
 
 .empty {
   padding: var(--space-16) var(--space-5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-top: 1px solid var(--color-border);
   color: var(--color-text-muted);
   text-align: center;
 }
