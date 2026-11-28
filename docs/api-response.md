@@ -39,7 +39,9 @@
 | `SECURITY` | 1xx | 인증·인가 일반 |
 | `SECURITY` | 2xx | 리프레시 토큰 |
 | `BUSINESS` | 1xx | 회원가입·로그인·계정 |
+| `BUSINESS` | 2xx | 관리자 문제은행 조회·변경·신고·버전 충돌 |
 | `INFRA` | 1xx | 카카오 연동 (#12) |
+| `INFRA` | 2xx | 문제은행 답안 생성 연결 |
 
 ## 예외를 던지는 법
 - 서비스는 `throw new CustomException(ErrorCode.XXX)`만 던진다. `ResponseStatusException`은 쓰지 않는다. 던지더라도 상태별로 아래처럼 바뀌므로 원래 상태(예: 409)가 사라진다.
@@ -51,9 +53,11 @@
 
 ## 문제은행의 기존 계약과 호환
 
-QB-10에서 인증 브랜치를 통합하면서 기존 문제은행의 flat 성공 응답과 `{code,message}` 업무 오류를 유지한다. 해당 Controller의 오류 처리는 질문 범위에 한정해 전역 처리보다 먼저 적용한다. Security 필터와 그 밖의 API는 이 문서의 envelope를 따른다.
+QB-10에서 인증 브랜치를 통합하면서 기존 사용자 문제은행·카테고리의 flat 성공 응답과 `{code,message}` 업무 오류를 유지한다. `QuestionPlainApi`를 표시한 Controller에만 해당 오류 처리를 적용하고 전역 처리보다 먼저 적용한다. Security 필터와 그 밖의 API는 이 문서의 envelope를 따른다.
 
 프론트의 문제은행 호출만 `responseFormat: "plain"`을 명시하며, 같은 요청에 envelope 오류가 오면 공통 parser로 읽는다. 다른 호출의 성공 형식 검사는 완화하지 않는다. 문제은행을 공통 envelope로 전환하려면 별도의 계약 변경으로 다룬다.
+
+관리자 문제은행은 공통 envelope를 사용한다. `question.admin` 범위의 `AdminQuestionExceptionHandler`가 공통 오류 처리를 재사용하며 안전한 필드 검증 메시지와 잠금 충돌을 보강한다. 입력 바인딩 실패의 거절된 값은 응답에 포함하지 않는다. 상세 대역과 HTTP 상태는 [관리자 공통 계약](backend/question/admin-question-contracts.md#오류-코드-대역)을 따른다.
 
 ## 아직 정하지 않은 것
 - `ErrorCode`의 약관 동의 코드(`REQUIRED_CONSENT_MISSING`, `DUPLICATE_CONSENT_TYPE`)에 맞는 약관 테이블이 ERD에 없다.

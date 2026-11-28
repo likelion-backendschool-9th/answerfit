@@ -1,8 +1,8 @@
-# 관리자 문제은행 화면 연결 청사진
+# 관리자 문제은행 화면 연결 청사진 (admin-question)
 
-백엔드: [관리자 문제은행 청사진](../../backend/question/admin.md) · [문제은행 공통 규칙](../../backend/question/README.md). 화면 URL은 `/admin/questions`와 `tab=bank|pending|reports`를 유지한다. 관리자 회원 관리(`/admin/members`)는 이 문서의 범위 밖이다.
+백엔드: [관리자 문제은행 청사진](../../backend/question/admin-question.md) · [문제은행 공통 규칙](../../backend/question/README.md). 화면 URL은 `/admin/questions`와 `tab=bank|pending|reports`를 유지한다. 관리자 회원 관리(`/admin/members`)는 이 문서의 범위 밖이다.
 
-원본은 [WBS 3의 관리자 항목 A71:N79](https://docs.google.com/spreadsheets/d/1ZcudXgHfxo-pvC2YsAEQAIcAnhHKStIwND0lUe540Ig/edit?gid=204813250#gid=204813250&range=A71:N79)이다. 아래 경로·메서드는 WBS를 따르며, 입력·응답 자료형과 액션 값은 백엔드 청사진에서 확정할 제안이다. 기존 프론트의 `/questions/pending`, `/reports`, `/questions/answer` 호출을 서버 계약으로 간주하지 않는다.
+원본은 [WBS 3의 관리자 항목 A71:N79](https://docs.google.com/spreadsheets/d/1ZcudXgHfxo-pvC2YsAEQAIcAnhHKStIwND0lUe540Ig/edit?gid=204813250#gid=204813250&range=A71:N79)이다. 아래 경로·메서드는 WBS를 따르며, 입력·응답 자료형과 액션 값은 [관리자 공통 계약](../../backend/question/admin-question-contracts.md)을 따른다. 기존 프론트의 `/questions/pending`, `/reports`, `/questions/answer` 호출을 서버 계약으로 간주하지 않는다.
 
 ## 화면과 통신 계약
 
@@ -12,7 +12,7 @@
 | --- | --- | --- |
 | admin-101 | `GET /api/v1/admin/questions` | 문제은행·승인 대기 필터 조회, 편집용 답안·힌트·키워드, 서버 페이지와 전체 집계 |
 | admin-102 | `POST /api/v1/admin/questions` | 관리자 질문과 답안·힌트·키워드 등록 |
-| admin-103 | `PATCH /api/v1/admin/questions/{questionId}` | `UPDATE`, `RESTORE`, `REGENERATE_ANSWER` 액션 제안에 따른 수정·재공개·답안 재생성 |
+| admin-103 | `PATCH /api/v1/admin/questions/{questionId}` | `UPDATE`, `RESTORE`, `REGENERATE_ANSWER` 액션에 따른 수정·재공개·답안 재생성 |
 | admin-104 | `DELETE /api/v1/admin/questions/{questionId}` | 단건 soft delete. 선택 삭제는 단건 요청을 순차 실행 |
 | admin-107 | `PATCH /api/v1/admin/questions/{questionId}/review` | `APPROVE` 또는 `REJECT`와 반려 사유 전달 |
 | admin-108 | `GET /api/v1/admin/question-reports` | 질문별 신고 묶음 조회. 같은 경로의 `questionId` 조건으로 선택 질문의 신고 상세 조회 |
@@ -25,7 +25,7 @@
 - 문제은행은 승인·숨김 질문, 승인 대기는 `USER/CS/PENDING` 질문을 조회한다. 검색·대분류·분류·정렬·페이지 조건을 서버에 전달하며 받은 페이지를 다시 로컬 필터링하거나 자르지 않는다. 기본 페이지 크기 10, 최대 100은 서버와 맞춘다.
 - 질문 내용·표시 코드 검색의 의미와 정렬은 백엔드 계약을 따른다. 검색어는 최대 100 Unicode code point이며 UTF-16 `slice`로 자르지 않는다. 탭·필터 변경 시 페이지를 1로 되돌리고 범위 초과는 서버가 반환한 실제 페이지를 표시한다.
 - 질문·분류 ID는 문자열로 유지한다. 표시 코드는 서버의 ID·출처에 근거한 값으로 받고 목업의 `Q-/U-` 코드에서 실제 ID를 역산하지 않는다. 작성자 닉네임 누락을 관리자 출처로 오인하지 않는다.
-- 분류 이름 상수 대신 공통 카테고리 ID·이름·표시 순서를 사용한다. CS는 분류 필수, 인성은 nullable 분류를 허용하는 제안이며 null은 대분류 이름으로 표시한다.
+- 분류 이름 상수 대신 공통 카테고리 ID·이름·표시 순서를 사용한다. CS는 분류 필수, 인성은 nullable 분류를 허용하며 null은 대분류 이름으로 표시한다.
 - 질문 목록 응답의 답안·힌트·키워드를 편집 drawer에 전달한다. 조회 응답에서 빠진 필드를 빈 값으로 바꿔 저장하지 않는다. 새 편집 상세 경로에 의존하지 않는다.
 - 답안 `PENDING/DONE/FAILED/null`과 질문 `PENDING/REJECTED/APPROVED/HIDDEN`을 독립적으로 변환한다. 실패를 ‘없음’이나 ‘생성 중’으로 합치지 않고 실패 안내와 허용된 재시도 버튼을 제공한다.
 - 생성 중 폴링은 해당 상태가 보일 때만 수행하고 완료·실패·탭 이탈·언마운트 시 종료한다. 서버 집계가 필요하더라도 매번 세 탭의 전체 데이터를 다시 받지 않는다.
@@ -33,7 +33,7 @@
 ## 등록·수정·검토
 
 - 관리자 등록은 CS·인성, 분류 ID, 질문, 답안, 힌트, 순서 있는 키워드를 전송한다. 수정에서는 기존 대분류 선택을 비활성화하고 같은 대분류 안에서 분류를 변경한다.
-- 입력 제한 제안은 trim 후 질문 10~200 code point, 답안 1~2,000, 키워드 최대 10개·각 1~20이다. 현행 관리자 폼의 최소 5자는 사용자 계약의 10자와 차이가 있으므로 공통 정책 확정 시 함께 고친다. 힌트의 nullable·길이 정책은 백엔드 계약을 따른다.
+- 입력 제한은 trim 후 질문 10~200 code point, 답안 1~2,000, 키워드 최대 10개·각 1~20이다. 현행 관리자 폼의 최소 5자는 사용자 계약의 10자와 차이가 있으므로 프론트 연결 시 함께 고친다. 힌트의 nullable·길이 정책은 백엔드 계약을 따른다.
 - 힌트 필드를 편집·보존한다. 키워드는 trim·빈 값 제거·중복 제거 후 입력 순서를 유지한다. 답안은 Markdown 원문을 저장·입력하며 표시의 안전한 HTML 렌더링과 공유 컴포넌트는 [#35](https://github.com/likelion-backendschool-9th/answerfit/issues/35)와 협업한다.
 - 반려에는 1~300 code point 사유 입력을 추가한다. 반려 결과는 `REJECTED`로 보존하고 사용자 상세의 사유·수정·같은 ID 재제출로 연결한다. 기존 ‘삭제되며 되돌릴 수 없음’ 안내를 반려 의미에 맞게 고친다.
 - 승인은 질문 공개와 AI 생성 상태의 변경을 반영한다. ‘승인됨’과 ‘AI 답안 생성 완료’를 구분하고, 실제 생성 작업은 담당 구현과 연결한다. 승인 후 일반 사용자의 수정·삭제 불가 상태를 재조회한다.
@@ -54,7 +54,7 @@
 
 ## TODO 연결과 검증
 
-작업 의존성과 완료 기준은 [백엔드 AQB-01~AQB-12](../../backend/question/admin.md)를 따른다. 진행 상태는 이슈·PR에 기록한다.
+작업 의존성과 완료 기준은 [백엔드 AQB-01~AQB-12](../../backend/question/admin-question.md)를 따른다. 진행 상태는 이슈·PR에 기록한다.
 
 | TODO | 프론트 작업과 완료 기준 |
 | --- | --- |

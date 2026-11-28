@@ -63,7 +63,7 @@ principal 없음·계약에 맞지 않는 principal·유효하지 않은 ID/권�
 
 업무상 404도 `QUESTION_NOT_FOUND`를 포함해 프론트가 API 미연동 오류로 오인하지 않게 한다. 입력 오류는 400, 인증 정보 오류는 401, 접근 거절은 403, 업무 상태 충돌은 409로 구분한다. 서버 반환값의 검증 실패는 500이며 입력 오류로 바꾸지 않는다.
 
-예외 처리는 `com.likelion.answerfit.question`의 Controller에 한정하고 전역 catch-all보다 먼저 적용한다. 다른 도메인의 오류 정책과 인증 필터의 entry point/access-denied 처리를 덮어쓰지 않는다. 인증 필터 단계 오류는 통합한 공통 `ApiResponse` envelope를 따르며, 프론트 문제은행 호출은 이 형식과 기존 flat 업무 오류를 구분해 읽는다.
+예외 처리는 `QuestionPlainApi`를 표시한 기존 사용자 문제은행·카테고리 Controller에 한정하고 전역 catch-all보다 먼저 적용한다. 관리자와 다른 도메인의 오류 정책, 인증 필터의 entry point/access-denied 처리를 덮어쓰지 않는다. 인증 필터 단계 오류는 통합한 공통 `ApiResponse` envelope를 따르며, 프론트 문제은행 호출은 이 형식과 기존 flat 업무 오류를 구분해 읽는다. 관리자는 [별도 공통 계약](admin-question-contracts.md)에 따라 envelope를 사용한다.
 
 ## 후속 연계 조건
 

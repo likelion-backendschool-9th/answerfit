@@ -1,8 +1,8 @@
-# 관리자 문제은행 구현 청사진
+# 관리자 문제은행 구현 청사진 (admin-question)
 
-관리자가 문제은행의 질문·답안·키워드를 관리하고, 사용자 질문을 승인·반려하며, 신고를 처리하도록 기존 `/admin/questions` 화면을 실제 백엔드에 연결한다. 이 문서는 구현 범위와 계약 제안, 의존성에 따른 TODO와 완료 기준을 정한다.
+관리자가 문제은행의 질문·답안·키워드를 관리하고, 사용자 질문을 승인·반려하며, 신고를 처리하도록 기존 `/admin/questions` 화면을 실제 백엔드에 연결한다. 이 문서는 구현 범위, 의존성에 따른 TODO와 완료 기준을 정한다. AQB-01의 확정 요청·응답·입력·인가·오류·버전 계약은 [관리자 공통 계약](admin-question-contracts.md)을 따른다.
 
-공유하는 모델·잠금·공개 조건은 [문제은행 청사진](README.md)과 [공통 계약](contracts.md)을 따른다. 화면 연결은 [관리자 문제은행 화면](../../frontend/question/admin.md), 사용자 전체 흐름의 후속 통합은 [QB-12](integration-regression.md#팀원-개발-완료-후-통합)에 연결한다.
+공유하는 모델·잠금·공개 조건은 [문제은행 청사진](README.md)과 [공통 계약](contracts.md)을 따른다. 화면 연결은 [관리자 문제은행 화면](../../frontend/question/admin-question.md), 사용자 전체 흐름의 후속 통합은 [QB-12](integration-regression.md#팀원-개발-완료-후-통합)에 연결한다.
 
 ## 1. 원본 요구사항과 범위
 
@@ -18,7 +18,7 @@
 | admin-108 | GET `/question-reports` | 질문별 신고 집계. 같은 GET의 questionId 조건으로 유형별 건수·개별 신고와 조치 정보 |
 | admin-109 | PATCH `/question-reports/{reportId}` | 같은 질문의 선택 신고를 한 조치로 묶어 숨김·삭제·문제 없음 처리 |
 
-경로와 기능 범위는 WBS를 따른다. 아래 DTO 필드, 입력 상한, 작업 enum, 반복 요청 정책은 구현을 시작할 때 AQB-01에서 확정할 제안이다. 프론트에 적힌 “백엔드 형식 모두 미확정” 자료형을 서버의 확정 계약으로 취급하지 않는다.
+경로와 기능 범위는 WBS를 따르며 DTO 필드·입력 상한·작업 enum·반복 요청 정책은 [관리자 공통 계약](admin-question-contracts.md)에서 정의한다. 프론트에 적힌 “백엔드 형식 모두 미확정” 자료형을 서버의 확정 계약으로 취급하지 않는다.
 
 AI 제공자 구현과 실제 계정·운영 DB 설정은 담당자와 연결한다. 수동 등록용 AI 초안 버튼의 `/questions/answer`는 기존 프론트 가정이며 WBS API가 아니다. 이 경로를 새로 만들거나 가짜 답안을 반환하는 일을 기본 범위에 넣지 않는다. 지원 여부는 별도 계약으로 정한다.
 
@@ -39,39 +39,39 @@ AI 제공자 구현과 실제 계정·운영 DB 설정은 담당자와 연결한
 
 관리자 모듈의 인터페이스는 검증된 관리자, 조회 조건 또는 명시적인 변경 명령과 결과다. 상태 검사·잠금·이력 저장·신고 묶음의 원자성은 내부 구현이 맡는다. 교체 대상이 실제로 있는 AI 연결에 출력 인터페이스와 adapter를 두며, 기존 JPA 호출마다 형식적인 interface/implementation 쌍을 추가하지 않는다.
 
-[헥사고날 전환](README.md#9-헥사고날-아키텍처-전환-todo)은 별도 계획이다. 관리자 기능을 HX 전체 완료에 종속시키지 않으며, 공통 엔티티·인증·저장소가 옮겨지는 시점에는 같은 변경을 양쪽에서 중복 구현하지 않도록 조정한다.
+[헥사고날 전환](README.md#9-헥사고날-아키텍처-전환-계획)은 별도 계획이다. 관리자 기능을 HX 전체 완료에 종속시키지 않으며, 공통 엔티티·인증·저장소가 옮겨지는 시점에는 같은 변경을 양쪽에서 중복 구현하지 않도록 조정한다.
 
-## 3. 공통 계약 제안
+## 3. 공통 계약
 
 ### 인증·인가와 응답
 
 - 모든 관리자 조회·변경에서 JWT의 서명·issuer·만료를 검증하고 현재 DB의 ACTIVE·미탈퇴·ADMIN을 확인한다. 일반 회원은 403, 인증 없음·위조·만료·탈퇴/없는 회원은 401, 정지 계정은 403이다. body/query의 adminId, 오래된 role 클레임, 프론트 역할 전환기를 권한 근거로 쓰지 않는다.
 - 공통 principal에서 관리자 actor를 얻고, 모듈 진입점에서도 관리자 권한을 보장한다. `hasRole("ADMIN")`만 추가할 경우 현재 DB 역할과 GrantedAuthorities의 매핑을 함께 검증해야 한다.
 - 관리자 성공·업무 오류·입력 오류는 [공통 ApiResponse](../../api-response.md)를 사용한다. 기존 사용자 문제은행의 flat 계약은 보존한다. `QuestionExceptionHandler`를 기존 사용자·카테고리 Controller에 한정하는 등 적용 대상을 명시하고 관리자 예외 처리와 겹치지 않게 한다.
-- ID는 JSON 문자열이다. 질문·신고 등 업무 시각은 ISO 8601 UTC이며 화면에서 KST로 표시하고, 공통 ErrorResponse.timestamp는 기존 KST(+09:00) 계약을 유지한다. GET/PATCH/DELETE 성공은 200 envelope, 등록은 201 envelope와 생성 ID를 제안한다. 현재 공통 parser는 빈 204를 성공 데이터로 처리하지 않으므로 상태 코드를 임의로 섞지 않는다.
+- ID는 JSON 문자열이다. 질문·신고 등 업무 시각은 ISO 8601 UTC이며 화면에서 KST로 표시하고, 공통 ErrorResponse.timestamp는 기존 KST(+09:00) 계약을 유지한다. GET/PATCH/DELETE 성공은 200 envelope, 등록은 201 envelope와 생성 ID를 반환한다. 현재 공통 parser는 빈 204를 성공 데이터로 처리하지 않으므로 상태 코드를 임의로 섞지 않는다.
 - 오류는 400 입력·분류, 401 인증, 403 인가, 404 질문/신고 없음, 409 현재 상태·이미 처리·잠금 경합, 502/503 AI 연결 실패·설정 미완료로 나눈다. 공통 ErrorCode의 미사용 대역과 한글 메시지를 AQB-01에서 등록한다. 업무상 404를 API 미연결로 표시하지 않는다.
 
 ### 입력·변경 가능 필드
 
-- 질문은 trim 후 10~200 Unicode code point로 사용자 계약과 통일하는 안이다. 현 관리자 목업의 최소 5자와 다른 점을 확정하고 프론트도 함께 바꾼다. 답안은 trim 후 1~2,000자, 키워드는 순서대로 최대 10개·각 1~20자다. Markdown 기호·개행도 길이에 포함하고 원문을 저장한다.
+- 질문은 trim 후 10~200 Unicode code point로 사용자 계약과 통일한다. 현 관리자 목업의 최소 5자 제한은 프론트 연결 작업에서 함께 바꾼다. 답안은 trim 후 1~2,000자, 키워드는 순서대로 최대 10개·각 1~20자다. Markdown 기호·개행도 길이에 포함하고 원문을 저장한다.
 - 키워드는 trim·빈 값 제거·중복 제거 후 순서를 보존한다. 서버도 상한과 정규화 결과를 검증한다. 교체 시 0부터 순서를 다시 부여하고 기존 유일 제약과 flush 순서를 고려한다.
-- 공통 카테고리 API의 ID를 사용한다. CS는 CS 카테고리가 필수이고 PERSONALITY는 같은 대분류 카테고리 또는 null을 허용한다. 등록한 질문의 major는 변경하지 않는 안이며 편집 화면의 대분류 전환도 막는다.
-- hint는 선택 문자열로 원문을 보존한다. 제안 상한은 2,000 code point다. DTO에서 생략은 유지, nullable hint/category의 명시적 null은 해당 필드 비우기로 구분한다. content/modelAnswer/keywords의 null은 거절하고 빈 keywords 배열은 전체 비우기다. 답안은 수정 요청에 포함된 경우에도 비어 있을 수 없다.
+- 공통 카테고리 API의 ID를 사용한다. CS는 CS 카테고리가 필수이고 PERSONALITY는 같은 대분류 카테고리 또는 null을 허용한다. 등록한 질문의 major는 변경하지 않으며 편집 화면의 대분류 전환도 막는다.
+- hint는 선택 문자열로 원문을 보존한다. 상한은 2,000 code point다. DTO에서 생략은 유지, nullable hint/category의 명시적 null은 해당 필드 비우기로 구분한다. content/modelAnswer/keywords의 null은 거절하고 빈 keywords 배열은 전체 비우기다. 답안은 수정 요청에 포함된 경우에도 비어 있을 수 없다.
 - source, authorId, status, reviewedBy, createdAt, deletedAt, modelAnswerStatus는 일반 수정 payload로 덮어쓰지 않는다. 관리자·사용자 출처와 작성자, 기존 검토/신고 이력을 보존한다.
-- 관리자 조회는 영속 revision을 반환하고 UPDATE·심사 요청은 expectedRevision을 전달한다. 질문 잠금 후 버전이 다르면 409로 재조회를 요구한다. 사용자 수정과 관리자 수정 등 공유 writer가 같은 버전을 갱신해야 하며, 현재 존재하지 않는 버전 컬럼을 가정하지 않고 증가 규칙·migration을 AQB-01에서 정한다. AI 입력 변경을 판정할 revision과 관리자 편집 버전의 관계도 함께 정의한다.
-- 반려·신고 조치 사유는 trim 후 1~300 code point를 제안한다. QuestionModeration.reason은 현재 VARCHAR(500)이므로 300개 이모지까지 수용하려면 600단위 저장 용량과 migration이 필요하다.
+- 관리자 조회는 영속 revision을 반환하고 UPDATE·심사 요청은 expectedRevision을 전달한다. 질문 잠금 후 버전이 다르면 409로 재조회를 요구한다. 사용자 수정과 관리자 수정 등 공유 writer가 같은 버전을 갱신해야 하며, [공통 계약의 버전 기준](admin-question-contracts.md#버전db외부-연결-기준)에 따라 편집 revision과 AI 입력 inputRevision을 구분하고 공유 writer·migration을 함께 적용한다.
+- 반려·신고 조치 사유는 trim 후 1~300 code point다. QuestionModeration.reason은 현재 VARCHAR(500)이므로 300개 이모지까지 수용하려면 600단위 저장 용량과 migration이 필요하다.
 
 ## 4. 조회와 화면 데이터
 
 ### 문제은행·승인대기
 
-`GET /questions`에서 major/categoryId/source/status/keyword/sort/page/pageSize를 검증한다. 기본 page=1, pageSize=10, 상한 100을 제안한다. 최신순·수정순·좋아요순은 최종 동점 조건에 ID를 넣고, 필드별 의미와 기본 정렬을 AQB-01에서 고정한다. 검색어는 최대 100 code point이며 LIKE 특수문자를 문자로 처리한다.
+`GET /questions`에서 major/categoryId/source/status/keyword/sort/page/pageSize를 검증한다. 기본 page=1, pageSize=10, 상한 100이다. 기본은 수정순이며 최신순·수정순·좋아요순의 필드와 동점 정렬은 공통 계약을 따른다. 검색어는 최대 100 code point이며 LIKE 특수문자를 문자로 처리한다.
 
 문제은행 탭은 APPROVED/HIDDEN, 승인대기는 USER/CS/PENDING을 조회한다. 상태 필터에서 REJECTED를 지원하더라도 승인대기 건수에는 섞지 않는다. 삭제 질문은 일반 문제은행에서 제외한다.
 
 응답 `data`에는 items/totalCount/page/pageSize/totalPages와 필터 전 탭·분류별 counts를 둔다. totalCount는 현재 필터 적용 건수다. 빈 결과는 page=1/totalPages=1, 초과 페이지는 마지막 페이지로 보정하는 사용자 계약을 재사용한다.
 
-목록 항목은 id, major, category, content, source, author, status, modelAnswer/modelAnswerStatus, hint, keywords, likeCount, reviewedAt, createdAt/updatedAt와 가능한 작업을 반환한다. WBS에 따라 같은 GET의 페이지 항목으로 편집 패널을 구성하며, 별도 상세 endpoint를 전제하지 않는다. 선택 항목만 최신 조회하는 questionId 조건의 추가 여부는 AQB-01에서 정한다.
+목록 항목은 id, major, category, content, source, author, status, modelAnswer/modelAnswerStatus, hint, keywords, likeCount, reviewedAt, createdAt/updatedAt와 가능한 작업을 반환한다. WBS에 따라 같은 GET의 페이지 항목으로 편집 패널을 구성하며, 별도 상세 endpoint를 전제하지 않는다. 선택 항목만 최신 조회할 때는 같은 GET의 단독 questionId 조건을 사용한다.
 
 표시 코드는 DB ID·출처로 결정적으로 만들고 영속 식별자로 쓰지 않는다. 코드 검색의 문법을 고정한다. 작성자 닉네임 null 여부로 ADMIN 출처를 추측하지 않는다. 승인대기의 닉네임·이메일은 관리자 응답에만 노출하며 탈퇴 작성자 표시와 누락 허용값을 정의한다.
 
@@ -82,7 +82,7 @@ AI 제공자 구현과 실제 계정·운영 DB 설정은 담당자와 연결한
 ### 신고 묶음·개별 신고
 
 - 목록은 questionId로 묶고 질문 내용·공개/삭제 상태, 총 신고 수, 미처리 수, 최근 신고일, 5유형별 건수와 요약 사유를 반환한다. 질문별 묶음 수와 개별 신고 수를 다른 필드로 제공한다.
-- 같은 GET에 questionId 조건을 주면 해당 질문의 개별 reportId/reasonType/detail/status/createdAt/handledAt/연결 조치와 선택 처리에 필요한 데이터를 반환한다. 개별 신고도 서버 페이지로 조회한다. 목록 페이지와 개별 신고 페이지의 요청·응답 필드 구분을 AQB-01에서 고정한다.
+- 같은 GET에 questionId 조건을 주면 해당 질문의 개별 reportId/reasonType/detail/status/createdAt/handledAt/연결 조치와 선택 처리에 필요한 데이터를 반환한다. 개별 신고도 서버 페이지로 조회한다. 목록 page/pageSize와 상세 entryPage/entryPageSize를 구분하며 기본 값·집계 의미는 공통 계약을 따른다.
 - 질문의 HIDDEN과 신고의 ACCEPTED는 다른 값이다. 화면의 waiting은 미처리 신고 존재 여부로 계산하고, 처리 이력과 질문 공개 상태를 각각 표시한다.
 - soft delete 후에도 신고·조치 기록을 조회할 수 있어야 한다. Question의 전역 SQLRestriction에 걸려 묶음이 사라지거나 lazy relation 오류가 나지 않도록 삭제 포함 전용 관리자 projection을 사용한다. 일반 사용자 조회의 삭제 필터는 유지한다.
 
@@ -100,30 +100,30 @@ AI 제공자 구현과 실제 계정·운영 DB 설정은 담당자와 연결한
 | 신고 HIDE/DELETE | 선택된 PENDING 신고를 REPORT 조치 1건에 연결해 ACCEPTED로 변경하고 질문 숨김/soft delete |
 | 신고 DISMISS | REPORT 조치·사유 1건에 선택 신고를 연결하고 DISMISSED·handledBy/handledAt 기록. 질문을 재공개하거나 다른 신고를 종료하지 않음 |
 
-UPDATE/RESTORE/REGENERATE_ANSWER는 한 요청에서 한 action만 받는다. REGENERATE/RESTORE와 일반 편집 필드를 섞으면 400이다. 수정할 필드가 없는 UPDATE도 400이다. 승인·반려 payload는 `decision: APPROVE|REJECT`와 반려 시 reason을 제안한다.
+UPDATE/RESTORE/REGENERATE_ANSWER는 한 요청에서 한 action만 받는다. REGENERATE/RESTORE와 일반 편집 필드를 섞으면 400이다. 수정할 필드가 없는 UPDATE도 400이다. 승인·반려 payload는 `decision: APPROVE|REJECT`, expectedRevision과 반려 시 reason을 사용한다.
 
 모든 기존 질문의 변경은 [공통 잠금·첫 조회 규칙](update.md#승인과-수정의-잠금-규칙)을 따른다. 쓰기 트랜잭션의 첫 Question 로드는 PESSIMISTIC_WRITE 조회이고, 잠금 획득 후 현재 상태를 검사하며 종료까지 유지한다. 잠금 전 읽은 managed 객체를 잠금 쿼리가 자동 refresh한다고 가정하지 않는다.
 
-다른 관리자가 처리했거나 사용자가 먼저 수정·삭제한 경우 409/404와 최신 재조회로 안내한다. 같은 승인·반려·신고 조치를 중복 생성하지 않는다. 재공개 반복은 409, 이미 삭제된 질문의 단건 DELETE는 404를 제안한다.
+다른 관리자가 처리했거나 사용자가 먼저 수정·삭제한 경우 409/404와 최신 재조회로 안내한다. 같은 승인·반려·신고 조치를 중복 생성하지 않는다. 재공개 반복은 409, 이미 삭제된 질문의 단건 DELETE는 404다.
 
-신고 처리 요청은 `action: HIDE|DELETE|DISMISS, reportIds, reason`을 제안한다. URL reportId를 선택 집합에 포함하고 모든 ID가 같은 질문의 PENDING 신고인지 검사한다. 1~100개를 제한하고 중복은 정규화한다. 하나라도 처리 불가하면 전체 롤백한다. 표시된 그룹 전체를 암묵적으로 처리하지 않으며 새로 들어온 미선택 신고는 PENDING을 유지한다.
+신고 처리 요청은 `action: HIDE|DELETE|DISMISS, reportIds, reason`을 사용한다. URL reportId를 선택 집합에 포함하고 모든 ID가 같은 질문의 PENDING 신고인지 검사한다. 1~100개를 제한하고 중복은 정규화한다. 하나라도 처리 불가하면 전체 롤백한다. 표시된 그룹 전체를 암묵적으로 처리하지 않으며 새로 들어온 미선택 신고는 PENDING을 유지한다.
 
-WBS의 선택 신고 묶음 조치는 DISMISS에도 적용한다. 조치 사유 입력·필수 여부는 이 청사진의 제안이며, 이를 받는다면 종료 사유도 REPORT 조치에 보존한다. 기존 QuestionReport.dismiss는 조치 연결을 받지 않으므로 이력 연계 동작을 보강한다.
+WBS의 선택 신고 묶음 조치는 DISMISS에도 적용한다. 세 조치의 사유 입력은 공통 계약상 필수이며, 종료 사유도 REPORT 조치에 보존한다. 기존 QuestionReport.dismiss는 조치 연결을 받지 않으므로 이력 연계 동작을 보강한다.
 
 신고에서 questionId를 찾을 때는 스칼라 조회 후 질문을 먼저 잠그고 선택 신고를 잠그는 순서를 고정한다. HIDE는 APPROVED만, DELETE는 미삭제 질문만 허용한다. 삭제된 질문의 잔여 신고 DISMISS는 삭제 포함 전용 잠금/조회 경로로 지원한다. 처리 후에도 (questionId, reporterId) 행을 남겨 같은 회원 재신고 금지를 유지한다.
 
-WBS는 단건 DELETE만 정의한다. 화면의 선택 삭제는 단건 요청을 순차 실행하고 성공/실패 ID와 최신 목록을 표시하는 안이다. 부분 성공이 가능한 여러 요청이며 원자적인 일괄 삭제처럼 안내하지 않는다. 별도 batch endpoint가 필요하면 범위 변경으로 합의한다.
+WBS는 단건 DELETE만 정의한다. 화면의 선택 삭제는 단건 요청을 순차 실행하고 성공/실패 ID와 최신 목록을 표시한다. 부분 성공이 가능한 여러 요청이며 원자적인 일괄 삭제처럼 안내하지 않는다. 별도 batch endpoint가 필요하면 범위 변경으로 합의한다.
 
 ## 6. AI 담당과의 연결
 
 WBS의 승인 후 생성·재생성 요구와 수동 폼의 초안 제안은 별개다. 원본 AI WBS에는 문제은행 답안 생성 전용 서버 간 경로가 없어 URL·모델·인증·타임아웃·출력 형식·재시도는 AI 담당과 확정해야 한다.
 
 - 외부 인터페이스는 generationId, questionId, 생성 당시 content/category와 입력 revision을 받고 답안 Markdown·순서 있는 키워드 또는 분류된 실패를 돌려주는 안이다. 식별자·revision은 서버에서 만들고 AI가 보낸 관리자 권한·공개 상태는 신뢰하지 않는다.
-- 승인/재생성의 DB 변경과 생성 요청 저장을 한 트랜잭션으로 묶는다. 내구성 있는 작업 기록 또는 동등한 전달 보장을 마련하고, 프로세스 메모리의 after-commit 이벤트만으로 유실 방지를 보장하지 않는다. 구체적인 작업 저장 구조와 migration은 AQB-08에서 정한다.
+- 승인/재생성의 DB 변경과 생성 요청 저장을 한 트랜잭션으로 묶는다. 내구성 있는 작업 기록 또는 동등한 전달 보장을 마련하고, 프로세스 메모리의 after-commit 이벤트만으로 유실 방지를 보장하지 않는다. 버전 컬럼·공유 writer의 기본 규칙은 공통 계약을 따르고 구체적인 작업 저장 구조와 migration은 AQB-08에서 정한다.
 - 네트워크 호출은 질문 행 잠금·쓰기 트랜잭션 밖에서 한다. 실행기 재시작, 중복 전달, timeout, 재시도 상한과 최종 FAILED 전환을 정의한다. 생성 요청을 안전하게 저장할 수 없으면 승인도 롤백한다. 설정 미완료를 성공이나 영구 PENDING으로 숨기지 않는다.
 - 결과 저장은 다시 질문을 잠그고 generationId/revision·미삭제·현재 생성 상태를 대조한다. 수동 답안 수정·질문/분류 변경·삭제·더 최신 생성 요청 뒤의 오래된 결과는 덮어쓰지 않는다. 무효화된 작업이 남은 경우 PENDING에서 빠져나오는 상태 정책도 함께 정한다.
-- 답안과 키워드를 함께 검증·저장하고 성공은 DONE, 최종 실패는 FAILED로 표시한다. 재생성 실패 시 기존 답안·키워드는 보존하는 안이며, 실패 상태는 별도로 표시한다. 수동 수정이 최종 선택이면 과거 작업의 실패 결과도 이를 덮어쓰지 않는다.
-- 숨김은 공개 상태만 바꾸고 같은 revision의 생성 결과 저장은 허용하는 안이다. 결과를 저장해도 HIDDEN은 유지한다. 삭제는 작업을 무효화하고 재공개는 답안 생성을 자동 중복 실행하지 않는다.
+- 답안과 키워드를 함께 검증·저장하고 성공은 DONE, 최종 실패는 FAILED로 표시한다. 재생성 실패 시 기존 답안·키워드는 보존하며, 실패 상태는 별도로 표시한다. 수동 수정이 최종 선택이면 과거 작업의 실패 결과도 이를 덮어쓰지 않는다.
+- 숨김은 공개 상태만 바꾸고 같은 inputRevision의 생성 결과 저장은 허용한다. 결과를 저장해도 HIDDEN은 유지한다. 삭제는 작업을 무효화하고 재공개는 답안 생성을 자동 중복 실행하지 않는다.
 - 기존 completeModelAnswer/retryModelAnswer만 호출해서 재생성 전체 정책이 충족된다고 가정하지 않는다. 수동 답안→재생성, FAILED 재시도, 진행 중 입력 변경의 명시적 상태 전이를 보강한다.
 
 AI 연결 전에도 수동 CRUD와 신고 처리는 검증할 수 있다. 승인·재생성의 실제 연결 완료는 AI 작업 전달·결과 저장까지 확인한 뒤 판단하며, 테스트 adapter의 성공을 실제 제공자 검증으로 보고하지 않는다.
@@ -235,7 +235,7 @@ AI 연결 전에도 수동 CRUD와 신고 처리는 검증할 수 있다. 승인
 
 1. **AI 담당**: 전용 서버 간 요청/결과, 작업 전달 보장, timeout·재시도·멱등 키·revision과 재생성 정책. 수동 폼 초안 버튼 지원은 별도 범위 합의.
 2. **DB 담당**: 운영 DB·migration 도구, 기존 신고 reason 600/WRONG_QUESTION, moderation reason 저장 용량, 편집 버전·AI 입력 revision, 생성 작업 식별자/내구성 구조 및 조회 인덱스.
-3. **제품 정책**: 관리자 질문 최소 10자 통일, hint/사유 상한, major 불변, 수동 답안과 AI 우선권, 재생성 중 기존 답안 보존, 표시 코드·집계 정의.
+3. **제품 정책**: 관리자 질문 최소 10자·hint/사유 상한·major 불변·수동 답안 우선권·표시 코드·집계는 공통 계약을 따른다. 정책 변경은 관련 요청·응답·화면 계약을 함께 수정한다.
 4. **화면·#35 담당**: 반려 사유 입력, 신고 선택·처리/공개 상태 분리, 안전한 Markdown 표시와 생성 실패 UI. 사용자·관리자 화면의 분류 ID와 상태 문구를 함께 맞춘다.
 5. **통합 순서**: 선행 [사용자 문제은행 PR #39](https://github.com/likelion-backendschool-9th/answerfit/pull/39)의 계약을 재사용한다. 관리자·AI 개발 완료 뒤 QB-12에 실제 연계 결과를 추가하며, 병합은 기존 팀원 리뷰 규칙을 따른다.
 
