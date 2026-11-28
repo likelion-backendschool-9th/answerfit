@@ -88,12 +88,11 @@ type Props = {
   onDuplicateStory: (expId: string, storyId: string) => void;
   onRemoveStory: (expId: string, storyId: string) => void;
   onDuplicate: (expId: string) => void;
-  onRemove: (expId: string) => void;
   onAdd: () => void;
 };
 
 /** 엑셀처럼 셀을 골라 고치는 표. 경험 정보는 세로로 병합하고, 옆에 역량 행을 나눠 쓴다 */
-export function ExperienceTable({ items, rowHeight, status, custom, focus, empty, onChange, onOpen, onAddStory, onDuplicateStory, onRemoveStory, onDuplicate, onRemove, onAdd }: Props) {
+export function ExperienceTable({ items, rowHeight, status, custom, focus, empty, onChange, onOpen, onAddStory, onDuplicateStory, onRemoveStory, onDuplicate, onAdd }: Props) {
   const table = useRef<HTMLTableElement>(null);
   const [active, setActive] = useState<{ expId: string; storyId: string; col: number } | null>(null);
   const [editing, setEditing] = useState<Editing | null>(null);
@@ -423,7 +422,6 @@ export function ExperienceTable({ items, rowHeight, status, custom, focus, empty
                 ["이 역량 행 삭제", () => onRemoveStory(menu.expId, menu.storyId), true],
                 null,
                 ["경험 복제", () => onDuplicate(menu.expId)],
-                ["경험 삭제", () => onRemove(menu.expId), true],
               ] as const
             ).map((item, i) =>
               item ? (

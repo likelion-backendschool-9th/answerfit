@@ -33,7 +33,7 @@ const DESKTOP = "(min-width: 40rem)";
 const newId = () => crypto.randomUUID();
 
 /** 지울 대상. storyId가 있으면 그 역량 행만, 없으면 경험 전체다 */
-type Removal = { expId: string; storyId: string | null };
+type Removal = { expId: string; storyId: string };
 
 /** items가 null이면 불러오는 중이다(행 스켈레톤) */
 export function ExperienceBoard({ items: loaded }: { items: Experience[] | null }) {
@@ -213,7 +213,6 @@ export function ExperienceBoard({ items: loaded }: { items: Experience[] | null 
                   onDuplicateStory={addStory}
                   onRemoveStory={(expId, storyId) => setRemoval({ expId, storyId })}
                   onDuplicate={duplicate}
-                  onRemove={(expId) => setRemoval({ expId, storyId: null })}
                   onAdd={add}
                 />
               </div>
@@ -279,8 +278,9 @@ type RemoveProps = { removal: Removal | null; experience: Experience | undefined
 function RemoveDialog({ removal, experience, onClose, onDone }: RemoveProps) {
   const [error, setError] = useState<string>();
   const [pending, startTransition] = useTransition();
-  const storyOnly = Boolean(removal?.storyId && experience && experience.stories.length > 1);
-  const description = storyOnly ? "이 행의 역량 태그·활동 내용·성과가 지워져요." : removal?.storyId ? "마지막 역량 행이라 경험 전체가 삭제돼요. 되돌릴 수 없어요." : "역량 행까지 모두 삭제돼요. 되돌릴 수 없어요.";
+  // 경험을 따로 지우는 메뉴는 없다. 역량 행이 하나 남았을 때 지우면 경험도 함께 지워진다
+  const storyOnly = Boolean(experience && experience.stories.length > 1);
+  const description = storyOnly ? "이 행의 역량 태그·활동 내용·성과가 지워져요." : "마지막 역량 행이라 경험 전체가 삭제돼요. 되돌릴 수 없어요.";
   const close = () => {
     setError(undefined);
     onClose();
